@@ -8,11 +8,13 @@ the various methods of metworkpy
 # Standard Library Imports
 import itertools
 import pathlib  # Handle paths
+from pprint import pprint
 from string import ascii_uppercase
 import sys  # Used to check if running in REPL or from file
+import tempfile
 
 # External Imports
-from cobra import Model, Reaction, Metabolite  # type:ignore
+from cobra import Model, Reaction, Metabolite, io  # type:ignore
 import metworkpy
 
 if hasattr(sys, "ps1"):
@@ -228,8 +230,38 @@ r_J__Q.gene_reaction_rule = "g010"
 reaction_list.append(r_J__Q)
 
 
+# Create a biomass reaction
+r_biomass = Reaction(
+    id="biomass",
+    name="Biomass",
+    subsystem="Biomass",
+    lower_bound=INTERNAL_FORWARD[0],
+    upper_bound=INTERNAL_FORWARD[1],
+)
+r_biomass.add_metabolites(
+    {
+        metabolite_dict["W_C"]: -1.0,
+        metabolite_dict["X_C"]: -1.0,
+        metabolite_dict["U_C"]: -1.0,
+    }
+)
+reaction_list.append(r_biomass)
+
 # Add all the reactions to the model
 sim_model.add_reactions(reaction_list=reaction_list)
+
+# Set the objective to be the biomass reaction
+sim_model.objective = "biomass"
+
+# Write the model to a temporary file
+with tempfile.NamedTemporaryFile(suffix=".xml") as f_sbml:
+    io.write_sbml_model(sim_model, f_sbml.name)
+    _, report = io.validate_sbml_model(f_sbml.name)
+for err_type, err_list in report.items():
+    if len(err_list) > 0:
+        raise RuntimeError(
+            f"Error in model-- Type: {err_type}, Errors: {err_list}"
+        )
 
 
 # Save the model in various formats
