@@ -6,9 +6,26 @@ platforms = ["linux-64"]
 version = "0.1.0"
 
 [tasks]
+create_model = {cmd = "python scripts/01_create_model.py"}
 
 [dependencies]
-python = "<3.14"
+python = "3.13.*"
+cobra = ">=0.30.0,<0.31"
+scipy = ">=1.16.3,<2"
+networkx = ">=3.6,<4"
+pandas = ">=2.3.3,<3"
+numpy = ">=2.3.5,<3"
+optlang = ">=1.8.3,<2"
+sympy = ">=1.14.0,<2"
+tqdm = ">=4.67.1,<5"
+pyarrow = ">=22.0.0,<23"
+joblib = ">=1.5.2,<2"
+osqp = ">=1.0.5,<2"
+highspy = ">=1.12.0,<2"
+openpyxl = ">=3.1.5,<4"
+
+[pypi-dependencies]
+metworkpy = ">=0.2.5, <0.3"
 
 [feature.dev.dependencies]
 mypy = "*"
@@ -17,6 +34,3 @@ python-lsp-server = ">=1.13.2,<2"
 
 [environments]
 dev = ["dev", "default"]
-
-[pypi-dependencies]
-metworkpy = ">=0.2.5, <0.3"
