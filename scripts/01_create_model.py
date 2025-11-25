@@ -6,21 +6,21 @@ the various methods of metworkpy
 # Setup
 # Imports
 # Standard Library Imports
-import itertools
+import itertools  # Used for chaining iterators
 import pathlib  # Handle paths
-from pprint import pprint
-from string import ascii_uppercase
+from string import ascii_uppercase  # Used for iteration to create metabolites
 import sys  # Used to check if running in REPL or from file
-import tempfile
+import tempfile  # Used to create temporary file for model validation
 
 # External Imports
 from cobra import Model, Reaction, Metabolite, io  # type:ignore
-import metworkpy
+import metworkpy  # Used for convienience function for writing the model
 
 if hasattr(sys, "ps1"):
     # Running in a REPL
     BASE_PATH = pathlib.Path(".")  # Use current dir as base path
 else:
+    # Running as a file
     # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent
 MODEL_OUT_PATH = BASE_PATH / "models"
@@ -29,16 +29,21 @@ MODEL_OUT_PATH = BASE_PATH / "models"
 MODEL_OUT_PATH.mkdir(parents=True, exist_ok=True)
 
 # Define Global Variables
+# Bounds of various types of reactions
 EXTERNAL_EXCHANGE_BOUNDS = (-100, 100)
 INTERNAL_REVERSIBLE = (-50, 50)
 INTERNAL_FORWARD = (0, 50)
 IMPORT_REVERSIBLE = (-50, 50)
 EXPORT_IRREVERSIBLE = (0, 50)
 
-# Create the model
+######################
+# Create the model ###
+######################
 sim_model = Model("simulation_model")
 
-# Create metabolites for the model
+########################
+# Create Metabolites ###
+########################
 metabolite_dict: dict[str, Metabolite] = {}
 # External Metabolites
 for met in itertools.chain(
@@ -63,10 +68,15 @@ for met in ascii_uppercase[: ascii_uppercase.find("X") + 1]:
         charge=0,
     )
 
-# Create reactions for the model
+######################
+# Create Reactions ###
+######################
 reaction_list: list[Reaction] = []
 
-# External Exchange Reactions
+#################################
+# External Exchange Reactions ###
+#################################
+
 for met in itertools.chain(
     ascii_uppercase[: ascii_uppercase.find("G") + 1],
     ["N", "R", "U", "V", "W", "X"],
@@ -81,7 +91,9 @@ for met in itertools.chain(
     rxn.add_metabolites({metabolite_dict[f"{met}_E"]: -1.0})  # Met <->
     reaction_list.append(rxn)
 
-# Reversible Import Reactions
+#################################
+# Reversible Import Reactions ###
+#################################
 for met in ascii_uppercase[: ascii_uppercase.find("G") + 1]:
     rxn = Reaction(
         id=f"{met}_import",
@@ -98,7 +110,9 @@ for met in ascii_uppercase[: ascii_uppercase.find("G") + 1]:
     )  # Met External <-> Met Internal
     reaction_list.append(rxn)
 
-# Irreversible Export Reactions
+###################################
+# Irreversible Export Reactions ###
+###################################
 export_met_to_subsys = {}
 for subsys, met_set in {
     "S3": {"N"},
@@ -138,7 +152,9 @@ for rxn in irreversible_export_dict.values():
     reaction_list.append(rxn)
 
 
-# Internal Subsystem 1
+##########################
+# Internal Subsystem 1 ###
+##########################
 r_A_B__G_H = Reaction(
     id="R_A_B__G_H",
     name="Reaction A+B<->G+H",
@@ -157,7 +173,9 @@ r_A_B__G_H.add_metabolites(
 r_A_B__G_H.gene_reaction_rule = "g001"
 reaction_list.append(r_A_B__G_H)
 
-# Internal Subsystem 2
+##########################
+# Internal Subsystem 2 ###
+##########################
 # C + H <-> I
 r_C_H__I = Reaction(
     id="R_C_H__I",
@@ -229,8 +247,216 @@ r_J__Q.add_metabolites(
 r_J__Q.gene_reaction_rule = "g010"
 reaction_list.append(r_J__Q)
 
+##########################
+# Internal Subsystem 3 ###
+##########################
+# E <-> M
+r_E__M = Reaction(
+    id="R_E__M",
+    name="Reaction E<->M",
+    subsystem="S3",
+    lower_bound=INTERNAL_REVERSIBLE[0],
+    upper_bound=INTERNAL_REVERSIBLE[1],
+)
+r_E__M.add_metabolites(
+    {
+        metabolite_dict["E_C"]: -1.0,
+        metabolite_dict["M_C"]: 1.0,
+    }
+)
+r_E__M.gene_reaction_rule = "g005"
+reaction_list.append(r_E__M)
 
-# Create a biomass reaction
+# F + M -> N
+r_F_M__N = Reaction(
+    id="R_F_M__N",
+    name="Reaction F+M->N",
+    subsystem="S3",
+    lower_bound=INTERNAL_FORWARD[0],
+    upper_bound=INTERNAL_FORWARD[1],
+)
+r_F_M__N.add_metabolites(
+    {
+        metabolite_dict["F_C"]: -1.0,
+        metabolite_dict["M_C"]: -1.0,
+        metabolite_dict["N_C"]: 1.0,
+    }
+)
+r_F_M__N.gene_reaction_rule = "( g006 and g007 )"
+reaction_list.append(r_F_M__N)
+
+# N <-> T
+r_N__T = Reaction(
+    id="R_N__T",
+    name="Reaction N<->T",
+    subsystem="S3",
+    lower_bound=INTERNAL_REVERSIBLE[0],
+    upper_bound=INTERNAL_REVERSIBLE[1],
+)
+r_N__T.add_metabolites(
+    {
+        metabolite_dict["N_C"]: -1.0,
+        metabolite_dict["T_C"]: 1.0,
+    }
+)
+r_N__T.gene_reaction_rule = "( g011 or g012 )"
+reaction_list.append(r_N__T)
+
+# N -> U
+r_N__U = Reaction(
+    id="R_N__U",
+    name="Reaction N->U",
+    subsystem="S3",
+    lower_bound=INTERNAL_FORWARD[0],
+    upper_bound=INTERNAL_FORWARD[1],
+)
+r_N__U.add_metabolites(
+    {
+        metabolite_dict["N_C"]: -1.0,
+        metabolite_dict["U_C"]: 1.0,
+    }
+)
+r_N__U.gene_reaction_rule = "( g011 or g013 )"
+reaction_list.append(r_N__U)
+
+##########################
+# Internal Subsystem 4 ###
+##########################
+# H <-> K
+r_H__K = Reaction(
+    id="R_H__K",
+    name="Reaction H<->K",
+    subsystem="S4",
+    lower_bound=INTERNAL_REVERSIBLE[0],
+    upper_bound=INTERNAL_REVERSIBLE[1],
+)
+r_H__K.add_metabolites(
+    {
+        metabolite_dict["H_C"]: -1.0,
+        metabolite_dict["K_C"]: 1.0,
+    }
+)
+r_H__K.gene_reaction_rule = "( g011 or g012 )"
+reaction_list.append(r_H__K)
+
+# G + K <-> L
+r_G_K__L = Reaction(
+    id="R_G_K__L",
+    name="Reaction G+K<->L",
+    subsystem="S4",
+    lower_bound=INTERNAL_REVERSIBLE[0],
+    upper_bound=INTERNAL_REVERSIBLE[1],
+)
+r_G_K__L.add_metabolites(
+    {
+        metabolite_dict["G_C"]: -1.0,
+        metabolite_dict["K_C"]: -1.0,
+        metabolite_dict["L_C"]: 1.0,
+    }
+)
+r_G_K__L.gene_reaction_rule = "( g006 and g007 )"
+reaction_list.append(r_G_K__L)
+
+# K -> O
+r_K__O = Reaction(
+    id="R_K__O",
+    name="Reaction K->O",
+    subsystem="S4",
+    lower_bound=INTERNAL_FORWARD[0],
+    upper_bound=INTERNAL_FORWARD[1],
+)
+r_K__O.add_metabolites(
+    {
+        metabolite_dict["K_C"]: -1.0,
+        metabolite_dict["O_C"]: 1.0,
+    }
+)
+r_K__O.gene_reaction_rule = "g024"
+reaction_list.append(r_K__O)
+
+# L -> W
+r_L__W = Reaction(
+    id="R_L__W",
+    name="Reaction L->W",
+    subsystem="S4",
+    lower_bound=INTERNAL_FORWARD[0],
+    upper_bound=INTERNAL_FORWARD[1],
+)
+r_L__W.add_metabolites(
+    {
+        metabolite_dict["L_C"]: -1.0,
+        metabolite_dict["W_C"]: 1.0,
+    }
+)
+r_L__W.gene_reaction_rule = "( g014 and g020 )"
+reaction_list.append(r_L__W)
+
+##########################
+# Internal Subsystem 5 ###
+##########################
+# O + P -> R
+r_O_P__R = Reaction(
+    id="R_O_P__R",
+    name="Reaction O+P->R",
+    subsystem="S4",
+    lower_bound=INTERNAL_FORWARD[0],
+    upper_bound=INTERNAL_FORWARD[1],
+)
+r_O_P__R.add_metabolites(
+    {
+        metabolite_dict["O_C"]: -1.0,
+        metabolite_dict["P_C"]: -1.0,
+        metabolite_dict["R_C"]: 1.0,
+    }
+)
+r_O_P__R.gene_reaction_rule = "( g015 abd g020 )"
+reaction_list.append(r_O_P__R)
+
+
+##########################
+# Internal Subsystem 6 ###
+##########################
+# P + Q -> S
+r_P_Q__S = Reaction(
+    id="R_P_Q__S",
+    name="Reaction P+Q->S",
+    subsystem="S6",
+    lower_bound=INTERNAL_FORWARD[0],
+    upper_bound=INTERNAL_FORWARD[1],
+)
+r_P_Q__S.add_metabolites(
+    {
+        metabolite_dict["P_C"]: -1.0,
+        metabolite_dict["Q_C"]: -1.0,
+        metabolite_dict["S_C"]: 1.0,
+    }
+)
+r_P_Q__S.gene_reaction_rule = "g016"
+reaction_list.append(r_P_Q__S)
+
+# S + T -> V + X
+r_S_T__V_X = Reaction(
+    id="R_S_T__V_X",
+    name="Reaction S+T->V+X",
+    subsystem="S6",
+    lower_bound=INTERNAL_FORWARD[0],
+    upper_bound=INTERNAL_FORWARD[1],
+)
+r_S_T__V_X.add_metabolites(
+    {
+        metabolite_dict["S_C"]: -1.0,
+        metabolite_dict["T_C"]: -1.0,
+        metabolite_dict["V_C"]: 1.0,
+        metabolite_dict["X_C"]: 1.0,
+    }
+)
+r_S_T__V_X.gene_reaction_rule = "g019"
+reaction_list.append(r_S_T__V_X)
+
+
+######################
+# Biomass Reaction ###
+######################
 r_biomass = Reaction(
     id="biomass",
     name="Biomass",
@@ -253,6 +479,10 @@ sim_model.add_reactions(reaction_list=reaction_list)
 # Set the objective to be the biomass reaction
 sim_model.objective = "biomass"
 
+######################
+# Model Validation ###
+######################
+
 # Write the model to a temporary file
 # in order to validate the sbml
 with tempfile.NamedTemporaryFile(suffix=".xml") as f_sbml:
@@ -264,8 +494,9 @@ for err_type, err_list in report.items():
             f"Error in model-- Type: {err_type}, Errors: {err_list}"
         )
 
-
-# Save the model in various formats
+####################
+# Save the Model ###
+####################
 metworkpy.write_model(sim_model, MODEL_OUT_PATH / "simulation_model.json")
 metworkpy.write_model(sim_model, MODEL_OUT_PATH / "simulation_model.xml")
 metworkpy.write_model(sim_model, MODEL_OUT_PATH / "simulation_model.mat")
