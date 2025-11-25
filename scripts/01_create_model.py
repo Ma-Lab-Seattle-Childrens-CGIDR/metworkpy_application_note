@@ -493,6 +493,9 @@ for err_type, err_list in report.items():
         raise RuntimeError(
             f"Error in model-- Type: {err_type}, Errors: {err_list}"
         )
+# Check that the optimal biomass generation is near 25.0
+if abs(sim_model.slim_optimize() - 25.0) > 1e-7:
+    raise ValueError("Model has incorrect biomass objective")
 
 ####################
 # Save the Model ###
