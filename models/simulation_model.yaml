@@ -1,0 +1,729 @@
+!!omap
+- metabolites:
+  - !!omap
+    - id: A_E
+    - name: Extracellular A
+    - compartment: E
+    - charge: 0
+    - formula: A
+  - !!omap
+    - id: B_E
+    - name: Extracellular B
+    - compartment: E
+    - charge: 0
+    - formula: B
+  - !!omap
+    - id: C_E
+    - name: Extracellular C
+    - compartment: E
+    - charge: 0
+    - formula: C
+  - !!omap
+    - id: D_E
+    - name: Extracellular D
+    - compartment: E
+    - charge: 0
+    - formula: D
+  - !!omap
+    - id: E_E
+    - name: Extracellular E
+    - compartment: E
+    - charge: 0
+    - formula: E
+  - !!omap
+    - id: F_E
+    - name: Extracellular F
+    - compartment: E
+    - charge: 0
+    - formula: F
+  - !!omap
+    - id: G_E
+    - name: Extracellular G
+    - compartment: E
+    - charge: 0
+    - formula: G
+  - !!omap
+    - id: N_E
+    - name: Extracellular N
+    - compartment: E
+    - charge: 0
+    - formula: N
+  - !!omap
+    - id: R_E
+    - name: Extracellular R
+    - compartment: E
+    - charge: 0
+    - formula: R
+  - !!omap
+    - id: U_E
+    - name: Extracellular U
+    - compartment: E
+    - charge: 0
+    - formula: U
+  - !!omap
+    - id: V_E
+    - name: Extracellular V
+    - compartment: E
+    - charge: 0
+    - formula: V
+  - !!omap
+    - id: W_E
+    - name: Extracellular W
+    - compartment: E
+    - charge: 0
+    - formula: W
+  - !!omap
+    - id: X_E
+    - name: Extracellular X
+    - compartment: E
+    - charge: 0
+    - formula: X
+  - !!omap
+    - id: A_C
+    - name: Cytosolic A
+    - compartment: C
+    - charge: 0
+    - formula: A
+  - !!omap
+    - id: B_C
+    - name: Cytosolic B
+    - compartment: C
+    - charge: 0
+    - formula: B
+  - !!omap
+    - id: C_C
+    - name: Cytosolic C
+    - compartment: C
+    - charge: 0
+    - formula: C
+  - !!omap
+    - id: D_C
+    - name: Cytosolic D
+    - compartment: C
+    - charge: 0
+    - formula: D
+  - !!omap
+    - id: E_C
+    - name: Cytosolic E
+    - compartment: C
+    - charge: 0
+    - formula: E
+  - !!omap
+    - id: F_C
+    - name: Cytosolic F
+    - compartment: C
+    - charge: 0
+    - formula: F
+  - !!omap
+    - id: G_C
+    - name: Cytosolic G
+    - compartment: C
+    - charge: 0
+    - formula: G
+  - !!omap
+    - id: N_C
+    - name: Cytosolic N
+    - compartment: C
+    - charge: 0
+    - formula: N
+  - !!omap
+    - id: R_C
+    - name: Cytosolic R
+    - compartment: C
+    - charge: 0
+    - formula: R
+  - !!omap
+    - id: U_C
+    - name: Cytosolic U
+    - compartment: C
+    - charge: 0
+    - formula: U
+  - !!omap
+    - id: V_C
+    - name: Cytosolic V
+    - compartment: C
+    - charge: 0
+    - formula: V
+  - !!omap
+    - id: W_C
+    - name: Cytosolic W
+    - compartment: C
+    - charge: 0
+    - formula: W
+  - !!omap
+    - id: X_C
+    - name: Cytosolic X
+    - compartment: C
+    - charge: 0
+    - formula: X
+  - !!omap
+    - id: H_C
+    - name: Cytosolic H
+    - compartment: C
+    - charge: 0
+    - formula: H
+  - !!omap
+    - id: I_C
+    - name: Cytosolic I
+    - compartment: C
+    - charge: 0
+    - formula: I
+  - !!omap
+    - id: J_C
+    - name: Cytosolic J
+    - compartment: C
+    - charge: 0
+    - formula: J
+  - !!omap
+    - id: P_C
+    - name: Cytosolic P
+    - compartment: C
+    - charge: 0
+    - formula: P
+  - !!omap
+    - id: Q_C
+    - name: Cytosolic Q
+    - compartment: C
+    - charge: 0
+    - formula: Q
+  - !!omap
+    - id: M_C
+    - name: Cytosolic M
+    - compartment: C
+    - charge: 0
+    - formula: M
+  - !!omap
+    - id: T_C
+    - name: Cytosolic T
+    - compartment: C
+    - charge: 0
+    - formula: T
+  - !!omap
+    - id: K_C
+    - name: Cytosolic K
+    - compartment: C
+    - charge: 0
+    - formula: K
+  - !!omap
+    - id: L_C
+    - name: Cytosolic L
+    - compartment: C
+    - charge: 0
+    - formula: L
+  - !!omap
+    - id: O_C
+    - name: Cytosolic O
+    - compartment: C
+    - charge: 0
+    - formula: O
+  - !!omap
+    - id: S_C
+    - name: Cytosolic S
+    - compartment: C
+    - charge: 0
+    - formula: S
+- reactions:
+  - !!omap
+    - id: A_E_ex
+    - name: External A exchange
+    - metabolites: !!omap
+      - A_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: B_E_ex
+    - name: External B exchange
+    - metabolites: !!omap
+      - B_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: C_E_ex
+    - name: External C exchange
+    - metabolites: !!omap
+      - C_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: D_E_ex
+    - name: External D exchange
+    - metabolites: !!omap
+      - D_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: E_E_ex
+    - name: External E exchange
+    - metabolites: !!omap
+      - E_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: F_E_ex
+    - name: External F exchange
+    - metabolites: !!omap
+      - F_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: G_E_ex
+    - name: External G exchange
+    - metabolites: !!omap
+      - G_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: N_E_ex
+    - name: External N exchange
+    - metabolites: !!omap
+      - N_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: R_E_ex
+    - name: External R exchange
+    - metabolites: !!omap
+      - R_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: U_E_ex
+    - name: External U exchange
+    - metabolites: !!omap
+      - U_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: V_E_ex
+    - name: External V exchange
+    - metabolites: !!omap
+      - V_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: W_E_ex
+    - name: External W exchange
+    - metabolites: !!omap
+      - W_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: X_E_ex
+    - name: External X exchange
+    - metabolites: !!omap
+      - X_E: -1.0
+    - lower_bound: -100
+    - upper_bound: 100
+    - gene_reaction_rule: ''
+    - subsystem: External Exchange Reactions
+  - !!omap
+    - id: A_import
+    - name: External A import
+    - metabolites: !!omap
+      - A_C: 1.0
+      - A_E: -1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: ''
+    - subsystem: Transport
+  - !!omap
+    - id: B_import
+    - name: External B import
+    - metabolites: !!omap
+      - B_C: 1.0
+      - B_E: -1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: ''
+    - subsystem: Transport
+  - !!omap
+    - id: C_import
+    - name: External C import
+    - metabolites: !!omap
+      - C_C: 1.0
+      - C_E: -1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: ''
+    - subsystem: Transport
+  - !!omap
+    - id: D_import
+    - name: External D import
+    - metabolites: !!omap
+      - D_C: 1.0
+      - D_E: -1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: ''
+    - subsystem: Transport
+  - !!omap
+    - id: E_import
+    - name: External E import
+    - metabolites: !!omap
+      - E_C: 1.0
+      - E_E: -1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: ''
+    - subsystem: Transport
+  - !!omap
+    - id: F_import
+    - name: External F import
+    - metabolites: !!omap
+      - F_C: 1.0
+      - F_E: -1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: ''
+    - subsystem: Transport
+  - !!omap
+    - id: G_import
+    - name: External G import
+    - metabolites: !!omap
+      - G_C: 1.0
+      - G_E: -1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: ''
+    - subsystem: Transport
+  - !!omap
+    - id: N_exp
+    - name: N export
+    - metabolites: !!omap
+      - N_C: -1.0
+      - N_E: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: ''
+    - subsystem: S3
+  - !!omap
+    - id: R_exp
+    - name: R export
+    - metabolites: !!omap
+      - R_C: -1.0
+      - R_E: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g018
+    - subsystem: S5
+  - !!omap
+    - id: U_exp
+    - name: U export
+    - metabolites: !!omap
+      - U_C: -1.0
+      - U_E: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g023
+    - subsystem: S7
+  - !!omap
+    - id: V_exp
+    - name: V export
+    - metabolites: !!omap
+      - V_C: -1.0
+      - V_E: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g022
+    - subsystem: S7
+  - !!omap
+    - id: W_exp
+    - name: W export
+    - metabolites: !!omap
+      - W_C: -1.0
+      - W_E: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g017
+    - subsystem: S5
+  - !!omap
+    - id: X_exp
+    - name: X export
+    - metabolites: !!omap
+      - X_C: -1.0
+      - X_E: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g021
+    - subsystem: S7
+  - !!omap
+    - id: R_A_B__G_H
+    - name: Reaction A+B<->G+H
+    - metabolites: !!omap
+      - A_C: -1.0
+      - B_C: -1.0
+      - G_C: 1.0
+      - H_C: 1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: g001
+    - subsystem: S1
+  - !!omap
+    - id: R_C_H__I
+    - name: Reaction C+H<->I
+    - metabolites: !!omap
+      - C_C: -1.0
+      - H_C: -1.0
+      - I_C: 1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: g002 or g003
+    - subsystem: S2
+  - !!omap
+    - id: R_C_D__J
+    - name: Reaction C+D<->J
+    - metabolites: !!omap
+      - C_C: -1.0
+      - D_C: -1.0
+      - J_C: 1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: g004
+    - subsystem: S2
+  - !!omap
+    - id: R_I__P
+    - name: Reaction I<->P
+    - metabolites: !!omap
+      - I_C: -1.0
+      - P_C: 1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: g008
+    - subsystem: S2
+  - !!omap
+    - id: R_J__Q
+    - name: Reaction J<->Q
+    - metabolites: !!omap
+      - J_C: -1.0
+      - Q_C: 1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: g010
+    - subsystem: S2
+  - !!omap
+    - id: R_E__M
+    - name: Reaction E<->M
+    - metabolites: !!omap
+      - E_C: -1.0
+      - M_C: 1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: g005
+    - subsystem: S3
+  - !!omap
+    - id: R_F_M__N
+    - name: Reaction F+M->N
+    - metabolites: !!omap
+      - F_C: -1.0
+      - M_C: -1.0
+      - N_C: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g006 and g007
+    - subsystem: S3
+  - !!omap
+    - id: R_N__T
+    - name: Reaction N<->T
+    - metabolites: !!omap
+      - N_C: -1.0
+      - T_C: 1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: g011 or g012
+    - subsystem: S3
+  - !!omap
+    - id: R_N__U
+    - name: Reaction N->U
+    - metabolites: !!omap
+      - N_C: -1.0
+      - U_C: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g011 or g013
+    - subsystem: S3
+  - !!omap
+    - id: R_H__K
+    - name: Reaction H<->K
+    - metabolites: !!omap
+      - H_C: -1.0
+      - K_C: 1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: g011 or g012
+    - subsystem: S4
+  - !!omap
+    - id: R_G_K__L
+    - name: Reaction G+K<->L
+    - metabolites: !!omap
+      - G_C: -1.0
+      - K_C: -1.0
+      - L_C: 1.0
+    - lower_bound: -50
+    - upper_bound: 50
+    - gene_reaction_rule: g006 and g007
+    - subsystem: S4
+  - !!omap
+    - id: R_K__O
+    - name: Reaction K->O
+    - metabolites: !!omap
+      - K_C: -1.0
+      - O_C: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g024
+    - subsystem: S4
+  - !!omap
+    - id: R_L__W
+    - name: Reaction L->W
+    - metabolites: !!omap
+      - L_C: -1.0
+      - W_C: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g014 and g020
+    - subsystem: S4
+  - !!omap
+    - id: R_O_P__R
+    - name: Reaction O+P->R
+    - metabolites: !!omap
+      - O_C: -1.0
+      - P_C: -1.0
+      - R_C: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g015 and g020
+    - subsystem: S4
+  - !!omap
+    - id: R_P_Q__S
+    - name: Reaction P+Q->S
+    - metabolites: !!omap
+      - P_C: -1.0
+      - Q_C: -1.0
+      - S_C: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g016
+    - subsystem: S6
+  - !!omap
+    - id: R_S_T__V_X
+    - name: Reaction S+T->V+X
+    - metabolites: !!omap
+      - S_C: -1.0
+      - T_C: -1.0
+      - V_C: 1.0
+      - X_C: 1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: g019
+    - subsystem: S6
+  - !!omap
+    - id: biomass
+    - name: Biomass
+    - metabolites: !!omap
+      - U_C: -1.0
+      - W_C: -1.0
+      - X_C: -1.0
+    - lower_bound: 0
+    - upper_bound: 50
+    - gene_reaction_rule: ''
+    - objective_coefficient: 1.0
+    - subsystem: Biomass
+- genes:
+  - !!omap
+    - id: g018
+    - name: ''
+  - !!omap
+    - id: g023
+    - name: ''
+  - !!omap
+    - id: g022
+    - name: ''
+  - !!omap
+    - id: g017
+    - name: ''
+  - !!omap
+    - id: g021
+    - name: ''
+  - !!omap
+    - id: g001
+    - name: ''
+  - !!omap
+    - id: g003
+    - name: ''
+  - !!omap
+    - id: g002
+    - name: ''
+  - !!omap
+    - id: g004
+    - name: ''
+  - !!omap
+    - id: g008
+    - name: ''
+  - !!omap
+    - id: g010
+    - name: ''
+  - !!omap
+    - id: g005
+    - name: ''
+  - !!omap
+    - id: g007
+    - name: ''
+  - !!omap
+    - id: g006
+    - name: ''
+  - !!omap
+    - id: g011
+    - name: ''
+  - !!omap
+    - id: g012
+    - name: ''
+  - !!omap
+    - id: g013
+    - name: ''
+  - !!omap
+    - id: g024
+    - name: ''
+  - !!omap
+    - id: g014
+    - name: ''
+  - !!omap
+    - id: g020
+    - name: ''
+  - !!omap
+    - id: g015
+    - name: ''
+  - !!omap
+    - id: g016
+    - name: ''
+  - !!omap
+    - id: g019
+    - name: ''
+- id: simulation_model
+- compartments: !!omap
+  - C: ''
+  - E: ''
+- version: '1.2'

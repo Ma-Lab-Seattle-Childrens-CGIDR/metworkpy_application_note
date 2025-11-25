@@ -409,7 +409,7 @@ r_O_P__R.add_metabolites(
         metabolite_dict["R_C"]: 1.0,
     }
 )
-r_O_P__R.gene_reaction_rule = "( g015 abd g020 )"
+r_O_P__R.gene_reaction_rule = "( g015 and g020 )"
 reaction_list.append(r_O_P__R)
 
 
