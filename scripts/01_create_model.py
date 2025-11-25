@@ -254,6 +254,7 @@ sim_model.add_reactions(reaction_list=reaction_list)
 sim_model.objective = "biomass"
 
 # Write the model to a temporary file
+# in order to validate the sbml
 with tempfile.NamedTemporaryFile(suffix=".xml") as f_sbml:
     io.write_sbml_model(sim_model, f_sbml.name)
     _, report = io.validate_sbml_model(f_sbml.name)
