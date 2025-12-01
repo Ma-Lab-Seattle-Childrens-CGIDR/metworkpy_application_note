@@ -362,6 +362,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tomli-2.3.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tomlkit-0.13.3-pyha770c72_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tqdm-4.67.1-pyhd8ed1ab_1.conda
+      - conda: https://conda.anaconda.org/conda-forge/noarch/types-networkx-3.6.0.20251127-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/types-pytz-2025.2.0.20251108-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing-extensions-4.15.0-h396c80c_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing-inspection-0.4.2-pyhd8ed1ab_1.conda
@@ -3024,6 +3025,17 @@ packages:
   - pkg:pypi/tqdm?source=hash-mapping
   size: 89498
   timestamp: 1735661472632
+- conda: https://conda.anaconda.org/conda-forge/noarch/types-networkx-3.6.0.20251127-pyhd8ed1ab_0.conda
+  sha256: b0c732579252a54171c5b411952b784cd9540856ff5aae314f686eeabdb27aaa
+  md5: 95063ea1cb5d10a62ad25913e23b024b
+  depends:
+  - numpy >=1.20
+  - python >=3.10
+  license: Apache-2.0 AND MIT
+  purls:
+  - pkg:pypi/types-networkx?source=hash-mapping
+  size: 93031
+  timestamp: 1764217586115
 - conda: https://conda.anaconda.org/conda-forge/noarch/types-pytz-2025.2.0.20251108-pyhd8ed1ab_0.conda
   sha256: 407eede257ad94d77dae4fd60b1a574d6551aa470d9f5c92ea0262d737a54109
   md5: 3121e2dcab1bae684b349509b033aec1
