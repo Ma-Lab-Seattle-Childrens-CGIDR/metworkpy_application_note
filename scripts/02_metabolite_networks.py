@@ -15,20 +15,18 @@ from metworkpy.metabolites.metabolite_network import (
     find_metabolite_synthesis_network_reactions,
     find_metabolite_consuming_network_reactions,
 )
-import numpy
-import pandas
 
 # Local Imports
 
 # Path Setup
 if hasattr(sys, "ps1"):
     # Running in a REPL
-    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+    BASE_PATH = pathlib.Path(".").absolute()  # Use current dir as base path
 else:
     # Running as a file
     # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent
-MODEL_OUT_PATH = BASE_PATH / "models"
+MODEL_PATH = BASE_PATH / "models"
 RESULTS_PATH = BASE_PATH / "results" / "metabolite_networks"
 
 # Create directories if needed
@@ -41,7 +39,7 @@ ESSENTIAL_PROPORTION = 0.10
 
 
 # Read in the Simulation Model
-sim_model = metworkpy.read_model(MODEL_OUT_PATH / "simulation_model.json")
+sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
 
 # Create a list of reactions which will be removed from the metabolite network
 # (These will be the exchange pseudo reactions, and the biomass reaction )
