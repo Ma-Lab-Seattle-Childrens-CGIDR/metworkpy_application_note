@@ -7,6 +7,7 @@ Script to generate metabolite networks from the simulation model
 # Standard Library Imports
 import pathlib
 import sys
+import tomllib
 
 # External Imports
 import cobra  # type: ignore
@@ -33,9 +34,10 @@ RESULTS_PATH = BASE_PATH / "results" / "metabolite_networks"
 RESULTS_PATH.mkdir(parents=True, exist_ok=True)
 
 # Script Configuration
-cobra.Configuration().solver = "hybrid"
-# Flux proportion, below which reaction is considered essential
-ESSENTIAL_PROPORTION = 0.10
+# Read in the configuration file
+with open(BASE_PATH / "config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
+cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 
 
 # Read in the Simulation Model
@@ -43,10 +45,9 @@ sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
 
 # Create a list of reactions which will be removed from the metabolite network
 # (These will be the exchange pseudo reactions, and the biomass reaction )
-SUBSYSTEMS_TO_IGNORE = {"Biomass", "External Exchange Reactions"}
 rxns_to_ignore_set = set()
 for rxn in sim_model.reactions:
-    if rxn.subsystem in SUBSYSTEMS_TO_IGNORE:
+    if rxn.subsystem in CONFIG["to-ignore"]["subsystems"]:
         rxns_to_ignore_set.add(rxn.id)
 rxns_to_ignore = list(rxns_to_ignore_set)  # Pandas wants a list for drop
 
@@ -54,7 +55,7 @@ rxns_to_ignore = list(rxns_to_ignore_set)  # Pandas wants a list for drop
 metabolite_synthesis_network = find_metabolite_synthesis_network_reactions(
     model=sim_model,
     method="essential",
-    essential_proportion=ESSENTIAL_PROPORTION,
+    essential_proportion=CONFIG["metabolite-networks"]["essential-proportion"],
     progress_bar=False,
 ).drop(rxns_to_ignore, axis=0)
 
@@ -66,7 +67,7 @@ metabolite_synthesis_network.to_csv(
 # Generate the metabolite consuming network dataframe
 metabolite_consuming_network = find_metabolite_consuming_network_reactions(
     model=sim_model,
-    reaction_proportion=ESSENTIAL_PROPORTION,
+    reaction_proportion=CONFIG["metabolite-networks"]["reaction-proportion"],
     check_reverse=True,
     progress_bar=False,
 ).drop(rxns_to_ignore, axis=0)

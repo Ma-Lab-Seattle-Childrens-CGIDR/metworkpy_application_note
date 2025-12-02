@@ -9,6 +9,7 @@ some centrality analysis
 import json
 import pathlib
 import sys
+import tomllib
 
 # External Imports
 import cobra  # type: ignore
@@ -34,23 +35,24 @@ RESULTS_PATH = BASE_PATH / "results" / "metabolic_networks"
 RESULTS_PATH.mkdir(parents=True, exist_ok=True)
 
 # Script Configuration
-cobra.Configuration().solver = "hybrid"
-DIRECTED = True  # Whether the network should be directed
+# Read in the configuration file
+with open(BASE_PATH / "config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
+cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 
 # Read in the simulation Model
 sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
 
 # Create a list of reaction to remove
-SUBSYSTEMS_TO_IGNORE = {"Biomass", "External Exchange Reactions"}
 rxns_to_ignore_set = set()
 for rxn in sim_model.reactions:
-    if rxn.subsystem in SUBSYSTEMS_TO_IGNORE:
+    if rxn.subsystem in CONFIG["to-ignore"]["subsystems"]:
         rxns_to_ignore_set.add(rxn.id)
 
 # Additionally ignore all extracellular metabolites
 met_to_ignore_set = set()
 for met in sim_model.metabolites:
-    if met.compartment == "E":
+    if met.compartment in CONFIG["to-ignore"]["compartments"]:
         met_to_ignore_set.add(met.id)
 
 # Combine the reactions/metabolites to ignore into one list
@@ -61,7 +63,7 @@ nodes_to_ignore = sorted(rxns_to_ignore_set | met_to_ignore_set)
 metabolic_network = metworkpy.create_metabolic_network(
     model=sim_model,
     weighted=False,
-    directed=DIRECTED,
+    directed=CONFIG["metabolic-network"]["directed"],
     nodes_to_remove=nodes_to_ignore,
 )
 
@@ -76,7 +78,7 @@ model_reactions = set(sim_model.reactions.list_attr("id")) - rxns_to_ignore_set
 reaction_network = metworkpy.bipartite_project(
     metabolic_network,
     node_set=model_reactions,
-    directed=DIRECTED,
+    directed=CONFIG["metabolic-network"]["directed"],
 )
 
 # Save the reaction network
@@ -89,7 +91,9 @@ model_metabolites = (
 )
 
 metabolite_network = metworkpy.bipartite_project(
-    metabolic_network, node_set=model_metabolites, directed=DIRECTED
+    metabolic_network,
+    node_set=model_metabolites,
+    directed=CONFIG["metabolic-network"]["directed"],
 )
 
 # Save the metabolite network
