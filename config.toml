@@ -1,0 +1,35 @@
+processes = 12
+
+[cobra]
+solver = "hybrid"
+
+[to-ignore]
+subsystems = ["Biomass", "External Exchange Reactions"]
+compartments = ["E"]
+
+[reaction-bounds]
+external-exchange = [-100, 100]
+internal-reversible = [-50, 50]
+internal-forward = [0, 50]
+import-reversible = [-50, 50]
+export-irreversible = [0, 50]
+
+[metabolite-networks]
+essential-proportion = 0.10
+reaction-proportion = 0.10
+
+[metabolic-network]
+directed = true
+
+[divergence]
+n-neighbors = 3
+type = "kl"
+
+[mutual-information]
+n-neighbors = 3
+x-metric = 2.0
+y-metric = 2.0
+
+[flux-sampling]
+num-samples = 1000
+thinning = 500
