@@ -10,11 +10,13 @@ create_model = { cmd = "python scripts/01_create_model.py" }
 find_metabolite_networks = { cmd = "python scripts/02_metabolite_networks.py" }
 metabolic_network_analysis = { cmd = "python scripts/03_metabolic_network_analysis.py" }
 ko_divergence = { cmd = "python scripts/04_ko_divergence.py" }
+mi_network = { cmd = "python scripts/05_mutual_information.py" }
 all = [
   { task = "create_model" },
   { task = "find_metabolite_networks" },
   { task = "metabolic_network_analysis" },
   { task = "ko_divergence" },
+  { task = "mi_network" },
 ]
 
 [dependencies]
