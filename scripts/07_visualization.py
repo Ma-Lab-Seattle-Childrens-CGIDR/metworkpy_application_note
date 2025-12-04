@@ -37,3 +37,26 @@ cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 
 # Read in the simulation model
 sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
+
+
+escher_maps.escher_map_add_data(
+    map_in_path,
+    ESCHER_MAPS_OUT_DIR,
+    output_prefix=f"{tf}_",
+    reaction_data=reaction_divergence_df.loc[tf]
+    .replace([np.inf, -np.inf], np.nan)
+    .dropna(),
+    metabolite_data=metabolite_divergence_df.loc[tf]
+    .replace([np.inf, -np.inf], np.nan)
+    .dropna(),
+    reaction_scale=[
+        {"type": "max", "color": "red", "size": 50},
+        {"type": "min", "color": "blue", "size": 50},
+        {"type": "value", "value": 0, "color": "grey", "size": 10},
+    ],
+    metabolite_scale=[
+        {"type": "max", "color": "red", "size": 50},
+        {"type": "min", "color": "blue", "size": 50},
+        {"type": "value", "value": 0, "color": "grey", "size": 10},
+    ],
+)
