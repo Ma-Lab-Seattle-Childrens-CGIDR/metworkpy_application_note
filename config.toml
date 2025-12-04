@@ -33,3 +33,7 @@ y-metric = 2.0
 [flux-sampling]
 num-samples = 1000
 thinning = 500
+
+[target-density]
+radius-list = [0, 1, 2, 3]
+targeted-genes = ["g006", "g011", "g024"]
