@@ -50,6 +50,7 @@ types-networkx = ">=3.6.0.20251127,<4"
 
 [feature.escher.pypi-dependencies]
 Escher = ">=1.8.1, <2"
+metabolic-modeling-utils = { git = "https://github.com/Braden-Griebel/metabolic_modeling_utils.git" }
 
 [feature.viz.dependencies]
 pandas = ">=2.3.3,<3"
