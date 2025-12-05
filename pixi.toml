@@ -6,12 +6,14 @@ platforms = ["linux-64"]
 version = "0.1.0"
 
 [tasks]
-create_model = { cmd = "python scripts/01_create_model.py" }
-find_metabolite_networks = { cmd = "python scripts/02_metabolite_networks.py" }
-metabolic_network_analysis = { cmd = "python scripts/03_metabolic_network_analysis.py" }
-ko_divergence = { cmd = "python scripts/04_ko_divergence.py" }
-mi_network = { cmd = "python scripts/05_mutual_information.py" }
-density = { cmd = "python scripts/06_density.py" }
+create_model = { cmd = "python 01_create_model.py", cwd = "scripts" }
+find_metabolite_networks = { cmd = "python 02_metabolite_networks.py", cwd = "scripts" }
+metabolic_network_analysis = { cmd = "python 03_metabolic_network_analysis.py", cwd = "scripts" }
+ko_divergence = { cmd = "python 04_ko_divergence.py", cwd = "scripts" }
+mi_network = { cmd = "python 05_mutual_information.py", cwd = "scripts" }
+density = { cmd = "python 06_density.py", cwd = "scripts" }
+visualization_script = { cmd = "python 07_visualization.py", cwd = "scripts" }
+viz = [{ task = "visualization_script", environment = "viz" }]
 all = [
   { task = "create_model" },
   { task = "find_metabolite_networks" },
@@ -19,6 +21,7 @@ all = [
   { task = "ko_divergence" },
   { task = "mi_network" },
   { task = "density" },
+  { task = "visualization_script", environment = "viz" },
 ]
 
 [dependencies]
