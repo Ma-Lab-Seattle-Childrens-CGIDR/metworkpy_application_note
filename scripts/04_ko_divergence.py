@@ -71,11 +71,13 @@ metabolite_consuming_network = find_metabolite_consuming_network_reactions(
 divergence_targets: dict[str, list[str]] = defaultdict(list)
 
 # Iterate through the reactions to create the divergence targets for subsystems
+# and reactions
 for rxn in sim_model.reactions:
     if rxn.subsystem in CONFIG["to-ignore"]["subsystems"]:
         continue
     divergence_targets[f"subsystem__{rxn.subsystem}"].append(rxn.id)
     divergence_targets["subsystem__whole_metabolism"].append(rxn.id)
+    divergence_targets[f"reaction__{rxn.id}"].append(rxn.id)
 
 # Iterate through the metabolite networks to create divergence targets for
 # metabolite networks
