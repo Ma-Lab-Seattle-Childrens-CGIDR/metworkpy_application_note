@@ -12,15 +12,17 @@ metabolic_network_analysis = { cmd = "python 03_metabolic_network_analysis.py", 
 ko_divergence = { cmd = "python 04_ko_divergence.py", cwd = "scripts" }
 mi_network = { cmd = "python 05_mutual_information.py", cwd = "scripts" }
 density = { cmd = "python 06_density.py", cwd = "scripts" }
+imat = { cmd = "python 07_imat_simulation.py", cwd = "scripts" }
 visualization_script = { cmd = "python 08_visualization.py", cwd = "scripts" }
 viz = [{ task = "visualization_script", environment = "viz" }]
 all = [
-  { task = "create_model" },
-  { task = "find_metabolite_networks" },
-  { task = "metabolic_network_analysis" },
-  { task = "ko_divergence" },
-  { task = "mi_network" },
-  { task = "density" },
+  { task = "create_model", environment = "default" },
+  { task = "find_metabolite_networks", environment = "default" },
+  { task = "metabolic_network_analysis", environment = "default" },
+  { task = "ko_divergence", environment = "default" },
+  { task = "mi_network", environment = "default" },
+  { task = "density", environment = "default" },
+  { task = "imat", environment = "default" },
   { task = "visualization_script", environment = "viz" },
 ]
 
@@ -64,4 +66,5 @@ seaborn = ">=0.13.2,<0.14"
 
 [environments]
 dev = ["dev", "default"]
-viz = ["escher", "viz", "dev"]
+viz = ["escher", "viz"]
+vdev = ["escher", "viz", "dev"]
