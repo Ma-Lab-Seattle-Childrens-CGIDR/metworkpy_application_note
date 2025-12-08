@@ -670,7 +670,7 @@
 },
 "lower_bound":0,
 "upper_bound":50,
-"gene_reaction_rule":"g011 or g013",
+"gene_reaction_rule":"g011 and g013",
 "subsystem":"S3"
 },
 {
@@ -682,7 +682,7 @@
 },
 "lower_bound":-50,
 "upper_bound":50,
-"gene_reaction_rule":"g011 or g012",
+"gene_reaction_rule":"g009",
 "subsystem":"S4"
 },
 {
@@ -695,7 +695,7 @@
 },
 "lower_bound":-50,
 "upper_bound":50,
-"gene_reaction_rule":"g006 and g007",
+"gene_reaction_rule":"g008",
 "subsystem":"S4"
 },
 {
@@ -803,11 +803,11 @@
 "name":""
 },
 {
-"id":"g003",
+"id":"g002",
 "name":""
 },
 {
-"id":"g002",
+"id":"g003",
 "name":""
 },
 {
@@ -844,6 +844,10 @@
 },
 {
 "id":"g013",
+"name":""
+},
+{
+"id":"g009",
 "name":""
 },
 {

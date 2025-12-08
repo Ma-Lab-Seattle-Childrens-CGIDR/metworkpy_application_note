@@ -427,10 +427,10 @@
           <speciesReference species="M_U_C" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <fbc:geneProductAssociation>
-          <fbc:or>
+          <fbc:and>
             <fbc:geneProductRef fbc:geneProduct="G_g011"/>
             <fbc:geneProductRef fbc:geneProduct="G_g013"/>
-          </fbc:or>
+          </fbc:and>
         </fbc:geneProductAssociation>
       </reaction>
       <reaction id="R_R_H__K" name="Reaction H&lt;-&gt;K" reversible="true" fast="false" fbc:lowerFluxBound="R_R_H__K_lower_bound" fbc:upperFluxBound="R_R_H__K_upper_bound">
@@ -441,10 +441,7 @@
           <speciesReference species="M_K_C" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <fbc:geneProductAssociation>
-          <fbc:or>
-            <fbc:geneProductRef fbc:geneProduct="G_g011"/>
-            <fbc:geneProductRef fbc:geneProduct="G_g012"/>
-          </fbc:or>
+          <fbc:geneProductRef fbc:geneProduct="G_g009"/>
         </fbc:geneProductAssociation>
       </reaction>
       <reaction id="R_R_G_K__L" name="Reaction G+K&lt;-&gt;L" reversible="true" fast="false" fbc:lowerFluxBound="R_R_G_K__L_lower_bound" fbc:upperFluxBound="R_R_G_K__L_upper_bound">
@@ -456,10 +453,7 @@
           <speciesReference species="M_L_C" stoichiometry="1" constant="true"/>
         </listOfProducts>
         <fbc:geneProductAssociation>
-          <fbc:and>
-            <fbc:geneProductRef fbc:geneProduct="G_g006"/>
-            <fbc:geneProductRef fbc:geneProduct="G_g007"/>
-          </fbc:and>
+          <fbc:geneProductRef fbc:geneProduct="G_g008"/>
         </fbc:geneProductAssociation>
       </reaction>
       <reaction id="R_R_K__O" name="Reaction K-&gt;O" reversible="false" fast="false" fbc:lowerFluxBound="cobra_0_bound" fbc:upperFluxBound="R_R_K__O_upper_bound">
@@ -549,8 +543,8 @@
       <fbc:geneProduct fbc:id="G_g017" fbc:name="G_g017" fbc:label="G_g017"/>
       <fbc:geneProduct fbc:id="G_g021" fbc:name="G_g021" fbc:label="G_g021"/>
       <fbc:geneProduct fbc:id="G_g001" fbc:name="G_g001" fbc:label="G_g001"/>
-      <fbc:geneProduct fbc:id="G_g003" fbc:name="G_g003" fbc:label="G_g003"/>
       <fbc:geneProduct fbc:id="G_g002" fbc:name="G_g002" fbc:label="G_g002"/>
+      <fbc:geneProduct fbc:id="G_g003" fbc:name="G_g003" fbc:label="G_g003"/>
       <fbc:geneProduct fbc:id="G_g004" fbc:name="G_g004" fbc:label="G_g004"/>
       <fbc:geneProduct fbc:id="G_g008" fbc:name="G_g008" fbc:label="G_g008"/>
       <fbc:geneProduct fbc:id="G_g010" fbc:name="G_g010" fbc:label="G_g010"/>
@@ -560,6 +554,7 @@
       <fbc:geneProduct fbc:id="G_g012" fbc:name="G_g012" fbc:label="G_g012"/>
       <fbc:geneProduct fbc:id="G_g011" fbc:name="G_g011" fbc:label="G_g011"/>
       <fbc:geneProduct fbc:id="G_g013" fbc:name="G_g013" fbc:label="G_g013"/>
+      <fbc:geneProduct fbc:id="G_g009" fbc:name="G_g009" fbc:label="G_g009"/>
       <fbc:geneProduct fbc:id="G_g024" fbc:name="G_g024" fbc:label="G_g024"/>
       <fbc:geneProduct fbc:id="G_g020" fbc:name="G_g020" fbc:label="G_g020"/>
       <fbc:geneProduct fbc:id="G_g014" fbc:name="G_g014" fbc:label="G_g014"/>

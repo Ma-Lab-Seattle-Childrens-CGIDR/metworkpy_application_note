@@ -315,7 +315,7 @@ r_N__U.add_metabolites(
         metabolite_dict["U_C"]: 1.0,
     }
 )
-r_N__U.gene_reaction_rule = "( g011 or g013 )"
+r_N__U.gene_reaction_rule = "( g011 and g013 )"
 reaction_list.append(r_N__U)
 
 ##########################
@@ -335,7 +335,7 @@ r_H__K.add_metabolites(
         metabolite_dict["K_C"]: 1.0,
     }
 )
-r_H__K.gene_reaction_rule = "( g011 or g012 )"
+r_H__K.gene_reaction_rule = "g009"
 reaction_list.append(r_H__K)
 
 # G + K <-> L
@@ -353,7 +353,7 @@ r_G_K__L.add_metabolites(
         metabolite_dict["L_C"]: 1.0,
     }
 )
-r_G_K__L.gene_reaction_rule = "( g006 and g007 )"
+r_G_K__L.gene_reaction_rule = "g008"
 reaction_list.append(r_G_K__L)
 
 # K -> O
