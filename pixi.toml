@@ -12,7 +12,7 @@ metabolic_network_analysis = { cmd = "python 03_metabolic_network_analysis.py", 
 ko_divergence = { cmd = "python 04_ko_divergence.py", cwd = "scripts" }
 mi_network = { cmd = "python 05_mutual_information.py", cwd = "scripts" }
 density = { cmd = "python 06_density.py", cwd = "scripts" }
-visualization_script = { cmd = "python 07_visualization.py", cwd = "scripts" }
+visualization_script = { cmd = "python 08_visualization.py", cwd = "scripts" }
 viz = [{ task = "visualization_script", environment = "viz" }]
 all = [
   { task = "create_model" },
