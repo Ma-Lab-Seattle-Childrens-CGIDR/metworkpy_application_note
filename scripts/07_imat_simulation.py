@@ -54,16 +54,6 @@ reaction_weights = metworkpy.gpr.gene_to_rxn_weights(
     fn_dict=metworkpy.gpr.gpr_functions.IMAT_FUNC_DICT,
 )
 
-print(f"reaction weights: {reaction_weights}")
-print(
-    f"Positive weight reactions: "
-    f"{list(reaction_weights[reaction_weights > 0.0].index)}"
-)
-print(
-    f"Negative weight reactions: "
-    f"{list(reaction_weights[reaction_weights < 0.0].index)}"
-)
-
 # Generate an iMAT model based on the reaction weights
 imat_model = metworkpy.imat.generate_model(
     model=sim_model,
