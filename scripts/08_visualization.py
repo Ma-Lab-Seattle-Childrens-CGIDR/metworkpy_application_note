@@ -6,7 +6,6 @@ results on the simulation model
 # Setup
 # Imports
 # Standard Library Imports
-import json
 import pathlib
 import sys
 import tomllib
@@ -15,7 +14,6 @@ import tomllib
 import cobra  # type:ignore
 from metabolic_modeling_utils import escher_maps
 import metworkpy
-import networkx as nx
 import numpy as np
 import pandas as pd
 
@@ -207,6 +205,9 @@ escher_maps.escher_map_add_data(
 target_density_df = pd.read_csv(
     RESULTS_PATH / "target_density" / "gene_target_density.csv", index_col=0
 )
+target_density_df.columns = target_density_df.columns.str.replace(
+    "^Radius: ", "", regex=True
+)
 density_escher_out_dir = RESULTS_PATH / "target_density" / "escher_maps"
 density_escher_out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -221,3 +222,34 @@ for radius, density_series in target_density_df.items():
             {"type": "max", "color": "red", "size": 25},
         ],
     )
+
+##########
+# IMAT ###
+##########
+# Read in the IMAT divergence results
+imat_div_res = pd.read_csv(
+    RESULTS_PATH / "iMAT" / "imat_divergence.csv", index_col=0
+)
+imat_rxn_div = imat_div_res[imat_div_res.index.str.startswith("reaction__")]
+imat_rxn_div.index = imat_rxn_div.index.str.replace("reaction__", "")
+imat_met_div = imat_div_res[imat_div_res.index.str.startswith("metabolite__")]
+imat_met_div.index = imat_met_div.index.str.replace("metabolite__", "")
+
+imat_escher_map_out_dir = RESULTS_PATH / "iMAT" / "escher_maps"
+imat_escher_map_out_dir.mkdir(parents=True, exist_ok=True)
+
+escher_maps.escher_map_add_data(
+    input_map=ESCHER_MAP_PATH,
+    output_dir=imat_escher_map_out_dir,
+    output_prefix="imat_divergence_",
+    reaction_data=imat_rxn_div["IMAT Divergence"],
+    reaction_scale=[
+        {"type": "min", "color": "blue", "size": 10},
+        {"type": "max", "color": "red", "size": 30},
+    ],
+    metabolite_data=imat_met_div["IMAT Divergence"],
+    metabolite_scale=[
+        {"type": "min", "color": "blue", "size": 10},
+        {"type": "max", "color": "red", "size": 30},
+    ],
+)
