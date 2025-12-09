@@ -37,3 +37,10 @@ thinning = 500
 [target-density]
 radius-list = [0, 1, 2, 3]
 targeted-genes = ["g006", "g011", "g024"]
+
+[imat]
+epsilon = 10.0
+threshold = 0.00001
+objective-tolerance = 0.01
+up-regulated-genes = ["g014", "g020", "g017", "g008"]
+down-regulated-genes = ["g013", "g023"]
