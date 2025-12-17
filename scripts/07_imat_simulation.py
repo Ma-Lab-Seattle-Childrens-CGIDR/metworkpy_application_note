@@ -54,6 +54,38 @@ reaction_weights = metworkpy.gpr.gene_to_rxn_weights(
     fn_dict=metworkpy.gpr.gpr_functions.IMAT_FUNC_DICT,
 )
 
+# Run the basic iMAT algorithm
+simple_imat_model = metworkpy.imat.add_imat_constraints(
+    model=sim_model,
+    rxn_weights=reaction_weights,
+    epsilon=CONFIG["imat"]["epsilon"],
+    threshold=CONFIG["imat"]["threshold"],
+)
+metworkpy.imat.add_imat_objective_(
+    model=simple_imat_model, rxn_weights=reaction_weights
+)
+imat_solution: cobra.core.Solution = simple_imat_model.optimize()
+# Create a series with 1.0 for active reactions, and -1.0 for inactive
+# reactions
+imat_activity_series = pd.Series(
+    0.0, index=pd.Index(sim_model.reactions.list_attr("id"))
+)
+imat_fluxes_pos_weight = imat_solution.fluxes[reaction_weights > 0.0]
+imat_fluxes_neg_weight = imat_solution.fluxes[reaction_weights < 0.0]
+imat_activity_series[
+    imat_fluxes_pos_weight[
+        (imat_fluxes_pos_weight.abs() >= CONFIG["imat"]["epsilon"])
+    ].index
+] = 1.0
+imat_activity_series[
+    imat_fluxes_neg_weight[
+        (imat_fluxes_neg_weight.abs() <= CONFIG["imat"]["threshold"])
+    ].index
+] = -1.0
+imat_activity_series.name = "IMAT Value"
+imat_activity_series.to_csv(RESULTS_PATH / "imat_solution.csv")
+
+
 # Generate an iMAT model based on the reaction weights
 imat_model = metworkpy.imat.generate_model(
     model=sim_model,
