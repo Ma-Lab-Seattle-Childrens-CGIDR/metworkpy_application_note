@@ -226,6 +226,28 @@ for radius, density_series in target_density_df.items():
 ##########
 # IMAT ###
 ##########
+# Read in the IMAT activity results
+imat_activity_series = pd.read_csv(
+    RESULTS_PATH / "iMAT" / "imat_activity.csv", index_col=0
+)["IMAT Activity"]
+# Create directory to save the escher maps
+imat_escher_map_out_dir = RESULTS_PATH / "iMAT" / "escher_maps"
+imat_escher_map_out_dir.mkdir(parents=True, exist_ok=True)
+
+
+escher_maps.escher_map_add_data(
+    input_map=ESCHER_MAP_PATH,
+    output_dir=imat_escher_map_out_dir,
+    output_prefix="imat_solution_",
+    reaction_data=imat_activity_series,
+    reaction_scale=[
+        {"type": "value", "value": -1.0, "color": "blue", "size": 10},
+        {"type": "value", "value": 0.0, "color": "grey", "size": 20},
+        {"type": "value", "value": 1.0, "color": "red", "size": 30},
+    ],
+)
+
+
 # Read in the IMAT divergence results
 imat_div_res = pd.read_csv(
     RESULTS_PATH / "iMAT" / "imat_divergence.csv", index_col=0
@@ -234,9 +256,6 @@ imat_rxn_div = imat_div_res[imat_div_res.index.str.startswith("reaction__")]
 imat_rxn_div.index = imat_rxn_div.index.str.replace("reaction__", "")
 imat_met_div = imat_div_res[imat_div_res.index.str.startswith("metabolite__")]
 imat_met_div.index = imat_met_div.index.str.replace("metabolite__", "")
-
-imat_escher_map_out_dir = RESULTS_PATH / "iMAT" / "escher_maps"
-imat_escher_map_out_dir.mkdir(parents=True, exist_ok=True)
 
 escher_maps.escher_map_add_data(
     input_map=ESCHER_MAP_PATH,

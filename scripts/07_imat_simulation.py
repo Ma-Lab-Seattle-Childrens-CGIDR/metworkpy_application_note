@@ -82,8 +82,8 @@ imat_activity_series[
         (imat_fluxes_neg_weight.abs() <= CONFIG["imat"]["threshold"])
     ].index
 ] = -1.0
-imat_activity_series.name = "IMAT Value"
-imat_activity_series.to_csv(RESULTS_PATH / "imat_solution.csv")
+imat_activity_series.name = "IMAT Activity"
+imat_activity_series.to_csv(RESULTS_PATH / "imat_activity.csv")
 
 
 # Generate an iMAT model based on the reaction weights
