@@ -215,10 +215,60 @@ for radius, density_series in target_density_df.items():
     escher_maps.escher_map_add_data(
         input_map=ESCHER_MAP_PATH,
         output_dir=density_escher_out_dir,
-        output_prefix=f"density_r{radius}",
+        output_prefix=f"density_r{radius}_",
         reaction_data=density_series,
         reaction_scale=[
             {"type": "min", "color": "black", "size": 25},
+            {"type": "max", "color": "red", "size": 25},
+        ],
+    )
+
+# Read in the target enrichment p-value results
+target_enrichment_pval_df = pd.read_csv(
+    RESULTS_PATH / "target_density" / "gene_target_enrichment_pval.csv",
+    index_col=0,
+)
+target_enrichment_pval_df.columns = (
+    target_enrichment_pval_df.columns.str.replace("^Radius: ", "", regex=True)
+)
+enrichment_escher_out_dir = RESULTS_PATH / "target_density" / "escher_maps"
+enrichment_escher_out_dir.mkdir(parents=True, exist_ok=True)
+
+for radius, enrichment_series in target_enrichment_pval_df.items():
+    escher_maps.escher_map_add_data(
+        input_map=ESCHER_MAP_PATH,
+        output_dir=enrichment_escher_out_dir,
+        output_prefix=f"enrichment_pval_r{radius}_",
+        reaction_data=enrichment_series,
+        reaction_scale=[
+            {"type": "value", "value": 1.0, "color": "black", "size": 25},
+            {"type": "value", "value": 0.0, "color": "red", "size": 25},
+        ],
+    )
+
+# Read in the target enrichment odds results
+target_enrichment_odds_df = pd.read_csv(
+    RESULTS_PATH / "target_density" / "gene_target_enrichment_odds.csv",
+    index_col=0,
+)
+target_enrichment_odds_df.columns = (
+    target_enrichment_odds_df.columns.str.replace("^Radius: ", "", regex=True)
+)
+enrichment_escher_out_dir = RESULTS_PATH / "target_density" / "escher_maps"
+enrichment_escher_out_dir.mkdir(parents=True, exist_ok=True)
+
+for radius, enrichment_series in target_enrichment_odds_df.items():
+    # Clip the odds ratio to max instead of inf
+    enrichment_series = enrichment_series.clip(
+        upper=enrichment_series.replace(np.inf, np.nan).max()
+    )
+    escher_maps.escher_map_add_data(
+        input_map=ESCHER_MAP_PATH,
+        output_dir=enrichment_escher_out_dir,
+        output_prefix=f"enrichment_odds_r{radius}_",
+        reaction_data=enrichment_series,
+        reaction_scale=[
+            {"type": "value", "value": 0.0, "color": "black", "size": 25},
             {"type": "max", "color": "red", "size": 25},
         ],
     )
