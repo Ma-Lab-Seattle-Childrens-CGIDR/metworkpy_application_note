@@ -60,9 +60,12 @@ metabolic-modeling-utils = { git = "https://github.com/Braden-Griebel/metabolic_
 [feature.viz.dependencies]
 pandas = ">=2.3.3,<3"
 numpy = ">=2.3.5,<3"
-networkx = ">=3.6,<4"
+networkx = ">=3.6.1,<4"
 matplotlib = ">=3.10.8,<4"
 seaborn = ">=0.13.2,<0.14"
+
+[feature.viz.pypi-dependencies]
+iplotx = ">=1.6.0, <2"
 
 [environments]
 dev = ["dev", "default"]
