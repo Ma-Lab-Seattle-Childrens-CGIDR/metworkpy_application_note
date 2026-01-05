@@ -6,14 +6,19 @@ results on the simulation model
 # Setup
 # Imports
 # Standard Library Imports
+from collections import defaultdict
+import json
 import pathlib
 import sys
 import tomllib
 
 # External Imports
 import cobra  # type:ignore
-from metabolic_modeling_utils import escher_maps
+import iplotx as ipx  # type: ignore
+import matplotlib.pyplot as plt
+from metabolic_modeling_utils import escher_maps  # type: ignore
 import metworkpy
+import networkx as nx
 import numpy as np
 import pandas as pd
 
@@ -321,4 +326,126 @@ escher_maps.escher_map_add_data(
         {"type": "min", "color": "blue", "size": 10},
         {"type": "max", "color": "red", "size": 30},
     ],
+)
+
+##################################
+# Reaction Network Visualization #
+##################################
+REACTION_NODE_COLOR = "tab:blue"
+METABOLITE_NODE_COLOR = "tab:red"
+NODE_SIZE = 20
+EDGE_ALPHA = 0.5
+EDGE_WIDTH = 2
+EDGE_COLOR = "k"
+PLOT_MARGIN = 0.2
+IMG_FORMAT = "svg"
+FIG_WIDTH = 30
+FIG_HEIGHT = 30
+# Create (if needed) directory to save images
+network_graph_viz_path = (
+    RESULTS_PATH / "metabolic_networks" / "graph_visualization"
+)
+network_graph_viz_path.mkdir(parents=True, exist_ok=True)
+sim_model_rxn_list = sim_model.reactions.list_attr("id")
+
+# Create a function to create a graph representation
+
+
+def draw_graph(
+    network: nx.DiGraph | nx.Graph,
+    figure_size: tuple[float, float],
+    node_colors: dict,
+    out_path: pathlib.Path,
+    **kwargs,
+):
+    """
+    Create a image representing a graph
+
+    Parameters
+    ----------
+    network : nx.Graph or nx.DiGraph
+        Network to create an image of
+    figure_size : tuple of float
+        Tuple describing size of the figure in inches as (width, height)
+    node_colors : dict of str to list of str
+        Dictionary describing node colors, the keys should be the colors,
+        and the values should be lists of nodes which will have that color
+    kwargs
+        Any additional arguments are passed to the iplotx network function
+    """
+    # Draw the metabolic network
+    fig, ax = plt.subplots()
+    fig.set_size_inches(*figure_size)
+    # Add color attributes to the graph
+    # Create a list of the colors for the nodes
+    node_color_list = []
+    for n in network.nodes:
+        for color, node_set in node_colors.items():
+            if n in node_set:
+                node_color_list.append(color)
+                break
+    # Plot the network with iplotx
+    ipx.network(
+        network,
+        ax=ax,
+        layout=nx.spring_layout(metabolic_network),
+        vertex_marker="r",
+        vertex_labels=True,
+        vertex_facecolor=node_color_list,
+        style="hollow",
+        **kwargs,
+    )
+    fig.savefig(out_path)
+    plt.close()
+
+
+# Read in the reaction networks
+with open(  # type: ignore
+    RESULTS_PATH / "metabolic_networks" / "metabolic_network.json", "r"
+) as f:
+    metabolic_network = nx.node_link_graph(json.load(f))
+with open(  # type: ignore
+    RESULTS_PATH / "metabolic_networks" / "metabolic_reaction_network.json",
+    "r",
+) as f:
+    metabolic_rxn_network = nx.node_link_graph(json.load(f))
+with open(  # type: ignore
+    RESULTS_PATH / "metabolic_networks" / "metabolic_metabolite_network.json",
+    "r",
+) as f:
+    metabolic_metabolite_network = nx.node_link_graph(json.load(f))
+
+# Find colors for the nodes in the graphs
+graph_node_colors = defaultdict(list)
+for n in metabolic_network.nodes:
+    graph_node_colors[
+        REACTION_NODE_COLOR
+        if n in sim_model_rxn_list
+        else METABOLITE_NODE_COLOR
+    ].append(n)
+
+# Draw the metabolic network
+draw_graph(
+    metabolic_network,
+    figure_size=(30, 30),
+    node_colors=graph_node_colors,
+    out_path=network_graph_viz_path / f"metabolic_network.{IMG_FORMAT}",
+)
+
+# Draw the metabolic reaction network
+draw_graph(
+    metabolic_rxn_network,
+    figure_size=(20, 20),
+    node_colors=graph_node_colors,
+    out_path=network_graph_viz_path
+    / f"metabolic_reaction_network.{IMG_FORMAT}",
+)
+
+# Draw the metabolic metabolite network
+draw_graph(
+    metabolic_metabolite_network,
+    figure_size=(15, 15),
+    node_colors=graph_node_colors,
+    out_path=network_graph_viz_path
+    / f"metabolic_metabolite_network.{IMG_FORMAT}",
 )
