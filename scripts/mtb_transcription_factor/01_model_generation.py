@@ -1,5 +1,6 @@
 """
-Script to generate condition specific models for all of the transcription factor over expression strains
+Script to generate condition specific models for all of the transcription
+factor over expression strains
 """
 
 # Setup
@@ -8,6 +9,8 @@ Script to generate condition specific models for all of the transcription factor
 import logging
 import pathlib
 import warnings
+import sys
+import tomllib
 
 # External Imports
 import cobra  # type:ignore
@@ -18,32 +21,38 @@ import pandas as pd  # type:ignore
 # Local Imports
 
 # Setup Path
-try:
+if hasattr(sys, "ps1"):
+    # Running in a REPL
+    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+else:
+    # Running as a file
+    # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
-except NameError:
-    BASE_PATH = pathlib.Path(".").absolute()
 DATA_PATH = BASE_PATH / "data"
 CACHE_PATH = BASE_PATH / "cache"
 MODEL_PATH = BASE_PATH / "models"
 MODEL_OUT_PATH = CACHE_PATH / "tf_models"
+LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 
 # Create directories if needed
 CACHE_PATH.mkdir(parents=True, exist_ok=True)
 MODEL_OUT_PATH.mkdir(parents=True, exist_ok=True)
+LOG_PATH.mkdir(parents=True, exist_ok=True)
 
 # Setup Logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=BASE_PATH
-    / "logs"
-    / "transcription_factors"
-    / "01_model_generation.log",
+    filename=LOG_PATH / "01_model_generation.log",
     filemode="w",
     level=logging.INFO,
 )
 
+# Read in the configuration file
+with open(BASE_PATH / "config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
+
 # Change the default cobra solver
-cobra.Configuration().solver = "hybrid"
+cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 
 # Read in base model
 logger.info("Reading in m7H9 model")
@@ -51,20 +60,12 @@ BASE_MODEL = metworkpy.read_model(
     MODEL_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
 )
 
-# Run Parameters
-PROCESSES = 12
-EPSILON = 1.0
-THRESHOLD = 0.01
-NEG_FOLD_CHANGE = -1
-POS_FOLD_CHANGE = 1
-OBJECTIVE_TOLERANCE = 5e-2
-
 # Read in the transcription factor differential expression data
 logger.info("Reading in the TFOE differential expression data")
 
 tfoe_l2fc = (
     pd.read_excel(
-        DATA_PATH / "transcription_factors" / "tfoe_targets.xlsx",
+        DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
         sheet_name="SupplementaryTableS2",
         skiprows=list(range(8)) + [9],
         usecols="A,E:HB",
@@ -121,10 +122,14 @@ for transcription_factor in tfoe_l2fc.index:
     # Convert log2fc to gene weights
     logger.info("Converting log2fc to gene weights")
     sample_l2fc = tfoe_l2fc.loc[transcription_factor]
-    gene_weights = np.zeros(sample_l2fc.size)
-    gene_weights[sample_l2fc <= NEG_FOLD_CHANGE] = -1
-    gene_weights[sample_l2fc >= POS_FOLD_CHANGE] = 1
-    gene_weights = pd.Series(gene_weights, index=sample_l2fc.index)  # type:ignore
+    gene_weights = pd.Series(0.0, index=sample_l2fc.index)
+    gene_weights[
+        sample_l2fc <= CONFIG["mtb_tf"]["imat"]["neg-fold-change"]
+    ] = -1
+    gene_weights[
+        sample_l2fc >= CONFIG["mtb_tf"]["imat"]["pos-fold-change"]
+    ] = 1
+    gene_weights = pd.Series(gene_weights, index=sample_l2fc.index)
     # Convert gene weights to reaction weights
     with warnings.catch_warnings():
         warnings.filterwarnings(
@@ -146,9 +151,9 @@ for transcription_factor in tfoe_l2fc.index:
         rxn_weights=rxn_weights,
         method="fva",
         loopless=False,
-        epsilon=EPSILON,
-        threshold=THRESHOLD,
-        objective_tolerance=OBJECTIVE_TOLERANCE,
+        epsilon=CONFIG["mtb_tf"]["imat"]["epsilon"],
+        threshold=CONFIG["mtb_tf"]["imat"]["threshold"],
+        objective_tolerance=CONFIG["mtb_tf"]["imat"]["objective-tolerance"],
     )
     # Save the model
     logger.info("Saving model")
