@@ -47,7 +47,7 @@ sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
 # (These will be the exchange pseudo reactions, and the biomass reaction )
 rxns_to_ignore_set = set()
 for rxn in sim_model.reactions:
-    if rxn.subsystem in CONFIG["to-ignore"]["subsystems"]:
+    if rxn.subsystem in CONFIG["simulation"]["to-ignore"]["subsystems"]:
         rxns_to_ignore_set.add(rxn.id)
 rxns_to_ignore = list(rxns_to_ignore_set)  # Pandas wants a list for drop
 
@@ -55,7 +55,9 @@ rxns_to_ignore = list(rxns_to_ignore_set)  # Pandas wants a list for drop
 metabolite_synthesis_network = find_metabolite_synthesis_network_reactions(
     model=sim_model,
     method="essential",
-    essential_proportion=CONFIG["metabolite-networks"]["essential-proportion"],
+    essential_proportion=CONFIG["simulation"]["metabolite-networks"][
+        "essential-proportion"
+    ],
     progress_bar=False,
 ).drop(rxns_to_ignore, axis=0)
 
@@ -67,7 +69,9 @@ metabolite_synthesis_network.to_csv(
 # Generate the metabolite consuming network dataframe
 metabolite_consuming_network = find_metabolite_consuming_network_reactions(
     model=sim_model,
-    reaction_proportion=CONFIG["metabolite-networks"]["reaction-proportion"],
+    reaction_proportion=CONFIG["simulation"]["metabolite-networks"][
+        "reaction-proportion"
+    ],
     check_reverse=True,
     progress_bar=False,
 ).drop(rxns_to_ignore, axis=0)

@@ -42,8 +42,8 @@ sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
 
 # Create a gene weights series
 gene_weights = pd.Series(0.0, index=pd.Index(sim_model.genes.list_attr("id")))
-gene_weights[CONFIG["imat"]["up-regulated-genes"]] = 1.0
-gene_weights[CONFIG["imat"]["down-regulated-genes"]] = -1.0
+gene_weights[CONFIG["simulation"]["imat"]["up-regulated-genes"]] = 1.0
+gene_weights[CONFIG["simulation"]["imat"]["down-regulated-genes"]] = -1.0
 
 # Convert the gene weights into reaction weights
 reaction_weights = metworkpy.gpr.gene_to_rxn_weights(
@@ -58,8 +58,8 @@ reaction_weights = metworkpy.gpr.gene_to_rxn_weights(
 simple_imat_model = metworkpy.imat.add_imat_constraints(
     model=sim_model,
     rxn_weights=reaction_weights,
-    epsilon=CONFIG["imat"]["epsilon"],
-    threshold=CONFIG["imat"]["threshold"],
+    epsilon=CONFIG["simulation"]["imat"]["epsilon"],
+    threshold=CONFIG["simulation"]["imat"]["threshold"],
 )
 metworkpy.imat.add_imat_objective_(
     model=simple_imat_model, rxn_weights=reaction_weights
@@ -74,12 +74,18 @@ imat_fluxes_pos_weight = imat_solution.fluxes[reaction_weights > 0.0]
 imat_fluxes_neg_weight = imat_solution.fluxes[reaction_weights < 0.0]
 imat_activity_series[
     imat_fluxes_pos_weight[
-        (imat_fluxes_pos_weight.abs() >= CONFIG["imat"]["epsilon"])
+        (
+            imat_fluxes_pos_weight.abs()
+            >= CONFIG["simulation"]["imat"]["epsilon"]
+        )
     ].index
 ] = 1.0
 imat_activity_series[
     imat_fluxes_neg_weight[
-        (imat_fluxes_neg_weight.abs() <= CONFIG["imat"]["threshold"])
+        (
+            imat_fluxes_neg_weight.abs()
+            <= CONFIG["simulation"]["imat"]["threshold"]
+        )
     ].index
 ] = -1.0
 imat_activity_series.name = "IMAT Activity"
@@ -91,9 +97,9 @@ imat_model = metworkpy.imat.generate_model(
     model=sim_model,
     rxn_weights=reaction_weights,
     method="fva",
-    epsilon=CONFIG["imat"]["epsilon"],
-    threshold=CONFIG["imat"]["threshold"],
-    objective_tolerance=CONFIG["imat"]["objective-tolerance"],
+    epsilon=CONFIG["simulation"]["imat"]["epsilon"],
+    threshold=CONFIG["simulation"]["imat"]["threshold"],
+    objective_tolerance=CONFIG["simulation"]["imat"]["objective-tolerance"],
     loopless=False,  # This can error on larger models
     processes=CONFIG["processes"],
 )
@@ -101,21 +107,21 @@ imat_model = metworkpy.imat.generate_model(
 # Create the sampler for the both the base model and the imat model
 base_sampler = cobra.sampling.OptGPSampler(
     model=sim_model,
-    thinning=CONFIG["flux-sampling"]["thinning"],
+    thinning=CONFIG["simulation"]["flux-sampling"]["thinning"],
     processes=CONFIG["processes"],
 )
 imat_sampler = cobra.sampling.OptGPSampler(
     model=imat_model,
-    thinning=CONFIG["flux-sampling"]["thinning"],
+    thinning=CONFIG["simulation"]["flux-sampling"]["thinning"],
     processes=CONFIG["processes"],
 )
 
 # Sample using the sampler
 base_samples = base_sampler.sample(
-    CONFIG["flux-sampling"]["num-samples"], fluxes=True
+    CONFIG["simulation"]["flux-sampling"]["num-samples"], fluxes=True
 )
 imat_samples = imat_sampler.sample(
-    CONFIG["flux-sampling"]["num-samples"], fluxes=True
+    CONFIG["simulation"]["flux-sampling"]["num-samples"], fluxes=True
 )
 
 # Validate the samples to ensure they all meet the model constraints

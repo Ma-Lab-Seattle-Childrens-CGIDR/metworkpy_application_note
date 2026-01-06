@@ -48,23 +48,23 @@ sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
 metabolic_network = metworkpy.create_metabolic_network(
     model=sim_model,
     weighted=False,
-    directed=CONFIG["metabolic-network"]["directed"],
+    directed=CONFIG["simulation"]["metabolic-network"]["directed"],
 )
 reaction_network = metworkpy.network.bipartite_project(
     metabolic_network,
-    directed=CONFIG["metabolic-network"]["directed"],
+    directed=CONFIG["simulation"]["metabolic-network"]["directed"],
     node_set=sim_model.reactions.list_attr("id"),
 )
 
 
 # Iterate through the radius list and find the density for each radius
 density_series_list: list[pd.Series] = []
-for radius in CONFIG["target-density"]["radius-list"]:
+for radius in CONFIG["simulation"]["target-density"]["radius-list"]:
     # Create the series of target density
     target_density_series = gene_target_density(
         metabolic_network=reaction_network,
         metabolic_model=sim_model,
-        gene_labels=CONFIG["target-density"]["targeted-genes"],
+        gene_labels=CONFIG["simulation"]["target-density"]["targeted-genes"],
         radius=radius,
     )
     target_density_series.name = f"Radius: {radius}"
@@ -75,12 +75,12 @@ density_df = pd.concat(density_series_list, axis=1)
 # Iterate through the radius list and find the enrichment p-value
 # for each radius
 enrichment_pval_series_list: list[pd.Series] = []
-for radius in CONFIG["target-density"]["radius-list"]:
+for radius in CONFIG["simulation"]["target-density"]["radius-list"]:
     # Create the series of target density
     target_enrichment_pval_series = gene_target_enrichment(
         metabolic_network=reaction_network,
         metabolic_model=sim_model,
-        gene_targets=CONFIG["target-density"]["targeted-genes"],
+        gene_targets=CONFIG["simulation"]["target-density"]["targeted-genes"],
         metric="p-value",
         alternative="greater",
         radius=radius,
@@ -93,12 +93,12 @@ enrichment_pval_df = pd.concat(enrichment_pval_series_list, axis=1)
 # Iterate through the radius list and find the enrichment odds-ratio for
 # each radius
 enrichment_odds_series_list: list[pd.Series] = []
-for radius in CONFIG["target-density"]["radius-list"]:
+for radius in CONFIG["simulation"]["target-density"]["radius-list"]:
     # Create the series of target density
     target_enrichment_odds_series = gene_target_enrichment(
         metabolic_network=reaction_network,
         metabolic_model=sim_model,
-        gene_targets=CONFIG["target-density"]["targeted-genes"],
+        gene_targets=CONFIG["simulation"]["target-density"]["targeted-genes"],
         metric="odds-ratio",
         alternative="greater",
         radius=radius,

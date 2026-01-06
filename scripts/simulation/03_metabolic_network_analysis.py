@@ -46,13 +46,13 @@ sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
 # Create a list of reaction to remove
 rxns_to_ignore_set = set()
 for rxn in sim_model.reactions:
-    if rxn.subsystem in CONFIG["to-ignore"]["subsystems"]:
+    if rxn.subsystem in CONFIG["simulation"]["to-ignore"]["subsystems"]:
         rxns_to_ignore_set.add(rxn.id)
 
 # Additionally ignore all extracellular metabolites
 met_to_ignore_set = set()
 for met in sim_model.metabolites:
-    if met.compartment in CONFIG["to-ignore"]["compartments"]:
+    if met.compartment in CONFIG["simulation"]["to-ignore"]["compartments"]:
         met_to_ignore_set.add(met.id)
 
 # Combine the reactions/metabolites to ignore into one list
@@ -63,7 +63,7 @@ nodes_to_ignore = sorted(rxns_to_ignore_set | met_to_ignore_set)
 metabolic_network = metworkpy.create_metabolic_network(
     model=sim_model,
     weighted=False,
-    directed=CONFIG["metabolic-network"]["directed"],
+    directed=CONFIG["simulation"]["metabolic-network"]["directed"],
     nodes_to_remove=nodes_to_ignore,
 )
 
@@ -78,7 +78,7 @@ model_reactions = set(sim_model.reactions.list_attr("id")) - rxns_to_ignore_set
 reaction_network = metworkpy.bipartite_project(
     metabolic_network,
     node_set=model_reactions,
-    directed=CONFIG["metabolic-network"]["directed"],
+    directed=CONFIG["simulation"]["metabolic-network"]["directed"],
 )
 
 # Save the reaction network
@@ -93,7 +93,7 @@ model_metabolites = (
 metabolite_network = metworkpy.bipartite_project(
     metabolic_network,
     node_set=model_metabolites,
-    directed=CONFIG["metabolic-network"]["directed"],
+    directed=CONFIG["simulation"]["metabolic-network"]["directed"],
 )
 
 # Save the metabolite network

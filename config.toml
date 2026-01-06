@@ -1,46 +1,63 @@
+###########################
+# General Configuration ###
+###########################
 processes = 12
 
 [cobra]
 solver = "hybrid"
 
-[to-ignore]
+##############################
+# Simulation Configuration ###
+##############################
+
+[simulation.to-ignore]
 subsystems = ["Biomass", "External Exchange Reactions"]
 compartments = ["E"]
 
-[reaction-bounds]
+[simulation.reaction-bounds]
 external-exchange = [-100, 100]
 internal-reversible = [-50, 50]
 internal-forward = [0, 50]
 import-reversible = [-50, 50]
 export-irreversible = [0, 50]
 
-[metabolite-networks]
+[simulation.metabolite-networks]
 essential-proportion = 0.10
 reaction-proportion = 0.10
 
-[metabolic-network]
+[simulation.metabolic-network]
 directed = true
 
-[divergence]
+[simulation.divergence]
 n-neighbors = 3
 type = "kl"
 
-[mutual-information]
+[simulation.mutual-information]
 n-neighbors = 3
 x-metric = 2.0
 y-metric = 2.0
 
-[flux-sampling]
+[simulation.flux-sampling]
 num-samples = 1000
 thinning = 500
 
-[target-density]
+[simulation.target-density]
 radius-list = [0, 1, 2, 3]
 targeted-genes = ["g006", "g011", "g024"]
 
-[imat]
+[simulation.imat]
 epsilon = 10.0
 threshold = 0.00001
 objective-tolerance = 0.01
 up-regulated-genes = ["g014", "g020", "g017", "g008"]
 down-regulated-genes = ["g013", "g023"]
+
+##########################
+# Mtb TF Configuration ###
+##########################
+[mtb_tf.imat]
+epsilon = 1.0
+threshold = 0.01
+neg-fold-change = -1
+pos-fold-change = 1
+objective-tolerance = 5e-2

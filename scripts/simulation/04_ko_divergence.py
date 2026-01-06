@@ -47,7 +47,7 @@ sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
 # Find which reactions to not include in the metabolite networks
 rxns_to_ignore_set = set()
 for rxn in sim_model.reactions:
-    if rxn.subsystem in CONFIG["to-ignore"]["subsystems"]:
+    if rxn.subsystem in CONFIG["simulation"]["to-ignore"]["subsystems"]:
         rxns_to_ignore_set.add(rxn.id)
 rxns_to_ignore = list(rxns_to_ignore_set)  # Pandas wants a list for drop
 
@@ -55,14 +55,18 @@ rxns_to_ignore = list(rxns_to_ignore_set)  # Pandas wants a list for drop
 metabolite_synthesis_network = find_metabolite_synthesis_network_reactions(
     model=sim_model,
     method="essential",
-    essential_proportion=CONFIG["metabolite-networks"]["essential-proportion"],
+    essential_proportion=CONFIG["simulation"]["metabolite-networks"][
+        "essential-proportion"
+    ],
     progress_bar=False,
 ).drop(rxns_to_ignore, axis=0)
 
 # Generate the metabolite consuming network dataframe
 metabolite_consuming_network = find_metabolite_consuming_network_reactions(
     model=sim_model,
-    reaction_proportion=CONFIG["metabolite-networks"]["reaction-proportion"],
+    reaction_proportion=CONFIG["simulation"]["metabolite-networks"][
+        "reaction-proportion"
+    ],
     check_reverse=True,
     progress_bar=False,
 ).drop(rxns_to_ignore, axis=0)
@@ -73,7 +77,7 @@ divergence_targets: dict[str, list[str]] = defaultdict(list)
 # Iterate through the reactions to create the divergence targets for subsystems
 # and reactions
 for rxn in sim_model.reactions:
-    if rxn.subsystem in CONFIG["to-ignore"]["subsystems"]:
+    if rxn.subsystem in CONFIG["simulation"]["to-ignore"]["subsystems"]:
         continue
     divergence_targets[f"subsystem__{rxn.subsystem}"].append(rxn.id)
     divergence_targets["subsystem__whole_metabolism"].append(rxn.id)
@@ -101,8 +105,8 @@ ko_divergence_df = metworkpy.divergence.ko_divergence(
     model=sim_model,
     genes_to_ko=sorted(sim_model.genes.list_attr("id")),
     target_networks=divergence_targets,
-    divergence_metric=CONFIG["divergence"]["type"],
-    n_neighbors=CONFIG["divergence"]["n-neighbors"],
+    divergence_metric=CONFIG["simulation"]["divergence"]["type"],
+    n_neighbors=CONFIG["simulation"]["divergence"]["n-neighbors"],
 ).clip(lower=0)  # Divergence should be >0, but
 # this is an estimate, so it can be slightly negative
 # Clipping to correct this somewhat

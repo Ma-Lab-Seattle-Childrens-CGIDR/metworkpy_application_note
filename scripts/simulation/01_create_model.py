@@ -84,8 +84,12 @@ for met in itertools.chain(
         id=f"{met}_E_ex",
         name=f"External {met} exchange",
         subsystem="External Exchange Reactions",
-        lower_bound=CONFIG["reaction-bounds"]["external-exchange"][0],
-        upper_bound=CONFIG["reaction-bounds"]["external-exchange"][1],
+        lower_bound=CONFIG["simulation"]["reaction-bounds"][
+            "external-exchange"
+        ][0],
+        upper_bound=CONFIG["simulation"]["reaction-bounds"][
+            "external-exchange"
+        ][1],
     )
     rxn.add_metabolites({metabolite_dict[f"{met}_E"]: -1.0})  # Met <->
     reaction_list.append(rxn)
@@ -98,8 +102,12 @@ for met in ascii_uppercase[: ascii_uppercase.find("G") + 1]:
         id=f"{met}_import",
         name=f"External {met} import",
         subsystem="Transport",
-        lower_bound=CONFIG["reaction-bounds"]["import-reversible"][0],
-        upper_bound=CONFIG["reaction-bounds"]["import-reversible"][1],
+        lower_bound=CONFIG["simulation"]["reaction-bounds"][
+            "import-reversible"
+        ][0],
+        upper_bound=CONFIG["simulation"]["reaction-bounds"][
+            "import-reversible"
+        ][1],
     )
     rxn.add_metabolites(
         {
@@ -128,8 +136,12 @@ for met in ["N", "R", "U", "V", "W", "X"]:
         id=f"{met}_exp",
         name=f"{met} export",
         subsystem=export_met_to_subsys[met],
-        lower_bound=CONFIG["reaction-bounds"]["export-irreversible"][0],
-        upper_bound=CONFIG["reaction-bounds"]["export-irreversible"][1],
+        lower_bound=CONFIG["simulation"]["reaction-bounds"][
+            "export-irreversible"
+        ][0],
+        upper_bound=CONFIG["simulation"]["reaction-bounds"][
+            "export-irreversible"
+        ][1],
     )
     rxn.add_metabolites(
         {
@@ -158,8 +170,12 @@ r_A_B__G_H = Reaction(
     id="R_A_B__G_H",
     name="Reaction A+B<->G+H",
     subsystem="S1",
-    lower_bound=CONFIG["reaction-bounds"]["internal-reversible"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-reversible"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        0
+    ],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        1
+    ],
 )
 r_A_B__G_H.add_metabolites(
     {
@@ -180,8 +196,12 @@ r_C_H__I = Reaction(
     id="R_C_H__I",
     name="Reaction C+H<->I",
     subsystem="S2",
-    lower_bound=CONFIG["reaction-bounds"]["internal-reversible"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-reversible"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        0
+    ],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        1
+    ],
 )
 r_C_H__I.add_metabolites(
     {
@@ -198,8 +218,12 @@ r_C_D__J = Reaction(
     id="R_C_D__J",
     name="Reaction C+D<->J",
     subsystem="S2",
-    lower_bound=CONFIG["reaction-bounds"]["internal-reversible"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-reversible"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        0
+    ],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        1
+    ],
 )
 r_C_D__J.add_metabolites(
     {
@@ -216,8 +240,12 @@ r_I__P = Reaction(
     id="R_I__P",
     name="Reaction I<->P",
     subsystem="S2",
-    lower_bound=CONFIG["reaction-bounds"]["internal-reversible"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-reversible"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        0
+    ],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        1
+    ],
 )
 r_I__P.add_metabolites(
     {
@@ -234,8 +262,12 @@ r_J__Q = Reaction(
     id="R_J__Q",
     name="Reaction J<->Q",
     subsystem="S2",
-    lower_bound=CONFIG["reaction-bounds"]["internal-reversible"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-reversible"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        0
+    ],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        1
+    ],
 )
 r_J__Q.add_metabolites(
     {
@@ -254,8 +286,12 @@ r_E__M = Reaction(
     id="R_E__M",
     name="Reaction E<->M",
     subsystem="S3",
-    lower_bound=CONFIG["reaction-bounds"]["internal-reversible"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-reversible"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        0
+    ],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        1
+    ],
 )
 r_E__M.add_metabolites(
     {
@@ -271,8 +307,8 @@ r_F_M__N = Reaction(
     id="R_F_M__N",
     name="Reaction F+M->N",
     subsystem="S3",
-    lower_bound=CONFIG["reaction-bounds"]["internal-forward"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-forward"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][0],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][1],
 )
 r_F_M__N.add_metabolites(
     {
@@ -289,8 +325,12 @@ r_N__T = Reaction(
     id="R_N__T",
     name="Reaction N<->T",
     subsystem="S3",
-    lower_bound=CONFIG["reaction-bounds"]["internal-reversible"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-reversible"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        0
+    ],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        1
+    ],
 )
 r_N__T.add_metabolites(
     {
@@ -306,8 +346,8 @@ r_N__U = Reaction(
     id="R_N__U",
     name="Reaction N->U",
     subsystem="S3",
-    lower_bound=CONFIG["reaction-bounds"]["internal-forward"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-forward"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][0],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][1],
 )
 r_N__U.add_metabolites(
     {
@@ -326,8 +366,12 @@ r_H__K = Reaction(
     id="R_H__K",
     name="Reaction H<->K",
     subsystem="S4",
-    lower_bound=CONFIG["reaction-bounds"]["internal-reversible"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-reversible"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        0
+    ],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        1
+    ],
 )
 r_H__K.add_metabolites(
     {
@@ -343,8 +387,12 @@ r_G_K__L = Reaction(
     id="R_G_K__L",
     name="Reaction G+K<->L",
     subsystem="S4",
-    lower_bound=CONFIG["reaction-bounds"]["internal-reversible"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-reversible"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        0
+    ],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-reversible"][
+        1
+    ],
 )
 r_G_K__L.add_metabolites(
     {
@@ -361,8 +409,8 @@ r_K__O = Reaction(
     id="R_K__O",
     name="Reaction K->O",
     subsystem="S4",
-    lower_bound=CONFIG["reaction-bounds"]["internal-forward"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-forward"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][0],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][1],
 )
 r_K__O.add_metabolites(
     {
@@ -378,8 +426,8 @@ r_L__W = Reaction(
     id="R_L__W",
     name="Reaction L->W",
     subsystem="S4",
-    lower_bound=CONFIG["reaction-bounds"]["internal-forward"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-forward"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][0],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][1],
 )
 r_L__W.add_metabolites(
     {
@@ -398,8 +446,8 @@ r_O_P__R = Reaction(
     id="R_O_P__R",
     name="Reaction O+P->R",
     subsystem="S4",
-    lower_bound=CONFIG["reaction-bounds"]["internal-forward"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-forward"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][0],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][1],
 )
 r_O_P__R.add_metabolites(
     {
@@ -420,8 +468,8 @@ r_P_Q__S = Reaction(
     id="R_P_Q__S",
     name="Reaction P+Q->S",
     subsystem="S6",
-    lower_bound=CONFIG["reaction-bounds"]["internal-forward"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-forward"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][0],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][1],
 )
 r_P_Q__S.add_metabolites(
     {
@@ -438,8 +486,8 @@ r_S_T__V_X = Reaction(
     id="R_S_T__V_X",
     name="Reaction S+T->V+X",
     subsystem="S6",
-    lower_bound=CONFIG["reaction-bounds"]["internal-forward"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-forward"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][0],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][1],
 )
 r_S_T__V_X.add_metabolites(
     {
@@ -460,8 +508,8 @@ r_biomass = Reaction(
     id="biomass",
     name="Biomass",
     subsystem="Biomass",
-    lower_bound=CONFIG["reaction-bounds"]["internal-forward"][0],
-    upper_bound=CONFIG["reaction-bounds"]["internal-forward"][1],
+    lower_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][0],
+    upper_bound=CONFIG["simulation"]["reaction-bounds"]["internal-forward"][1],
 )
 r_biomass.add_metabolites(
     {

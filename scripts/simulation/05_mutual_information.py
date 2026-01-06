@@ -49,7 +49,7 @@ sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
 # Create a list of reactions to not include in the centrality calculations
 rxns_to_ignore_set = set()
 for rxn in sim_model.reactions:
-    if rxn.subsystem in CONFIG["to-ignore"]["subsystems"]:
+    if rxn.subsystem in CONFIG["simulation"]["to-ignore"]["subsystems"]:
         rxns_to_ignore_set.add(rxn.id)
 rxns_to_ignore: list[str] = list(rxns_to_ignore_set)
 
@@ -60,11 +60,13 @@ if flux_sample_cache_path.exists():
 else:
     sampler = cobra.sampling.OptGPSampler(
         model=sim_model,
-        thinning=CONFIG["flux-sampling"]["thinning"],
+        thinning=CONFIG["simulation"]["flux-sampling"]["thinning"],
         processes=CONFIG["processes"],
     )
     # Generate samples
-    flux_samples = sampler.sample(CONFIG["flux-sampling"]["num-samples"])
+    flux_samples = sampler.sample(
+        CONFIG["simulation"]["flux-sampling"]["num-samples"]
+    )
     # Validate samples
     flux_samples = flux_samples[sampler.validate(flux_samples) == "v"]
     # Save the flux samples
@@ -81,9 +83,9 @@ else:
         flux_samples,
         processes=CONFIG["processes"],
         progress_bar=False,
-        n_neighbors=CONFIG["mutual-information"]["n-neighbors"],
-        metric_x=CONFIG["mutual-information"]["x-metric"],
-        metric_y=CONFIG["mutual_information"]["y-metric"],
+        n_neighbors=CONFIG["simulation"]["mutual-information"]["n-neighbors"],
+        metric_x=CONFIG["simulation"]["mutual-information"]["x-metric"],
+        metric_y=CONFIG["simulation"]["mutual_information"]["y-metric"],
         truncate=True,
     )
     mi_adj_mat.to_csv(mi_adj_mat_out_path, index=True)
