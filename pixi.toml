@@ -26,6 +26,11 @@ simulation = [
   { task = "visualization_script", environment = "viz" },
 ]
 tf_gen_model = { cmd = "python 01_model_generation.py", cwd = "scripts/mtb_transcription_factor" }
+tf_sample_model = { cmd = "python 02_model_sampling.py", cwd = "scripts/mtb_transcription_factor" }
+mtb_tf = [
+  { task = "tf_gen_model", environment = "default" },
+  { task = "tf_sample_model", environment = "default" },
+]
 
 [dependencies]
 python = ">=3.13.10,<3.14"
