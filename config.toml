@@ -61,3 +61,7 @@ threshold = 0.01
 neg-fold-change = -1
 pos-fold-change = 1
 objective-tolerance = 5e-2
+
+[mtb_tf.sampling]
+thinning = 500
+num-samples = 1000

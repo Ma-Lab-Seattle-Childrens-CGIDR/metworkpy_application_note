@@ -212,3 +212,4 @@ __marimo__/
 # Cache files
 cache/
 slurm/
+logs/
