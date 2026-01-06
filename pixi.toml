@@ -15,7 +15,7 @@ density = { cmd = "python 06_density.py", cwd = "scripts/simulation" }
 imat = { cmd = "python 07_imat_simulation.py", cwd = "scripts/simulation" }
 visualization_script = { cmd = "python 08_visualization.py", cwd = "scripts/simulation" }
 viz = [{ task = "visualization_script", environment = "viz" }]
-all = [
+simulation = [
   { task = "create_model", environment = "default" },
   { task = "find_metabolite_networks", environment = "default" },
   { task = "metabolic_network_analysis", environment = "default" },

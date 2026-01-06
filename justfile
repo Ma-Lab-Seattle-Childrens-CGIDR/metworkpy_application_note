@@ -1,6 +1,6 @@
 #!/usr/bin/env just --justfile
 
-default: all
+default: simulation
 
 create_model:
     pixi run create_model
@@ -26,5 +26,5 @@ imat:
 viz:
     pixi run viz
 
-all:
-    pixi run all
+simulation:
+    pixi run simulation
