@@ -25,6 +25,7 @@ simulation = [
   { task = "imat", environment = "default" },
   { task = "visualization_script", environment = "viz" },
 ]
+tf_gen_model = { cmd = "python 01_model_generation.py", cwd = "scripts/mtb_transcription_factor" }
 
 [dependencies]
 python = ">=3.13.10,<3.14"
