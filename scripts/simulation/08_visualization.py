@@ -15,7 +15,7 @@ import tomllib
 # External Imports
 import cobra  # type:ignore
 import iplotx as ipx  # type: ignore
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 from metabolic_modeling_utils import escher_maps  # type: ignore
 import metworkpy
 import networkx as nx
@@ -31,7 +31,7 @@ if hasattr(sys, "ps1"):
 else:
     # Running as a file
     # Use file path to find root
-    BASE_PATH = pathlib.Path(__file__).parent.parent
+    BASE_PATH = pathlib.Path(__file__).parent.parent.parent
 MODEL_PATH = BASE_PATH / "models"
 RESULTS_PATH = BASE_PATH / "results"
 ESCHER_MAP_PATH = BASE_PATH / "escher_maps" / "simulation_model.json"
@@ -341,6 +341,7 @@ PLOT_MARGIN = 0.2
 IMG_FORMAT = "svg"
 FIG_WIDTH = 30
 FIG_HEIGHT = 30
+LAYOUT_SEED = 314
 # Create (if needed) directory to save images
 network_graph_viz_path = (
     RESULTS_PATH / "metabolic_networks" / "graph_visualization"
@@ -356,6 +357,7 @@ def draw_graph(
     figure_size: tuple[float, float],
     node_colors: dict,
     out_path: pathlib.Path,
+    seed: int | np.random.RandomState | None = None,
     **kwargs,
 ):
     """
@@ -370,6 +372,7 @@ def draw_graph(
     node_colors : dict of str to list of str
         Dictionary describing node colors, the keys should be the colors,
         and the values should be lists of nodes which will have that color
+    seed : int, RanomState instance or None, default=None
     kwargs
         Any additional arguments are passed to the iplotx network function
     """
@@ -388,7 +391,7 @@ def draw_graph(
     ipx.network(
         network,
         ax=ax,
-        layout=nx.spring_layout(metabolic_network),
+        layout=nx.spring_layout(metabolic_network, seed=seed),
         vertex_marker="r",
         vertex_labels=True,
         vertex_facecolor=node_color_list,
@@ -430,6 +433,7 @@ draw_graph(
     figure_size=(30, 30),
     node_colors=graph_node_colors,
     out_path=network_graph_viz_path / f"metabolic_network.{IMG_FORMAT}",
+    seed=LAYOUT_SEED,
 )
 
 # Draw the metabolic reaction network
@@ -439,6 +443,7 @@ draw_graph(
     node_colors=graph_node_colors,
     out_path=network_graph_viz_path
     / f"metabolic_reaction_network.{IMG_FORMAT}",
+    seed=LAYOUT_SEED,
 )
 
 # Draw the metabolic metabolite network
@@ -448,4 +453,5 @@ draw_graph(
     node_colors=graph_node_colors,
     out_path=network_graph_viz_path
     / f"metabolic_metabolite_network.{IMG_FORMAT}",
+    seed=LAYOUT_SEED,
 )

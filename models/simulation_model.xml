@@ -543,8 +543,8 @@
       <fbc:geneProduct fbc:id="G_g017" fbc:name="G_g017" fbc:label="G_g017"/>
       <fbc:geneProduct fbc:id="G_g021" fbc:name="G_g021" fbc:label="G_g021"/>
       <fbc:geneProduct fbc:id="G_g001" fbc:name="G_g001" fbc:label="G_g001"/>
-      <fbc:geneProduct fbc:id="G_g002" fbc:name="G_g002" fbc:label="G_g002"/>
       <fbc:geneProduct fbc:id="G_g003" fbc:name="G_g003" fbc:label="G_g003"/>
+      <fbc:geneProduct fbc:id="G_g002" fbc:name="G_g002" fbc:label="G_g002"/>
       <fbc:geneProduct fbc:id="G_g004" fbc:name="G_g004" fbc:label="G_g004"/>
       <fbc:geneProduct fbc:id="G_g008" fbc:name="G_g008" fbc:label="G_g008"/>
       <fbc:geneProduct fbc:id="G_g010" fbc:name="G_g010" fbc:label="G_g010"/>

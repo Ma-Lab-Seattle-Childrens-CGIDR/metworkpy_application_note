@@ -672,10 +672,10 @@
     - id: g001
     - name: ''
   - !!omap
-    - id: g002
+    - id: g003
     - name: ''
   - !!omap
-    - id: g003
+    - id: g002
     - name: ''
   - !!omap
     - id: g004

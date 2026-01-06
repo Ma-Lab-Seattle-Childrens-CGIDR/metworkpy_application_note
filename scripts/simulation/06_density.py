@@ -28,7 +28,7 @@ if hasattr(sys, "ps1"):
 else:
     # Running as a file
     # Use file path to find root
-    BASE_PATH = pathlib.Path(__file__).parent.parent
+    BASE_PATH = pathlib.Path(__file__).parent.parent.parent
 MODEL_PATH = BASE_PATH / "models"
 RESULTS_PATH = BASE_PATH / "results" / "target_density"
 
@@ -94,7 +94,6 @@ enrichment_pval_df = pd.concat(enrichment_pval_series_list, axis=1)
 # each radius
 enrichment_odds_series_list: list[pd.Series] = []
 for radius in CONFIG["target-density"]["radius-list"]:
-    print(f"radius: {radius}")
     # Create the series of target density
     target_enrichment_odds_series = gene_target_enrichment(
         metabolic_network=reaction_network,

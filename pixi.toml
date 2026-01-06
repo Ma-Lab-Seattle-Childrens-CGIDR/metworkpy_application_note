@@ -6,14 +6,14 @@ platforms = ["linux-64"]
 version = "0.1.0"
 
 [tasks]
-create_model = { cmd = "python 01_create_model.py", cwd = "scripts" }
-find_metabolite_networks = { cmd = "python 02_metabolite_networks.py", cwd = "scripts" }
-metabolic_network_analysis = { cmd = "python 03_metabolic_network_analysis.py", cwd = "scripts" }
-ko_divergence = { cmd = "python 04_ko_divergence.py", cwd = "scripts" }
-mi_network = { cmd = "python 05_mutual_information.py", cwd = "scripts" }
-density = { cmd = "python 06_density.py", cwd = "scripts" }
-imat = { cmd = "python 07_imat_simulation.py", cwd = "scripts" }
-visualization_script = { cmd = "python 08_visualization.py", cwd = "scripts" }
+create_model = { cmd = "python 01_create_model.py", cwd = "scripts/simulation" }
+find_metabolite_networks = { cmd = "python 02_metabolite_networks.py", cwd = "scripts/simulation" }
+metabolic_network_analysis = { cmd = "python 03_metabolic_network_analysis.py", cwd = "scripts/simulation" }
+ko_divergence = { cmd = "python 04_ko_divergence.py", cwd = "scripts/simulation" }
+mi_network = { cmd = "python 05_mutual_information.py", cwd = "scripts/simulation" }
+density = { cmd = "python 06_density.py", cwd = "scripts/simulation" }
+imat = { cmd = "python 07_imat_simulation.py", cwd = "scripts/simulation" }
+visualization_script = { cmd = "python 08_visualization.py", cwd = "scripts/simulation" }
 viz = [{ task = "visualization_script", environment = "viz" }]
 all = [
   { task = "create_model", environment = "default" },
@@ -52,6 +52,11 @@ python-lsp-server = ">=1.13.2,<2"
 pandas-stubs = ">=2.3.3.251201,<3"
 taplo = ">=0.10.0,<0.11"
 types-networkx = ">=3.6.0.20251127,<4"
+
+[feature.escher.dependencies]
+r-base = ">=4.5.2,<4.6"
+r-robustrankaggreg = ">=1.2.1,<2"
+rpy2 = ">=3.6.4,<4"
 
 [feature.escher.pypi-dependencies]
 Escher = ">=1.8.1, <2"

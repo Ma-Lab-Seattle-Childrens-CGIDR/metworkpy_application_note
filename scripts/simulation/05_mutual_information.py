@@ -26,7 +26,7 @@ if hasattr(sys, "ps1"):
 else:
     # Running as a file
     # Use file path to find root
-    BASE_PATH = pathlib.Path(__file__).parent.parent
+    BASE_PATH = pathlib.Path(__file__).parent.parent.parent
 MODEL_PATH = BASE_PATH / "models"
 CACHE_PATH = BASE_PATH / "cache"
 RESULTS_PATH = BASE_PATH / "results" / "mutual_information"

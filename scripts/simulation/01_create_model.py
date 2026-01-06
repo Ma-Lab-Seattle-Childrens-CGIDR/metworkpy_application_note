@@ -23,7 +23,7 @@ if hasattr(sys, "ps1"):
 else:
     # Running as a file
     # Use file path to find root
-    BASE_PATH = pathlib.Path(__file__).parent.parent
+    BASE_PATH = pathlib.Path(__file__).parent.parent.parent
 MODEL_OUT_PATH = BASE_PATH / "models"
 
 # Make directories if needed
