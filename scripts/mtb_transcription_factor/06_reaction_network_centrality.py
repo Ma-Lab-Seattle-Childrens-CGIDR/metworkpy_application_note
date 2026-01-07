@@ -10,6 +10,8 @@ from collections import defaultdict
 import logging
 import pathlib
 from typing import Literal
+import sys
+import tomllib
 
 # External Imports
 import cobra  # type: ignore
@@ -25,44 +27,37 @@ from metabolic_modeling_utils.false_discovery_control import fdr_with_nan
 from metabolic_modeling_utils.bootstrap_function import bootstrap
 
 # Path Setup
-try:
+if hasattr(sys, "ps1"):
+    # Running in a REPL
+    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+    PROGRESS_BAR = True
+else:
+    # Running as a file
+    # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
     PROGRESS_BAR = False  # Don't use progress bar when run as script
-except NameError:
-    BASE_PATH = pathlib.Path(".").absolute()
-    PROGRESS_BAR = True
 DATA_PATH = BASE_PATH / "data"
 RESULTS_PATH = BASE_PATH / "results" / "transcription_factors"
 BASE_MODEL_PATH = BASE_PATH / "models" / "iEK1011_v2_7H10_ADC_glycerol.json"
+LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 
 # Create Directories if needed
 RESULTS_PATH.mkdir(parents=True, exist_ok=True)
+LOG_PATH.mkdir(parents=True, exist_ok=True)
 
 # Logging Setup
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=BASE_PATH
-    / "logs"
-    / "transcription_factors"
-    / "06_reaction_network_centrality.log",
+    filename=LOG_PATH / "06_reaction_network_centrality.log",
     filemode="w",
     level=logging.INFO,
 )
 
-# Script Parameters
-EXCLUDE_TOP_N_MET = 10  # Number of highly connected metabolites to exclude (h2o, atp, adp, etc)
-cobra.Configuration().solver = "hybrid"  # Solver to use for cobra
-DIRECTED = True  # Whether the network should be directed
-BOOTSTRAP_ITERATIONS = (
-    1_000  # Number of iterations to perform for bootstrapping a p-value
-)
-BOOTSTRAP_METHOD = (
-    "kernel"  # Method to use for computing p-value from bootstrap samples
-)
-BOOTSTRAP_ALTERNATIVE: Literal["greater", "less", "two-sided"] = (
-    "greater"  # Alternative for bootstrapping
-)
+# Read in the configuration file
+with open(BASE_PATH / "config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
 
+cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 
 # Read in the base model
 logger.info("Reading in base model")
@@ -92,7 +87,7 @@ metabolites_to_exclude = set(
     map(
         lambda t: t[0],
         sorted(metabolite_counts.items(), key=lambda i: i[1], reverse=True)[
-            :EXCLUDE_TOP_N_MET
+            : CONFIG["mtb"]["network_properties"]["exclude-top-n-met"]
         ],
     )
 )
@@ -105,7 +100,7 @@ logger.info("Constructing the metabolic network")
 metabolic_network = metworkpy.network.create_metabolic_network(
     model=BASE_MODEL,
     weighted=False,
-    directed=DIRECTED,
+    directed=CONFIG["mtb"]["network_properties"]["directed"],
     nodes_to_remove=nodes_to_exclude,
 )
 
@@ -137,14 +132,14 @@ betweenness_centrality_series = pd.Series(
 # Find the TF targets
 logger.info("Finding the TF targets")
 tf_fc_df = pd.read_excel(
-    DATA_PATH / "transcription_factors" / "tfoe_targets.xlsx",
+    DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
     sheet_name="SupplementaryTableS2",
     skiprows=list(range(8)) + [9],
     usecols="A,E:HB",
     index_col=0,
 )
 tf_pval_df = pd.read_excel(
-    DATA_PATH / "transcription_factors" / "tfoe_targets.xlsx",
+    DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
     sheet_name="SupplementaryTableS2",
     skiprows=list(range(8)) + [9],
     usecols="A,HC:OZ",
@@ -152,7 +147,9 @@ tf_pval_df = pd.read_excel(
 )
 tf_pval_df.columns = tf_pval_df.columns.str.replace(".1", "")
 
-tf_target_df = (tf_fc_df.abs() >= 1.0) & (tf_pval_df <= 0.05)
+tf_target_df = (
+    tf_fc_df.abs() >= CONFIG["mtb"]["network_properties"]["target-fc-cutoff"]
+) & (tf_pval_df <= CONFIG["mtb"]["network_properties"]["target-pval-cutoff"])
 
 # Create a dictionary of TF: reaction targets
 logger.info("Creating a reaction target dictionary for all the TFs")
@@ -272,8 +269,10 @@ for tf, tf_target_rxns in tqdm(
         closeness_centrality_series[model_reactions_assoc_with_genes],
         sample_set=tf_target_rxns,  # type:ignore
         statistic=np.mean,
-        iterations=BOOTSTRAP_ITERATIONS,
-        alternative=BOOTSTRAP_ALTERNATIVE,
+        iterations=CONFIG["mtb"]["network_properties"]["bootstrap-iterations"],
+        alternative=CONFIG["mtb"]["network_properties"][
+            "bootstrap-alternative"
+        ],
         seed=324,
     )
     tf_centrality_results_df.loc[tf, "closeness bootstrap p-value"] = (
@@ -283,8 +282,10 @@ for tf, tf_target_rxns in tqdm(
         betweenness_centrality_series[model_reactions_assoc_with_genes],
         sample_set=tf_target_rxns,  # type:ignore
         statistic=np.mean,
-        iterations=BOOTSTRAP_ITERATIONS,
-        alternative=BOOTSTRAP_ALTERNATIVE,
+        iterations=CONFIG["mtb"]["network_properties"]["bootstrap-iterations"],
+        alternative=CONFIG["mtb"]["network_properties"][
+            "bootstrap-alternative"
+        ],
         seed=324,
     )
     tf_centrality_results_df.loc[tf, "betweenness bootstrap p-value"] = (

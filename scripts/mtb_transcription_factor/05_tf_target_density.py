@@ -9,6 +9,8 @@ factor targets in the metabolic model
 from collections import defaultdict
 import logging
 import pathlib
+import sys
+import tomllib
 
 # External Imports
 import cobra  # type: ignore
@@ -19,43 +21,39 @@ import pandas as pd
 from metabolic_modeling_utils import gene_target_density
 
 # Path Setup
-try:
+if hasattr(sys, "ps1"):
+    # Running in a REPL
+    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+else:
+    # Running as a file
+    # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
-except NameError:
-    BASE_PATH = pathlib.Path(".").absolute()
 DATA_PATH = BASE_PATH / "data"
 CACHE_PATH = BASE_PATH / "cache"
-RESULTS_PATH = BASE_PATH / "results" / "transcription_factors"
+RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 BASE_MODEL_PATH = BASE_PATH / "models" / "iEK1011_v2_7H9_ADC_glycerol.json"
+LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 
 # Create Directories if needed
 CACHE_PATH.mkdir(parents=True, exist_ok=True)
 RESULTS_PATH.mkdir(parents=True, exist_ok=True)
+LOG_PATH.mkdir(parents=True, exist_ok=True)
 
 # Logging Config
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=BASE_PATH
-    / "logs"
-    / "transcription_factors"
-    / "05_tf_target_density.log",
+    filename=LOG_PATH / "05_tf_target_density.log",
     filemode="w",
     level=logging.INFO,
 )
 
-# Script Parameters
-EXCLUDE_TOP_N_MET = 10  # Number of highly connected metabolites to not include (h20, atp, etc.)
-DENSITY_RADIUS = 1  # Radius to use when calculating density
-TF_TARGET_FOLD_CHANGE_CUTOFF = (
-    1.0  # log2(fold-change) cutoff for considering a gene a TF target
-)
-TF_TARGET_PVALUE_CUTOFF = (
-    0.05  # p-value cutoff for considering a gene a TF target
-)
+# Read in the configuration file
+with open(BASE_PATH / "config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
 
 # Read in the metabolic model
 logger.info("Reading in the base model")
-cobra.Configuration().solver = "hybrid"
+cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 BASE_MODEL = metworkpy.read_model(BASE_MODEL_PATH)
 
 # SECTION: Construct the reaction network
@@ -89,7 +87,7 @@ METABOLITES_TO_EXCLUDE = list(
                 metabolite_rxn_count_dict.items(),
                 key=lambda i: i[1],
                 reverse=True,
-            )[:EXCLUDE_TOP_N_MET],
+            )[: CONFIG["mtb"]["target_density"]["exclude-top-n-met"]],
         )
     )
 )
@@ -118,14 +116,14 @@ reaction_network = metworkpy.network.bipartite_project(
 # SECTION: TF targets
 logger.info("Reading in TF target information")
 tf_fc_df = pd.read_excel(
-    DATA_PATH / "transcription_factors" / "tfoe_targets.xlsx",
+    DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
     sheet_name="SupplementaryTableS2",
     skiprows=list(range(8)) + [9],
     usecols="A,E:HB",
     index_col=0,
 )
 tf_pval_df = pd.read_excel(
-    DATA_PATH / "transcription_factors" / "tfoe_targets.xlsx",
+    DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
     sheet_name="SupplementaryTableS2",
     skiprows=list(range(8)) + [9],
     usecols="A,HC:OZ",
@@ -135,8 +133,10 @@ tf_pval_df.columns = tf_pval_df.columns.str.replace(".1", "")
 
 # Create the TF target dataframe
 logger.info("Finding TF targets")
-tf_target_df = (tf_fc_df.abs() >= TF_TARGET_FOLD_CHANGE_CUTOFF) & (
-    tf_pval_df <= TF_TARGET_PVALUE_CUTOFF
+tf_target_df = (
+    tf_fc_df.abs() >= CONFIG["mtb"]["target_density"]["target-fc-cutoff"]
+) & (
+    tf_pval_df <= CONFIG["mtb"]["target_density"]["target-pval-cutoff"]
 ).astype("float")
 
 # SECTION: Target Density
@@ -148,7 +148,7 @@ for tf, target_series in tf_target_df.items():
         metabolic_network=reaction_network,
         metabolic_model=BASE_MODEL,
         gene_labels=target_series,
-        radius=DENSITY_RADIUS,
+        radius=CONFIG["mtb"]["target_density"]["radius"],
     )
     target_density_series.name = tf
     tf_target_density_list.append(target_density_series)
