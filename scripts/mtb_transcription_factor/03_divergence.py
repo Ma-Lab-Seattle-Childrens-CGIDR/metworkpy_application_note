@@ -1,6 +1,7 @@
 """
-Calculate the divergence between each of the TFOE models and a wildtype reference,
-for all of the reactions, subsystems, and KEGG pathways
+Calculate the divergence between each of the TFOE models and a
+wildtype reference, for all of the reactions, subsystems, and
+KEGG pathways
 """
 
 # Setup
@@ -9,39 +10,46 @@ for all of the reactions, subsystems, and KEGG pathways
 from collections import defaultdict
 import logging
 import pathlib
-import warnings
+import sys
+import tomllib
 from typing import Any
+import warnings
 
 # External Imports
 import cobra  # type:ignore
 from metabolic_modeling_utils import kegg_rest
 import metworkpy  # type:ignore
 from metworkpy.divergence import calculate_divergence_grouped  # type:ignore
-from metworkpy.metabolites import metabolite_network  # type:ignore
 import numpy as np
 import pandas as pd
 from tqdm import tqdm  # type:ignore
 
 # Local Imports
+from common_functions import get_metabolite_network
 
 
 # Path setup
-try:
+if hasattr(sys, "ps1"):
+    # Running in a REPL
+    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+else:
+    # Running as a file
+    # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
-except NameError:
-    BASE_PATH = pathlib.Path(".").absolute()
 DATA_PATH = BASE_PATH / "data"
 CACHE_PATH = BASE_PATH / "cache"
 METABOLITE_NETWORKS_PATH = CACHE_PATH / "metabolite_networks" / "7H9_ADC"
-RESULTS_PATH = BASE_PATH / "results" / "transcription_factors"
+RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 FLUX_SAMPLES_PATH = CACHE_PATH / "tf_model_flux_samples"
 MODELS_PATH = BASE_PATH / "models"
+LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 
 # Make required directories if they don't exist
 CACHE_PATH.mkdir(parents=True, exist_ok=True)
 METABOLITE_NETWORKS_PATH.mkdir(parents=True, exist_ok=True)
 RESULTS_PATH.mkdir(parents=True, exist_ok=True)
 FLUX_SAMPLES_PATH.mkdir(parents=True, exist_ok=True)
+LOG_PATH.mkdir(parents=True, exist_ok=True)
 
 # Read in the base model for finding subsystems
 cobra.Configuration().solver = "hybrid"
@@ -49,27 +57,21 @@ BASE_MODEL = metworkpy.read_model(
     MODELS_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
 )
 
-# Run Parameters
-PROCESSES = 12
-N_NEIGHBORS = 5
-METRIC = 2.0
-ESSENTIAL_PROPORTION = 0.1
-REACTION_PROPORTION = 0.1
-PROGRESS_BAR = True
-
 # Setup logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=BASE_PATH
-    / "logs"
-    / "transcription_factors"
-    / "03_divergence.log",
+    filename=LOG_PATH / "03_divergence.log",
     filemode="w",
     level=logging.INFO,
 )
 
+# Read in the configuration file
+with open(BASE_PATH / "config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
+
 # Determine the metabolite reaction synthesis/consumption networks
-# NOTE: The network dataframes are indexed by reactions, with columns for each metabolite
+# NOTE: The network dataframes are indexed by reactions,
+# with columns for each metabolite
 
 # Create a list of reactions to remove from the metabolite networks
 reactions_to_remove = []
@@ -84,54 +86,29 @@ for rxn in BASE_MODEL.reactions:
 metabolite_synthesis_rxn_net_df_path = (
     METABOLITE_NETWORKS_PATH / "metabolite_synthesis_reaction_network.csv"
 )
-if metabolite_synthesis_rxn_net_df_path.exists():
-    metabolite_synthesis_rxn_network_df = pd.read_csv(
-        metabolite_synthesis_rxn_net_df_path, index_col=0
-    )
-else:
-    # Create the metabolite network
-    metabolite_synthesis_rxn_network_df = (
-        metabolite_network.find_metabolite_synthesis_network_reactions(
-            model=BASE_MODEL.copy(),
-            method="essential",
-            essential_proportion=ESSENTIAL_PROPORTION,
-            processes=PROCESSES,
-        )
-    )
-    # Drop the reactions to ignore
-    metabolite_synthesis_rxn_network_df = (
-        metabolite_synthesis_rxn_network_df.drop(reactions_to_remove, axis=0)
-    )
-    # Save the results
-    metabolite_synthesis_rxn_network_df.to_csv(
-        metabolite_synthesis_rxn_net_df_path, index=True
-    )
+metabolite_synthesis_rxn_network_df = get_metabolite_network(
+    metabolite_synthesis_rxn_net_df_path,
+    model=BASE_MODEL,
+    rxns_to_remove=reactions_to_remove,
+    proportion=CONFIG["mtb_tf"]["divergence"]["essential-proportion"],
+    synthesis=True,
+    processes=CONFIG["processes"],
+)
+
 
 # Repeat for the consuming networks
 metabolite_consumption_rxn_network_df_path = (
     METABOLITE_NETWORKS_PATH / "metabolite_consumption_reaction_network.csv"
 )
-if metabolite_consumption_rxn_network_df_path.exists():
-    metabolite_consumption_rxn_network_df = pd.read_csv(
-        metabolite_consumption_rxn_network_df_path, index_col=0
-    )
-else:
-    # NOTE: Indexed by reactions, columns are metabolites
-    metabolite_consumption_rxn_network_df = (
-        metabolite_network.find_metabolite_consuming_network_reactions(
-            BASE_MODEL,
-            reaction_proportion=REACTION_PROPORTION,
-            progress_bar=False,
-            processes=PROCESSES,
-        )
-    )
-    # Drop the reactions being ignored
-    metabolite_consumption_rxn_network_df = (
-        metabolite_consumption_rxn_network_df.drop(reactions_to_remove, axis=0)
-    )
-    metabolite_consumption_rxn_network_df.to_csv(
-        metabolite_consumption_rxn_network_df_path, index=True
-    )
+metabolite_consumption_rxn_network_df = get_metabolite_network(
+    metabolite_consumption_rxn_network_df_path,
+    model=BASE_MODEL,
+    rxns_to_remove=reactions_to_remove,
+    proportion=CONFIG["mtb_tf"]["divergence"]["reaction-proportion"],
+    synthesis=False,
+    processes=CONFIG["processes"],
+)
+
 # Get the Kegg pathways
 kegg_path_df = kegg_rest.get_kegg_pathway_genes("mtu")
 kegg_desc_df = kegg_rest.get_kegg_pathway_descriptions(
@@ -224,8 +201,10 @@ divergence_results_df = pd.DataFrame(
     columns=pd.Index(divergence_rxn_group_dict.keys())
 )
 
-# Iterate through all the samples, finding the divergence for all the subsystems
-for sample in tqdm(sample_list, disable=not PROGRESS_BAR):
+# Iterate through all the samples, finding the divergence for all subsystems
+for sample in tqdm(
+    sample_list, disable=not CONFIG["mtb_tf"]["divergence"]["progress-bar"]
+):
     sample_name = sample
     logger.info(f"Starting calculating divergence for {sample_name}")
     # Read in the sample flux distribution
@@ -237,9 +216,9 @@ for sample in tqdm(sample_list, disable=not PROGRESS_BAR):
             sample_flux_dist,
             divergence_groups=divergence_rxn_group_dict,
             divergence_type="kl",
-            processes=PROCESSES,
-            n_neighbors=N_NEIGHBORS,
-            distance_metric=METRIC,
+            processes=CONFIG["processes"],
+            n_neighbors=CONFIG["mtb_tf"]["divergence"]["n-neighbors"],
+            distance_metric=CONFIG["mtb_tf"]["divergence"]["metric"],
             discrete=False,
             jitter=None,
         )
@@ -260,4 +239,4 @@ divergence_results_df.to_csv(
     divergence_results_path,
 )
 
-print("Finished calculating divergence :)")
+logger.info("Finished calculating divergence :)")

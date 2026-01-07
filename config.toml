@@ -65,3 +65,10 @@ objective-tolerance = 5e-2
 [mtb_tf.sampling]
 thinning = 500
 num-samples = 1000
+
+[mtb_tf.divergence]
+n-neighbors = 5
+metric = 2.0
+essential-proportion = 0.1
+reaction-proportion = 0.1
+progress-bar = false
