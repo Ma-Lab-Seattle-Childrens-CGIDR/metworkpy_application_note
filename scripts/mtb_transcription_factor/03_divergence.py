@@ -51,11 +51,6 @@ RESULTS_PATH.mkdir(parents=True, exist_ok=True)
 FLUX_SAMPLES_PATH.mkdir(parents=True, exist_ok=True)
 LOG_PATH.mkdir(parents=True, exist_ok=True)
 
-# Read in the base model for finding subsystems
-cobra.Configuration().solver = "hybrid"
-BASE_MODEL = metworkpy.read_model(
-    MODELS_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
-)
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -68,6 +63,12 @@ logging.basicConfig(
 # Read in the configuration file
 with open(BASE_PATH / "config.toml", "rb") as f:
     CONFIG = tomllib.load(f)
+
+# Read in the base model for finding subsystems
+cobra.Configuration().solver = CONFIG["cobra"]["solver"]
+BASE_MODEL = metworkpy.read_model(
+    MODELS_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
+)
 
 # Determine the metabolite reaction synthesis/consumption networks
 # NOTE: The network dataframes are indexed by reactions,
