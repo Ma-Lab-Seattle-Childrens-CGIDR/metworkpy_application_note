@@ -28,10 +28,12 @@ simulation = [
 tf_gen_model = { cmd = "python 01_model_generation.py", cwd = "scripts/mtb_transcription_factor" }
 tf_sample_model = { cmd = "python 02_model_sampling.py", cwd = "scripts/mtb_transcription_factor" }
 tf_divergence = { cmd = "python 03_divergence.py", cwd = "scripts/mtb_transcription_factor" }
+tf_ko_divergence = { cmd = "python 04_tf_ko_divergence.py", cwd = "scripts/mtb_transcription_factor" }
 mtb_tf = [
   { task = "tf_gen_model", environment = "default" },
   { task = "tf_sample_model", environment = "default" },
   { task = "tf_divergence", environment = "default" },
+  { task = "tf_ko_divergence", environment = "default" },
 ]
 
 [dependencies]

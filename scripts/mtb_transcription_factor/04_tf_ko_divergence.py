@@ -9,46 +9,54 @@ on the metabolic network using ko-divergence
 from collections import defaultdict
 import logging
 import pathlib
+import sys
+import tomllib
 
 # External Imports
 import cobra  # type: ignore
 import metworkpy  # type:ignore
 import numpy as np  # type:ignore
 import pandas as pd  # type:ignore
-from scipy import stats  #  type:ignore
+from scipy import stats  # type:ignore
 
 # Local Imports
 from metabolic_modeling_utils.false_discovery_control import fdr_with_nan
 
 # Path Setup
-try:
+if hasattr(sys, "ps1"):
+    # Running in a REPL
+    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+else:
+    # Running as a file
+    # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
-except NameError:
-    BASE_PATH = pathlib.Path(".").absolute()
 DATA_PATH = BASE_PATH / "data"
-RESULTS_PATH = BASE_PATH / "results" / "transcription_factors"
+RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 CACHE_PATH = BASE_PATH / "cache"
 GENE_KO_DIVERGENCE_PATH = CACHE_PATH / "gene_ko_divergence" / "7h9_adc"
 BASE_MODEL_PATH = BASE_PATH / "models" / "iEK1011_v2_7H9_ADC_glycerol.json"
+LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 
 # Create Directories if needed
 CACHE_PATH.mkdir(parents=True, exist_ok=True)
 GENE_KO_DIVERGENCE_PATH.mkdir(parents=True, exist_ok=True)
 RESULTS_PATH.mkdir(parents=True, exist_ok=True)
+LOG_PATH.mkdir(parents=True, exist_ok=True)
 
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=BASE_PATH
-    / "logs"
-    / "transcription_factors"
-    / "04_tf_ko_divergence.log",
+    filename=LOG_PATH / "04_tf_ko_divergence.log",
     filemode="w",
     level=logging.INFO,
 )
 
+# Read in the configuration file
+with open(BASE_PATH / "config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
+
 # Script Parameters
-cobra.Configuration().solver = "hybrid"
+cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 SUBSYSTEMS_TO_IGNORE = {
     "Biomass and maintenance functions",
     "Extracellular exchange",
@@ -58,23 +66,6 @@ SUBSYSTEM_RENAME_DICT = {
     "Propanoate metabolism": "Propanoate Metabolism",
     "Arabinogalactan bioynthesis": "Arabinogalactan biosynthesis",
 }
-KO_DIVERGENCE_SAMPLE_COUNT = (
-    1_000  # Number of samples to use when calclating divergence
-)
-KO_DIVERGENCE_N_NEIGHBORS = (
-    5  # Number of neighbors to use in divergence estimation
-)
-PROCESSES = 16  # Number of processes to use for KO divergence calculations
-TF_TARGET_FC_CUTOFF = (
-    1.0  # Log2(fold-change) cutoff for considering a gene a TF target
-)
-TF_TARGET_PVAL_CUTOFF = (
-    0.05  # P-value cutoff for considering a gene a TF target
-)
-MIN_TARGET_COUNT = (
-    5  # Minimum number of targets in model for calculating enrichment
-)
-
 
 # Read in the Base Model
 logger.info("Reading in the base model")
@@ -109,9 +100,9 @@ else:
         genes_to_ko=BASE_MODEL.genes.list_attr("id"),
         target_networks=subsystem_to_rxn_dict,
         divergence_metric="kl",
-        n_neighbors=KO_DIVERGENCE_N_NEIGHBORS,
-        sample_count=KO_DIVERGENCE_SAMPLE_COUNT,
-        processes=PROCESSES,
+        n_neighbors=CONFIG["mtb"]["ko_divergence"]["n-neighbors"],
+        sample_count=CONFIG["mtb"]["ko_divergence"]["sample-count"],
+        processes=CONFIG["processes"],
     ).clip(lower=0.0)
     logger.info("Saving the ko divergence results")
     ko_divergence_df.to_csv(ko_divergence_df_path, index=True)
@@ -139,9 +130,9 @@ tf_pval_df = pd.read_excel(
 )
 tf_pval_df.columns = tf_pval_df.columns.str.replace(".1", "")
 
-tf_target_df = (tf_fc_df.abs() >= TF_TARGET_FC_CUTOFF) & (
-    tf_pval_df <= TF_TARGET_PVAL_CUTOFF
-)
+tf_target_df = (
+    tf_fc_df.abs() >= CONFIG["mtb"]["ko_divergence"]["target-fc-cutoff"]
+) & (tf_pval_df <= CONFIG["mtb"]["ko_divergence"]["target-pval-cutoff"])
 
 # Create a dictionary of TF: reaction targets
 logger.info("Creating a reaction target dictionary for all the TFs")
@@ -155,7 +146,9 @@ for tf, target_series in tf_target_df.items():
 
 # Filter for only TFs which have at least 5 targets in the model
 tf_target_dict = {
-    k: v for k, v in tf_target_dict.items() if len(v) >= MIN_TARGET_COUNT
+    k: v
+    for k, v in tf_target_dict.items()
+    if len(v) >= CONFIG["mtb"]["ko_divergence"]["min-target-count"]
 }
 
 # Now, for each TF test if it targets genes which cause
@@ -190,7 +183,12 @@ for tf, target_list in tf_target_dict.items():
         non_targeted_divergence = ko_divergence_series[
             ~ko_divergence_series.index.isin(target_list)
         ]
-        if len(targeted_divergence) < 5 or len(non_targeted_divergence) < 5:
+        if (
+            len(targeted_divergence)
+            < CONFIG["mtb"]["ko_divergence"]["min-target-count"]
+            or len(non_targeted_divergence)
+            < CONFIG["mtb"]["ko_divergence"]["min-target-count"]
+        ):
             continue  # Don't calculate for TFs which target too many, or too few genes
         # Calculate the results
         # Calculate the Mann-Whitney test results
