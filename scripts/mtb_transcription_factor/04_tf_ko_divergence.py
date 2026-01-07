@@ -115,14 +115,14 @@ model_gene_set = set(BASE_MODEL.genes.list_attr("id"))
 # Find the TF targets
 logger.info("Finding the TF targets")
 tf_fc_df = pd.read_excel(
-    DATA_PATH / "transcription_factors" / "tfoe_targets.xlsx",
+    DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
     sheet_name="SupplementaryTableS2",
     skiprows=list(range(8)) + [9],
     usecols="A,E:HB",
     index_col=0,
 )
 tf_pval_df = pd.read_excel(
-    DATA_PATH / "transcription_factors" / "tfoe_targets.xlsx",
+    DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
     sheet_name="SupplementaryTableS2",
     skiprows=list(range(8)) + [9],
     usecols="A,HC:OZ",
