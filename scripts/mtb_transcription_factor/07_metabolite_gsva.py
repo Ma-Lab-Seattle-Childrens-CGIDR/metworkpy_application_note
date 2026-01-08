@@ -9,58 +9,58 @@ metabolite networks (consuming and synthesis)
 import logging
 import pathlib
 from typing import cast
+import sys
+import tomllib
 
 # External Imports
 import cobra  # type:ignore
-import decoupler as dc
+import decoupler as dc  # type: ignore
 import metworkpy  # type:ignore
 from metworkpy.metabolites import metabolite_network  # type:ignore
 import pandas as pd
 
 # Local Imports
+from common_functions import get_metabolite_network
 
 
 # Path setup
-try:
+if hasattr(sys, "ps1"):
+    # Running in a REPL
+    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+else:
+    # Running as a file
+    # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
-except NameError:
-    BASE_PATH = pathlib.Path(".").absolute()
 DATA_PATH = BASE_PATH / "data"
 CACHE_PATH = BASE_PATH / "cache"
 METABOLITE_NETWORKS_PATH = CACHE_PATH / "metabolite_networks" / "7H9_ADC"
-RESULTS_PATH = BASE_PATH / "results" / "transcription_factors"
+RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 MODELS_PATH = BASE_PATH / "models"
+LOG_PATH = BASE_PATH / "mtb_transcription_factors"
 
 # Make required directories if they don't exist
 CACHE_PATH.mkdir(parents=True, exist_ok=True)
 METABOLITE_NETWORKS_PATH.mkdir(parents=True, exist_ok=True)
 RESULTS_PATH.mkdir(parents=True, exist_ok=True)
+LOG_PATH.mkdir(parents=True, exist_ok=True)
+
+# Read in the configuration file
+with open(BASE_PATH / "config.toml", "rb") as f:
+    CONFIG = tomllib.load(f)
 
 # Read in the base model for finding subsystems
-cobra.Configuration().solver = "hybrid"
+cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 BASE_MODEL = metworkpy.read_model(
     MODELS_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
 )
 
-# Run Parameters
-PROCESSES = 12
-N_NEIGHBORS = 5
-METRIC = 2.0
-ESSENTIAL_PROPORTION = 0.1
-REACTION_PROPORTION = 0.1
-PROGRESS_BAR = True
-
 # Setup logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=BASE_PATH
-    / "logs"
-    / "transcription_factors"
-    / "03_divergence.log",
+    filename=LOG_PATH / "07_metabolite_gsva.log",
     filemode="w",
     level=logging.INFO,
 )
-
 # Create a list of reactions to remove from the metabolite networks
 reactions_to_remove = []
 subsystems_to_ignore = [
@@ -74,54 +74,29 @@ for rxn in BASE_MODEL.reactions:
 metabolite_synthesis_rxn_net_df_path = (
     METABOLITE_NETWORKS_PATH / "metabolite_synthesis_reaction_network.csv"
 )
-if metabolite_synthesis_rxn_net_df_path.exists():
-    metabolite_synthesis_rxn_network_df = pd.read_csv(
-        metabolite_synthesis_rxn_net_df_path, index_col=0
-    )
-else:
-    # Create the metabolite network
-    metabolite_synthesis_rxn_network_df = (
-        metabolite_network.find_metabolite_synthesis_network_reactions(
-            model=BASE_MODEL.copy(),
-            method="essential",
-            essential_proportion=ESSENTIAL_PROPORTION,
-            processes=PROCESSES,
-        )
-    )
-    # Drop the reactions to ignore
-    metabolite_synthesis_rxn_network_df = (
-        metabolite_synthesis_rxn_network_df.drop(reactions_to_remove, axis=0)
-    )
-    # Save the results
-    metabolite_synthesis_rxn_network_df.to_csv(
-        metabolite_synthesis_rxn_net_df_path, index=True
-    )
+metabolite_synthesis_rxn_network_df = get_metabolite_network(
+    metabolite_synthesis_rxn_net_df_path,
+    model=BASE_MODEL,
+    rxns_to_remove=reactions_to_remove,
+    proportion=CONFIG["mtb_tf"]["metabolite_gsva"]["essential-proportion"],
+    synthesis=True,
+    processes=CONFIG["processes"],
+)
+
 
 # Repeat for the consuming networks
 metabolite_consumption_rxn_network_df_path = (
     METABOLITE_NETWORKS_PATH / "metabolite_consumption_reaction_network.csv"
 )
-if metabolite_consumption_rxn_network_df_path.exists():
-    metabolite_consumption_rxn_network_df = pd.read_csv(
-        metabolite_consumption_rxn_network_df_path, index_col=0
-    )
-else:
-    # NOTE: Indexed by reactions, columns are metabolites
-    metabolite_consumption_rxn_network_df = (
-        metabolite_network.find_metabolite_consuming_network_reactions(
-            BASE_MODEL,
-            reaction_proportion=REACTION_PROPORTION,
-            progress_bar=False,
-            processes=PROCESSES,
-        )
-    )
-    # Drop the reactions being ignored
-    metabolite_consumption_rxn_network_df = (
-        metabolite_consumption_rxn_network_df.drop(reactions_to_remove, axis=0)
-    )
-    metabolite_consumption_rxn_network_df.to_csv(
-        metabolite_consumption_rxn_network_df_path, index=True
-    )
+metabolite_consumption_rxn_network_df = get_metabolite_network(
+    metabolite_consumption_rxn_network_df_path,
+    model=BASE_MODEL,
+    rxns_to_remove=reactions_to_remove,
+    proportion=CONFIG["mtb_tf"]["metabolite_gsva"]["reaction-proportion"],
+    synthesis=False,
+    processes=CONFIG["processes"],
+)
+
 
 # Create a rxn to gene dataframe to translate reaction networks
 # into gene networks
@@ -151,7 +126,7 @@ metabolite_synthesis_network_long = cast(
 )
 # Add a suffix to the networks to keep track of synthesis vs consumption
 metabolite_synthesis_network_long["metabolite"] = (
-    metabolite_synthesis_network_long["metabolite"] + "_synthesis_network"
+    metabolite_synthesis_network_long["metabolite"] + "_synthesis_network"  # type: ignore
 )
 # Repeat above for the consumption network
 metabolite_consumption_network_long = pd.merge(
@@ -169,8 +144,10 @@ metabolite_consumption_network_long = cast(
         metabolite_consumption_network_long["to_keep"]
     ][["metabolite", "gene"]],
 )
-# Add a suffix to the networks to keep track of whether it is for synthesis or consumption
+# Add a suffix to the networks to keep track of whether it is for synthesis or
+# consumption
 metabolite_consumption_network_long["metabolite"] = (
+    # type: ignore
     metabolite_consumption_network_long["metabolite"] + "_consumption_network"
 )
 # Join the two metabolite network dataframes
@@ -188,7 +165,7 @@ metabolite_network_combined = metabolite_network_combined.rename(
 # Read in the log2(fold-change) data
 tfoe_l2fc = (
     pd.read_excel(
-        DATA_PATH / "transcription_factors" / "tfoe_targets.xlsx",
+        DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
         sheet_name="SupplementaryTableS2",
         skiprows=list(range(8)) + [9],
         usecols="A,E:HB",

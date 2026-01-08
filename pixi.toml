@@ -25,19 +25,30 @@ simulation = [
   { task = "imat", environment = "default" },
   { task = "visualization_script", environment = "viz" },
 ]
+tf_reaction_info = { cmd = "python 00_reaction_info.py", cwd = "scripts/mtb_transcription_factor" }
+tf_metabolite_info = { cmd = "python 00_metabolite_info.py", cwd = "scripts/mtb_transcription_factor" }
 tf_gen_model = { cmd = "python 01_model_generation.py", cwd = "scripts/mtb_transcription_factor" }
 tf_sample_model = { cmd = "python 02_model_sampling.py", cwd = "scripts/mtb_transcription_factor" }
 tf_divergence = { cmd = "python 03_divergence.py", cwd = "scripts/mtb_transcription_factor" }
 tf_ko_divergence = { cmd = "python 04_tf_ko_divergence.py", cwd = "scripts/mtb_transcription_factor" }
 tf_target_density = { cmd = "python 05_tf_target_density.py", cwd = "scripts/mtb_transcription_factor" }
 tf_reaction_centrality = { cmd = "python 06_reaction_network_centrality.py", cwd = "scripts/mtb_transcription_factor" }
+tf_metabolite_gsva_private = { cmd = "python 07_metabolite_gsva.py", cwd = "scripts/mtb_transcription_factor" }
+tf_metabolite_gsva = [
+  { task = "tf_metabolite_gsva_private", environment = "decoupler" },
+]
+tf_metabolite_enrichment = { cmd = "python 08_metabolite_network_target_enrichment.py", cwd = "scripts/mtb_transcription_factor" }
 mtb_tf = [
+  { task = "tf_reaction_info", environment = "default" },
+  { task = "tf_metabolite_info", environment = "default" },
   { task = "tf_gen_model", environment = "default" },
   { task = "tf_sample_model", environment = "default" },
   { task = "tf_divergence", environment = "default" },
   { task = "tf_ko_divergence", environment = "default" },
   { task = "tf_target_density", environment = "default" },
   { task = "tf_reaction_centrality", environment = "default" },
+  { task = "tf_metabolite_gsva_private", environment = "decoupler" },
+  { task = "tf_metabolite_enrichment", environment = "default" },
 ]
 
 [dependencies]
@@ -84,7 +95,11 @@ seaborn = ">=0.13.2,<0.14"
 [feature.viz.pypi-dependencies]
 iplotx = ">=1.6.0, <2"
 
+[feature.decoupler.dependencies]
+decoupler-py = "*"
+
 [environments]
 dev = ["dev", "default"]
+decoupler = ["default", "decoupler"]
 viz = ["escher", "viz", "default"]
 vdev = ["escher", "viz", "dev"]
