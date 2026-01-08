@@ -9,7 +9,6 @@ of transcription factor targets
 from collections import defaultdict
 import logging
 import pathlib
-from typing import Literal
 import sys
 import tomllib
 
@@ -38,7 +37,7 @@ else:
     PROGRESS_BAR = False  # Don't use progress bar when run as script
 DATA_PATH = BASE_PATH / "data"
 RESULTS_PATH = BASE_PATH / "results" / "transcription_factors"
-BASE_MODEL_PATH = BASE_PATH / "models" / "iEK1011_v2_7H10_ADC_glycerol.json"
+BASE_MODEL_PATH = BASE_PATH / "models" / "iEK1011_v2_7H9_ADC_glycerol.json"
 LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 
 # Create Directories if needed
@@ -206,7 +205,7 @@ for tf, tf_target_rxns in tqdm(
         r for r in model_reactions_assoc_with_genes if r not in tf_target_rxns
     ]
     if len(tf_target_rxns) < 5 or len(non_targeted_rxns) < 5:
-        continue  # Exclude TFs which either target too few, or too many reactions
+        continue  # Exclude TFs which either target too few/many reactions
     # Start by finding the mean/std for closeness and betweenness
     tf_centrality_results_df.loc[tf, "mean closeness"] = (
         closeness_centrality_series[tf_target_rxns].mean()
