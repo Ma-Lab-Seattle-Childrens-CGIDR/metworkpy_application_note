@@ -14,7 +14,6 @@ import tomllib
 
 # External Imports
 import cobra  # type:ignore
-import numpy as np
 import metworkpy  # type:ignore
 import pandas as pd  # type:ignore
 
