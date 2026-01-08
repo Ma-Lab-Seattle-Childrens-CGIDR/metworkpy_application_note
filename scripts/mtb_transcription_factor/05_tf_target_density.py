@@ -87,7 +87,7 @@ METABOLITES_TO_EXCLUDE = list(
                 metabolite_rxn_count_dict.items(),
                 key=lambda i: i[1],
                 reverse=True,
-            )[: CONFIG["mtb"]["target_density"]["exclude-top-n-met"]],
+            )[: CONFIG["mtb_tf"]["target_density"]["exclude-top-n-met"]],
         )
     )
 )
@@ -134,9 +134,9 @@ tf_pval_df.columns = tf_pval_df.columns.str.replace(".1", "")
 # Create the TF target dataframe
 logger.info("Finding TF targets")
 tf_target_df = (
-    tf_fc_df.abs() >= CONFIG["mtb"]["target_density"]["target-fc-cutoff"]
+    tf_fc_df.abs() >= CONFIG["mtb_tf"]["target_density"]["target-fc-cutoff"]
 ) & (
-    tf_pval_df <= CONFIG["mtb"]["target_density"]["target-pval-cutoff"]
+    tf_pval_df <= CONFIG["mtb_tf"]["target_density"]["target-pval-cutoff"]
 ).astype("float")
 
 # SECTION: Target Density
@@ -148,7 +148,7 @@ for tf, target_series in tf_target_df.items():
         metabolic_network=reaction_network,
         metabolic_model=BASE_MODEL,
         gene_labels=target_series,
-        radius=CONFIG["mtb"]["target_density"]["radius"],
+        radius=CONFIG["mtb_tf"]["target_density"]["radius"],
     )
     target_density_series.name = tf
     tf_target_density_list.append(target_density_series)

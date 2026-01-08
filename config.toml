@@ -73,20 +73,20 @@ essential-proportion = 0.1
 reaction-proportion = 0.1
 progress-bar = false
 
-[mtb.ko_divergence]
+[mtb_tf.ko_divergence]
 sample-count = 1_000      # Number of samples to use when calclating divergence
 n-neighbors = 5           # Number of neighbors to use in divergence estimation
 target-fc-cutoff = 1.0    # Log2(fold-change) cutoff for considering a gene a TF target
 target-pval-cutoff = 0.05 # P-value cutoff for considering a gene a TF target
 min-target-count = 5      # Minimum number of targets in model for calculating enrichment
 
-[mtb.target_density]
+[mtb_tf.target_density]
 exclude-top-n-met = 10
 radius = 1
 target-fc-cutoff = 1.0
 target-pval-cutoff = 0.05
 
-[mtb.network_properties]
+[mtb_tf.network_properties]
 directed = true
 bootstrap-iterations = 1_000
 exclude-top-n-met = 10
@@ -94,3 +94,13 @@ bootrap-method = "kernel"
 bootstrap-alternative = "greater"
 target-fc-cutoff = 1.0
 target-pval-cutoff = 0.05
+
+[mtb_tf.metabolite_gsva]
+essential-proportion = 0.1
+reaction-proportion = 0.1
+
+[mtb_tf.target_enrichment]
+essential-proportion = 0.1 # Number of samples to use when calclating divergence
+reaction-proportion = 0.1  # Number of neighbors to use in divergence estimation
+target-fc-cutoff = 1.0     # Log2(fold-change) cutoff for considering a gene a TF target
+target-pval-cutoff = 0.05  # P-value cutoff for considering a gene a TF target

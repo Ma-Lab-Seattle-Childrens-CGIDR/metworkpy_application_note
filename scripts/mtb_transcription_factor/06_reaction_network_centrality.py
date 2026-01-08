@@ -36,7 +36,7 @@ else:
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
     PROGRESS_BAR = False  # Don't use progress bar when run as script
 DATA_PATH = BASE_PATH / "data"
-RESULTS_PATH = BASE_PATH / "results" / "transcription_factors"
+RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 BASE_MODEL_PATH = BASE_PATH / "models" / "iEK1011_v2_7H9_ADC_glycerol.json"
 LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 
@@ -86,7 +86,7 @@ metabolites_to_exclude = set(
     map(
         lambda t: t[0],
         sorted(metabolite_counts.items(), key=lambda i: i[1], reverse=True)[
-            : CONFIG["mtb"]["network_properties"]["exclude-top-n-met"]
+            : CONFIG["mtb_tf"]["network_properties"]["exclude-top-n-met"]
         ],
     )
 )
@@ -99,7 +99,7 @@ logger.info("Constructing the metabolic network")
 metabolic_network = metworkpy.network.create_metabolic_network(
     model=BASE_MODEL,
     weighted=False,
-    directed=CONFIG["mtb"]["network_properties"]["directed"],
+    directed=CONFIG["mtb_tf"]["network_properties"]["directed"],
     nodes_to_remove=nodes_to_exclude,
 )
 
@@ -147,8 +147,11 @@ tf_pval_df = pd.read_excel(
 tf_pval_df.columns = tf_pval_df.columns.str.replace(".1", "")
 
 tf_target_df = (
-    tf_fc_df.abs() >= CONFIG["mtb"]["network_properties"]["target-fc-cutoff"]
-) & (tf_pval_df <= CONFIG["mtb"]["network_properties"]["target-pval-cutoff"])
+    tf_fc_df.abs()
+    >= CONFIG["mtb_tf"]["network_properties"]["target-fc-cutoff"]
+) & (
+    tf_pval_df <= CONFIG["mtb_tf"]["network_properties"]["target-pval-cutoff"]
+)
 
 # Create a dictionary of TF: reaction targets
 logger.info("Creating a reaction target dictionary for all the TFs")
@@ -268,8 +271,10 @@ for tf, tf_target_rxns in tqdm(
         closeness_centrality_series[model_reactions_assoc_with_genes],
         sample_set=tf_target_rxns,  # type:ignore
         statistic=np.mean,
-        iterations=CONFIG["mtb"]["network_properties"]["bootstrap-iterations"],
-        alternative=CONFIG["mtb"]["network_properties"][
+        iterations=CONFIG["mtb_tf"]["network_properties"][
+            "bootstrap-iterations"
+        ],
+        alternative=CONFIG["mtb_tf"]["network_properties"][
             "bootstrap-alternative"
         ],
         seed=324,
@@ -281,8 +286,10 @@ for tf, tf_target_rxns in tqdm(
         betweenness_centrality_series[model_reactions_assoc_with_genes],
         sample_set=tf_target_rxns,  # type:ignore
         statistic=np.mean,
-        iterations=CONFIG["mtb"]["network_properties"]["bootstrap-iterations"],
-        alternative=CONFIG["mtb"]["network_properties"][
+        iterations=CONFIG["mtb_tf"]["network_properties"][
+            "bootstrap-iterations"
+        ],
+        alternative=CONFIG["mtb_tf"]["network_properties"][
             "bootstrap-alternative"
         ],
         seed=324,

@@ -100,8 +100,8 @@ else:
         genes_to_ko=BASE_MODEL.genes.list_attr("id"),
         target_networks=subsystem_to_rxn_dict,
         divergence_metric="kl",
-        n_neighbors=CONFIG["mtb"]["ko_divergence"]["n-neighbors"],
-        sample_count=CONFIG["mtb"]["ko_divergence"]["sample-count"],
+        n_neighbors=CONFIG["mtb_tf"]["ko_divergence"]["n-neighbors"],
+        sample_count=CONFIG["mtb_tf"]["ko_divergence"]["sample-count"],
         processes=CONFIG["processes"],
     ).clip(lower=0.0)
     logger.info("Saving the ko divergence results")
@@ -131,8 +131,8 @@ tf_pval_df = pd.read_excel(
 tf_pval_df.columns = tf_pval_df.columns.str.replace(".1", "")
 
 tf_target_df = (
-    tf_fc_df.abs() >= CONFIG["mtb"]["ko_divergence"]["target-fc-cutoff"]
-) & (tf_pval_df <= CONFIG["mtb"]["ko_divergence"]["target-pval-cutoff"])
+    tf_fc_df.abs() >= CONFIG["mtb_tf"]["ko_divergence"]["target-fc-cutoff"]
+) & (tf_pval_df <= CONFIG["mtb_tf"]["ko_divergence"]["target-pval-cutoff"])
 
 # Create a dictionary of TF: reaction targets
 logger.info("Creating a reaction target dictionary for all the TFs")
@@ -148,7 +148,7 @@ for tf, target_series in tf_target_df.items():
 tf_target_dict = {
     k: v
     for k, v in tf_target_dict.items()
-    if len(v) >= CONFIG["mtb"]["ko_divergence"]["min-target-count"]
+    if len(v) >= CONFIG["mtb_tf"]["ko_divergence"]["min-target-count"]
 }
 
 # Now, for each TF test if it targets genes which cause
@@ -185,11 +185,12 @@ for tf, target_list in tf_target_dict.items():
         ]
         if (
             len(targeted_divergence)
-            < CONFIG["mtb"]["ko_divergence"]["min-target-count"]
+            < CONFIG["mtb_tf"]["ko_divergence"]["min-target-count"]
             or len(non_targeted_divergence)
-            < CONFIG["mtb"]["ko_divergence"]["min-target-count"]
+            < CONFIG["mtb_tf"]["ko_divergence"]["min-target-count"]
         ):
-            continue  # Don't calculate for TFs which target too many, or too few genes
+            # Don't calculate for TFs which target too many, or too few genes
+            continue
         # Calculate the results
         # Calculate the Mann-Whitney test results
         mann_whitney_res = stats.mannwhitneyu(
