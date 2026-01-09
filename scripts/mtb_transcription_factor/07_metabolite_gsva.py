@@ -16,7 +16,6 @@ import tomllib
 import cobra  # type:ignore
 import decoupler as dc  # type: ignore
 import metworkpy  # type:ignore
-from metworkpy.metabolites import metabolite_network  # type:ignore
 import pandas as pd
 
 # Local Imports
