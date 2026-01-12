@@ -71,7 +71,7 @@ r-robustrankaggreg = ">=1.2.1,<2"
 rpy2 = ">=3.6.4,<4"
 
 [pypi-dependencies]
-metworkpy = ">=0.2.7, <0.3"
+metworkpy = ">=0.2.8, <0.3"
 metabolic-modeling-utils = { git = "https://github.com/Braden-Griebel/metabolic_modeling_utils.git" }
 
 [feature.dev.dependencies]

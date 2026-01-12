@@ -186,7 +186,8 @@ for tf, target_list in tf_target_dict.items():
         if (
             len(targeted_divergence)
             < CONFIG["mtb_tf"]["ko_divergence"]["min-target-count"]
-            or len(non_targeted_divergence)
+        ) or (
+            len(non_targeted_divergence)
             < CONFIG["mtb_tf"]["ko_divergence"]["min-target-count"]
         ):
             # Don't calculate for TFs which target too many, or too few genes

@@ -213,8 +213,8 @@ for sample in tqdm(
     # Find the divergence for all the divergence groups
     with warnings.catch_warnings(action="ignore"):
         div_res = calculate_divergence_grouped(
-            wt_sample,
             sample_flux_dist,
+            wt_sample,
             divergence_groups=divergence_rxn_group_dict,
             divergence_type="kl",
             processes=CONFIG["processes"],

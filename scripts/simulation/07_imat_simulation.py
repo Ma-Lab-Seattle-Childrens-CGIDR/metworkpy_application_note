@@ -159,8 +159,8 @@ divergence_groups = {k: v for k, v in divergence_groups.items() if len(v) > 0}
 # Compute the divergence for all these groups
 imat_divergence = (
     metworkpy.divergence.group_divergence.calculate_divergence_grouped(
-        dataset1=base_samples,
-        dataset2=imat_samples,
+        dataset1=imat_samples,
+        dataset2=base_samples,
         divergence_groups=divergence_groups,
         divergence_type="kl",
         processes=CONFIG["processes"],
