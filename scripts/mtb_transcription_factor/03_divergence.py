@@ -213,8 +213,8 @@ for sample in tqdm(
     # Find the divergence for all the divergence groups
     with warnings.catch_warnings(action="ignore"):
         div_res = calculate_divergence_grouped(
-            sample_flux_dist,
             wt_sample,
+            sample_flux_dist,
             divergence_groups=divergence_rxn_group_dict,
             divergence_type="kl",
             processes=CONFIG["processes"],
@@ -228,11 +228,11 @@ for sample in tqdm(
 
 divergence_results_df = divergence_results_df.copy()
 # Clip the values in the divergence results
-divergence_results_df = divergence_results_df.clip(
+divergence_results_df = divergence_results_df.clip(  # type: ignore
     lower=0,
     upper=divergence_results_df.replace(np.inf, np.nan).max(
         axis=0, skipna=True
-    ),  # type:ignore # Can be arraylike
+    ),
     axis="columns",
 )
 # Save the clipped divergence
