@@ -107,6 +107,7 @@ ko_divergence_df = metworkpy.divergence.ko_divergence(
     target_networks=divergence_targets,
     divergence_metric=CONFIG["simulation"]["divergence"]["type"],
     n_neighbors=CONFIG["simulation"]["divergence"]["n-neighbors"],
+    use_unperturbed_as_true=True,
 ).clip(lower=0)  # Divergence should be >0, but
 # this is an estimate, so it can be slightly negative
 # Clipping to correct this somewhat

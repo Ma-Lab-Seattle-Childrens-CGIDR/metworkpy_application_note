@@ -162,7 +162,7 @@ imat_divergence = (
         dataset1=base_samples,
         dataset2=imat_samples,
         divergence_groups=divergence_groups,
-        divergence_type="kl",
+        divergence_type="js",
         processes=CONFIG["processes"],
     )
 ).clip(lower=0.0)
