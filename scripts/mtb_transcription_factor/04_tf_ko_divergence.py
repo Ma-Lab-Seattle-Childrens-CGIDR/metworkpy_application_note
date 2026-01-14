@@ -6,26 +6,30 @@ on the metabolic network using ko-divergence
 # Setup
 # Imports
 # Standard Library Imports
-from collections import defaultdict
 import logging
 import pathlib
 import sys
 import tomllib
+import warnings
 
 # External Imports
 import cobra  # type: ignore
-import metworkpy  # type:ignore
-import numpy as np  # type:ignore
+import metworkpy
+from metabolic_modeling_utils.false_discovery_control import fdr_with_nan
+from metabolic_modeling_utils.connected_components import (
+    find_connected_components,
+)
+import numpy as np
 import pandas as pd  # type:ignore
 from scipy import stats  # type:ignore
 
 # Local Imports
-from metabolic_modeling_utils.false_discovery_control import fdr_with_nan
+from common_functions import get_metabolite_network
 
 # Path Setup
 if hasattr(sys, "ps1"):
     # Running in a REPL
-    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+    BASE_PATH = pathlib.Path(".").absolute()  # Use current dir as base path
 else:
     # Running as a file
     # Use file path to find root
@@ -33,6 +37,7 @@ else:
 DATA_PATH = BASE_PATH / "data"
 RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 CACHE_PATH = BASE_PATH / "cache"
+METABOLITE_NETWORKS_PATH = CACHE_PATH / "metabolite_networks" / "7H9_ADC"
 GENE_KO_DIVERGENCE_PATH = CACHE_PATH / "gene_ko_divergence" / "7h9_adc"
 BASE_MODEL_PATH = BASE_PATH / "models" / "iEK1011_v2_7H9_ADC_glycerol.json"
 LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
@@ -40,6 +45,7 @@ LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 # Create Directories if needed
 CACHE_PATH.mkdir(parents=True, exist_ok=True)
 GENE_KO_DIVERGENCE_PATH.mkdir(parents=True, exist_ok=True)
+METABOLITE_NETWORKS_PATH.mkdir(parents=True, exist_ok=True)
 RESULTS_PATH.mkdir(parents=True, exist_ok=True)
 LOG_PATH.mkdir(parents=True, exist_ok=True)
 
@@ -71,19 +77,70 @@ SUBSYSTEM_RENAME_DICT = {
 logger.info("Reading in the base model")
 BASE_MODEL = metworkpy.read_model(BASE_MODEL_PATH)
 
-# Create a dictionary of subsystem to reactions
-logger.info("Creating subsystem dictionary")
-subsystem_to_rxn_dict: dict[str, list[str]] = defaultdict(list)
+# Create a list of reactions to remove from the metabolite networks
+reactions_to_remove: list[str] = []
+subsystems_to_ignore: list[str] = [
+    "Intracellular demand",
+    "Biomass and maintenance functions",
+    "Extracellular exchange",
+]
 for rxn in BASE_MODEL.reactions:
-    if rxn.subsystem in SUBSYSTEMS_TO_IGNORE:
+    if rxn.subsystem in subsystems_to_ignore:
+        reactions_to_remove.append(rxn.id)
+metabolite_synthesis_rxn_net_df_path = (
+    METABOLITE_NETWORKS_PATH / "metabolite_synthesis_reaction_network.csv"
+)
+metabolite_synthesis_rxn_network_df = get_metabolite_network(
+    out_path=metabolite_synthesis_rxn_net_df_path,
+    model=BASE_MODEL,
+    rxns_to_remove=reactions_to_remove,
+    proportion=CONFIG["mtb_tf"]["divergence"]["essential-proportion"],
+    synthesis=True,
+    processes=CONFIG["processes"],
+)
+# Start by dropping any columns that are all 0
+metabolite_synthesis_rxn_network_df = metabolite_synthesis_rxn_network_df.drop(
+    metabolite_synthesis_rxn_network_df.loc[
+        :, metabolite_synthesis_rxn_network_df.sum() == 0
+    ].columns,
+    axis=1,
+)
+
+# Find correlation between the metabolite networks
+# and create a list of representative metabolites
+corr_df = metabolite_synthesis_rxn_network_df.corr()
+# Create an edge list for finding connected components
+edge_list: list[tuple[str, str]] = (
+    corr_df[corr_df >= 0.75].stack().index.to_list()
+)
+node_list = corr_df.columns.tolist()
+components = find_connected_components(
+    node_list=node_list, edge_list=edge_list
+)
+representative_metabolite_dict: dict[str, set[str]] = {
+    min(s): s - {min(s)} for s in components
+}
+metabolites_to_drop: set[str] = set()
+for mets in representative_metabolite_dict.values():
+    metabolites_to_drop |= mets
+metabolite_synthesis_rxn_network_df = metabolite_synthesis_rxn_network_df.drop(
+    list(metabolites_to_drop), axis=1
+)
+# Create a dict of metabolite: reaction set for each network still in the dataframe
+metabolite_network_dict: dict[str, list[str]] = {}
+for met, rxns in metabolite_synthesis_rxn_network_df.items():
+    metabolite_network_dict[met] = list(rxns[rxns].index)  # type: ignore
+# Make sure none of the networks are empty (they shouldn't be, issue a warning if any are)
+new_metabolite_network_dict: dict[str, list[str]] = {}
+for met, net in metabolite_network_dict.items():
+    if len(net) == 0:
+        warnings.warn(
+            f"Found empty network for metabolite: {met}"
+        )  # This will print to slurm output
+        logger.warning(f"Found empty network for metabolite: {met}")
         continue
-    subsys = (
-        SUBSYSTEM_RENAME_DICT[rxn.subsystem]
-        if rxn.subsystem in SUBSYSTEM_RENAME_DICT
-        else rxn.subsystem
-    )
-    subsystem_to_rxn_dict[subsys].append(rxn.id)
-    subsystem_to_rxn_dict["whole_metabolism"].append(rxn.id)
+    new_metabolite_network_dict[met] = net
+metabolite_network_dict = new_metabolite_network_dict
 
 # Perform the KO divergence calculations
 logger.info("Reading in or generating the ko divergence results")
@@ -98,7 +155,7 @@ else:
     ko_divergence_df = metworkpy.divergence.ko_divergence(
         model=BASE_MODEL,
         genes_to_ko=BASE_MODEL.genes.list_attr("id"),
-        target_networks=subsystem_to_rxn_dict,
+        target_networks=metabolite_network_dict,
         divergence_metric="kl",
         n_neighbors=CONFIG["mtb_tf"]["ko_divergence"]["n-neighbors"],
         sample_count=CONFIG["mtb_tf"]["ko_divergence"]["sample-count"],
@@ -110,7 +167,7 @@ else:
 ko_divergence_df = ko_divergence_df.dropna(axis="columns")
 
 # Get a list of genes in the model
-model_gene_set = set(BASE_MODEL.genes.list_attr("id"))
+model_gene_set: set[str] = set(BASE_MODEL.genes.list_attr("id"))
 
 # Find the TF targets
 logger.info("Finding the TF targets")
@@ -152,7 +209,7 @@ tf_target_dict = {
 }
 
 # Now, for each TF test if it targets genes which cause
-# relatively large perturbations in each of the various subsystems
+# relatively large perturbations in each of the various metabolite synthesis networks
 logger.info("Performing tests for TF target ko-divergence")
 results_df_list: list[pd.DataFrame] = []
 
@@ -171,7 +228,7 @@ for tf, target_list in tf_target_dict.items():
             ]
         ),
     )
-    for subsystem, ko_divergence_series in ko_divergence_df.items():
+    for metabolite, ko_divergence_series in ko_divergence_df.items():
         # Drop na values and infs
         ko_divergence_series = ko_divergence_series.replace(
             [np.inf, -np.inf], np.nan
@@ -198,18 +255,20 @@ for tf, target_list in tf_target_dict.items():
             x=targeted_divergence, y=non_targeted_divergence
         )
         u1 = mann_whitney_res.statistic
+        # Calculate u2 based on Scipy Stats documnetation
         u2 = len(targeted_divergence) * len(non_targeted_divergence) - u1
+        # Calculate the rho (aka AUC)
         rho = u1 / (len(targeted_divergence) * len(non_targeted_divergence))
         pval = mann_whitney_res.pvalue
-        tf_res_df.loc[subsystem, "Mann-Whitney U1"] = u1  # type:ignore
-        tf_res_df.loc[subsystem, "Mann-Whitney U2"] = u2  # type:ignore
-        tf_res_df.loc[subsystem, "rho"] = rho  # type:ignore
-        tf_res_df.loc[subsystem, "p-value"] = pval  # type:ignore
+        tf_res_df.loc[metabolite, "Mann-Whitney U1"] = u1  # type:ignore
+        tf_res_df.loc[metabolite, "Mann-Whitney U2"] = u2  # type:ignore
+        tf_res_df.loc[metabolite, "rho"] = rho  # type:ignore
+        tf_res_df.loc[metabolite, "p-value"] = pval  # type:ignore
     logger.info(f"Finished performing tests for {tf}")
     # Correct for false discovery rate
     tf_res_df["adj p-value"] = fdr_with_nan(tf_res_df["p-value"])
-    # Reset the index to get a subsystem column
-    tf_res_df = tf_res_df.reset_index(drop=False, names="subsystem")
+    # Reset the index to get a metabolite column
+    tf_res_df = tf_res_df.reset_index(drop=False, names="metabolite")
     tf_res_df["tf"] = tf
     # Add the results dataframe to the overall results
     results_df_list.append(tf_res_df)
@@ -218,6 +277,30 @@ for tf, target_list in tf_target_dict.items():
 logger.info("Finished performing results, combining across TFs")
 tf_ko_divergence_res_df = pd.concat(results_df_list, axis=0)
 
+# Add in a column describing which metabolites are represented by each representative
+represented_met_df = pd.Series(
+    {k: str(v) for k, v in representative_metabolite_dict.items()}
+).to_frame(name="represented metabolites")
+tf_ko_divergence_res_df = tf_ko_divergence_res_df.merge(
+    right=represented_met_df,
+    left_on="metabolite",
+    right_index=True,
+    how="left",
+)
+
+
+# Add in metabolite information
+metabolite_info_df = pd.read_csv(
+    CACHE_PATH / "model_information" / "metabolite_information.csv"
+)
+
+tf_ko_divergence_res_df = pd.merge(
+    tf_ko_divergence_res_df,
+    metabolite_info_df,
+    how="left",
+    left_on="metabolite",
+    right_on="id",
+)
 # Save the final results
 logger.info("Saving the final results")
 tf_ko_divergence_res_df.to_csv(

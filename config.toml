@@ -1,7 +1,7 @@
 ###########################
 # General Configuration ###
 ###########################
-processes = 12
+processes = 16
 
 [cobra]
 solver = "hybrid"
@@ -73,6 +73,7 @@ n-neighbors = 5
 metric = 2.0
 essential-proportion = 0.1
 reaction-proportion = 0.1
+correlation-cutoff = 0.75
 progress-bar = false
 
 [mtb_tf.ko_divergence]
