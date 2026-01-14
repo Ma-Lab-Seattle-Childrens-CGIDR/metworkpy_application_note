@@ -105,9 +105,12 @@ ko_divergence_df = metworkpy.divergence.ko_divergence(
     model=sim_model,
     genes_to_ko=sorted(sim_model.genes.list_attr("id")),
     target_networks=divergence_targets,
+    sample_count=CONFIG["simulation"]["divergence"]["num-samples"],
     divergence_metric=CONFIG["simulation"]["divergence"]["type"],
     n_neighbors=CONFIG["simulation"]["divergence"]["n-neighbors"],
-    use_unperturbed_as_true=True,
+    use_unperturbed_as_true=CONFIG["simulation"]["divergence"][
+        "use-unperturbed-as-true"
+    ],
 ).clip(lower=0)  # Divergence should be >0, but
 # this is an estimate, so it can be slightly negative
 # Clipping to correct this somewhat

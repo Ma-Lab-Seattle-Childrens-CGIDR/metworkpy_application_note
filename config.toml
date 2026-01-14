@@ -29,7 +29,9 @@ reaction-proportion = 0.10
 directed = true
 
 [simulation.divergence]
-n-neighbors = 3
+n-neighbors = 5
+num-samples = 1000
+use-unperturbed-as-true = true
 type = "kl"
 
 [simulation.mutual-information]
