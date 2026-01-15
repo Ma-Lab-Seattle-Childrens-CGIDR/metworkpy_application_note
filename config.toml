@@ -26,7 +26,7 @@ essential-proportion = 0.10
 reaction-proportion = 0.10
 
 [simulation.metabolic-network]
-directed = true
+directed = false
 
 [simulation.divergence]
 n-neighbors = 5
@@ -107,3 +107,8 @@ essential-proportion = 0.1 # Number of samples to use when calclating divergence
 reaction-proportion = 0.1  # Number of neighbors to use in divergence estimation
 target-fc-cutoff = 1.0     # Log2(fold-change) cutoff for considering a gene a TF target
 target-pval-cutoff = 0.05  # P-value cutoff for considering a gene a TF target
+
+[mtb_tf.mutual_information]
+target-fc-cutoff = 1.0    # Log2(fold-change) cutoff for considering a gene a TF target
+target-pval-cutoff = 0.05 # P-value cutoff for considering a gene a TF target
+min-target-count = 5      # Minimum number of targets in model for calculating p-value

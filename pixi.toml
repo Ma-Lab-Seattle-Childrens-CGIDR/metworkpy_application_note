@@ -6,24 +6,24 @@ platforms = ["linux-64"]
 version = "0.1.0"
 
 [tasks]
-create_model = { cmd = "python 01_create_model.py", cwd = "scripts/simulation" }
-find_metabolite_networks = { cmd = "python 02_metabolite_networks.py", cwd = "scripts/simulation" }
-metabolic_network_analysis = { cmd = "python 03_metabolic_network_analysis.py", cwd = "scripts/simulation" }
-ko_divergence = { cmd = "python 04_ko_divergence.py", cwd = "scripts/simulation" }
-mi_network = { cmd = "python 05_mutual_information.py", cwd = "scripts/simulation" }
-density = { cmd = "python 06_density.py", cwd = "scripts/simulation" }
-imat = { cmd = "python 07_imat_simulation.py", cwd = "scripts/simulation" }
-visualization_script = { cmd = "python 08_visualization.py", cwd = "scripts/simulation" }
-viz = [{ task = "visualization_script", environment = "viz" }]
+simulation_create_model = { cmd = "python 01_create_model.py", cwd = "scripts/simulation" }
+simulation_find_metabolite_networks = { cmd = "python 02_metabolite_networks.py", cwd = "scripts/simulation" }
+simulation_metabolic_network_analysis = { cmd = "python 03_metabolic_network_analysis.py", cwd = "scripts/simulation" }
+simulation_ko_divergence = { cmd = "python 04_ko_divergence.py", cwd = "scripts/simulation" }
+simulation_mi_network = { cmd = "python 05_mutual_information.py", cwd = "scripts/simulation" }
+simulation_density = { cmd = "python 06_density.py", cwd = "scripts/simulation" }
+simulation_imat = { cmd = "python 07_imat_simulation.py", cwd = "scripts/simulation" }
+simulation_visualization_script = { cmd = "python 08_visualization.py", cwd = "scripts/simulation" }
+simulation_viz = [{ task = "visualization_script", environment = "viz" }]
 simulation = [
-  { task = "create_model", environment = "default" },
-  { task = "find_metabolite_networks", environment = "default" },
-  { task = "metabolic_network_analysis", environment = "default" },
-  { task = "ko_divergence", environment = "default" },
-  { task = "mi_network", environment = "default" },
-  { task = "density", environment = "default" },
-  { task = "imat", environment = "default" },
-  { task = "visualization_script", environment = "viz" },
+  { task = "simulation_create_model", environment = "default" },
+  { task = "simulation_find_metabolite_networks", environment = "default" },
+  { task = "simulation_metabolic_network_analysis", environment = "default" },
+  { task = "simulation_ko_divergence", environment = "default" },
+  { task = "simulation_mi_network", environment = "default" },
+  { task = "simulation_density", environment = "default" },
+  { task = "simulation_imat", environment = "default" },
+  { task = "simulation_visualization_script", environment = "viz" },
 ]
 tf_reaction_info = { cmd = "python 00_reaction_info.py", cwd = "scripts/mtb_transcription_factor" }
 tf_metabolite_info = { cmd = "python 00_metabolite_info.py", cwd = "scripts/mtb_transcription_factor" }

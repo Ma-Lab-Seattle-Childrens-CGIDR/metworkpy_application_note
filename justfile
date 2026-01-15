@@ -6,28 +6,28 @@ default: simulation mtb_tf
 simulation:
     pixi run simulation
 
-create_model:
+simulation_create_model:
     pixi run create_model
 
-find_metabolite_networks:
+simulation_find_metabolite_networks:
     pixi run find_metabolite_networks
 
-metabolic_network_analysis:
+simulation_metabolic_network_analysis:
     pixi run metabolic_network_analysis
 
-ko_divergence:
+simulation_ko_divergence:
     pixi run ko_divergence
 
-mi_network:
+simulation_mi_network:
     pixi run mi_network
 
-density:
+simulation_density:
     pixi run density
 
-imat:
+simulation_imat:
     pixi run imat
 
-viz:
+simulation_viz:
     pixi run viz
 
 # Mtb Transcription Factor Analysis
