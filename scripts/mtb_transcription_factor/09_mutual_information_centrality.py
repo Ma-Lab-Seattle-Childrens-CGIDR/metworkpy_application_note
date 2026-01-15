@@ -35,10 +35,15 @@ else:
 DATA_PATH = BASE_PATH / "data"
 CACHE_PATH = BASE_PATH / "cache"
 MI_NETWORK_ADJACENCY_PATH = CACHE_PATH / "mtb_mutual_information"
-FLUX_SAMPLES_PATH = CACHE_PATH / "tf_model_flux_path"
+FLUX_SAMPLES_PATH = CACHE_PATH / "tf_model_flux_samples"
 RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 MODELS_PATH = BASE_PATH / "models"
 LOG_PATH = BASE_PATH / "mtb_transcription_factors"
+
+# Create directories if needed
+CACHE_PATH.mkdir(parents=True, exist_ok=True)
+MI_NETWORK_ADJACENCY_PATH.mkdir(parents=True, exist_ok=True)
+LOG_PATH.mkdir(parents=True, exist_ok=True)
 
 # Setup Logging
 logger = logging.getLogger(__name__)
@@ -56,6 +61,17 @@ cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 BASE_MODEL = metworkpy.read_model(
     MODELS_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
 )
+
+# Find reactions which should be ignored
+reactions_to_remove: list[str] = []
+subsystems_to_ignore: list[str] = [
+    "Intracellular demand",
+    "Biomass and maintenance functions",
+    "Extracellular exchange",
+]
+for rxn in BASE_MODEL.reactions:
+    if rxn.subsystem in subsystems_to_ignore:
+        reactions_to_remove.append(rxn.id)
 
 # If needed get flux samples for the iEK1011_v2 model
 logger.info("Generating samples if needed")
@@ -88,10 +104,12 @@ if mi_adj_out_path.exists():
     mi_adj_df = pd.read_csv(mi_adj_out_path, index_col=0)
 else:
     mi_adj_df = metworkpy.information.mi_network_adjacency_matrix(
-        samples=flux_sample_df,
+        samples=flux_sample_df.drop(
+            reactions_to_remove, axis=1
+        ),  # Drop reactions to remove
         processes=CONFIG["processes"],
         progress_bar=False,
-    )
+    ).fillna(0.0)  # Fill any NA values with 0
     mi_adj_df.to_csv(mi_adj_out_path, index=True)
 
 
@@ -172,8 +190,10 @@ for tf, tf_target_series in tf_target_df.items():
     results_df.loc[tf, "auc"] = auc
     results_df.loc[tf, "p-value"] = pvalue
 # Perform false discovery correction
+logger.info("Finished finding significance, adjusting p-values")
 results_df["adj p-value"] = fdr_with_nan(results_df["p-value"])
 
 
 # Save the final results
+logger.info("Saving final results")
 results_df.to_csv(RESULTS_PATH / "mutual_information_tf_target.csv")
