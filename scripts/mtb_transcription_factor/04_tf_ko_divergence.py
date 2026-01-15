@@ -160,6 +160,7 @@ else:
         n_neighbors=CONFIG["mtb_tf"]["ko_divergence"]["n-neighbors"],
         sample_count=CONFIG["mtb_tf"]["ko_divergence"]["sample-count"],
         processes=CONFIG["processes"],
+        sampler_seed=1618,
     ).clip(lower=0.0)
     logger.info("Saving the ko divergence results")
     ko_divergence_df.to_csv(ko_divergence_df_path, index=True)
