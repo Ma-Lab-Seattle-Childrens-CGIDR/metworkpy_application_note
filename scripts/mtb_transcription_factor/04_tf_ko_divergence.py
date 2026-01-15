@@ -63,15 +63,6 @@ with open(BASE_PATH / "config.toml", "rb") as f:
 
 # Script Parameters
 cobra.Configuration().solver = CONFIG["cobra"]["solver"]
-SUBSYSTEMS_TO_IGNORE = {
-    "Biomass and maintenance functions",
-    "Extracellular exchange",
-    "Intracellular demand",
-}
-SUBSYSTEM_RENAME_DICT = {
-    "Propanoate metabolism": "Propanoate Metabolism",
-    "Arabinogalactan bioynthesis": "Arabinogalactan biosynthesis",
-}
 
 # Read in the Base Model
 logger.info("Reading in the base model")
