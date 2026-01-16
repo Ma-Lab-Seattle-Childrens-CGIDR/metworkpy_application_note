@@ -103,24 +103,30 @@ mi_adj_out_path = MI_NETWORK_ADJACENCY_PATH / "metabolic_mi_adjacency.csv"
 if mi_adj_out_path.exists():
     mi_adj_df = pd.read_csv(mi_adj_out_path, index_col=0)
 else:
-    mi_adj_df = metworkpy.information.mi_network_adjacency_matrix(
-        samples=flux_sample_df.drop(
-            reactions_to_remove, axis=1
-        ),  # Drop reactions to remove
-        processes=CONFIG["processes"],
-        progress_bar=False,
-    ).fillna(0.0)  # Fill any NA values with 0
+    mi_adj_df = (
+        metworkpy.information.mi_network_adjacency_matrix(
+            samples=flux_sample_df.drop(
+                reactions_to_remove, axis=1
+            ),  # Drop reactions to remove
+            processes=CONFIG["processes"],
+            progress_bar=False,
+        )
+        .fillna(0.0)
+        .clip(0.0)
+    )  # Fill any NA values with 0, remove all negative values
     mi_adj_df.to_csv(mi_adj_out_path, index=True)
 
 
 # Convert from the mutual information adjacency matrix to a networkx network
-mi_network: nx.Graph[str] = nx.from_pandas_adjacency(
+mi_network: nx.Graph = nx.from_pandas_adjacency(
     mi_adj_df, create_using=nx.Graph
 )
 
 
 # Compute the eigenvector centrality of the networkx graph
-eigenvector_centrality = pd.Series(nx.eigenvector_centrality(mi_network))
+eigenvector_centrality = pd.Series(
+    nx.eigenvector_centrality(mi_network, weight="weight")
+)
 
 # Read in the targets for all of the transcription factors
 # Find the TF targets
@@ -158,18 +164,24 @@ results_df = pd.DataFrame(
 )
 logger.info("Evaluating Eigenvector centrality significance for TF targets")
 for tf, tf_target_series in tf_target_df.items():
-    targeted_genes = set(tf_target_series[tf_target_series]) & model_gene_set
-    non_targeted_genes = model_gene_set - targeted_genes
+    target_gene_set = (
+        set(tf_target_series[tf_target_series].index) & model_gene_set
+    )
+    # Translate the target gene set into a reaction list
+    target_reaction_list = metworkpy.utils.gene_to_reaction_list(
+        model=BASE_MODEL, gene_list=list(target_gene_set)
+    )
+    # Get the eigenvector centrality of these reactions
+    targeted_centrality = eigenvector_centrality[target_reaction_list]
+    non_targeted_centrality = eigenvector_centrality.drop(target_reaction_list)
     if (
-        len(targeted_genes)
+        len(targeted_centrality)
         < CONFIG["mtb_tf"]["mutual_information"]["min-target-count"]
     ) or (
-        len(non_targeted_genes)
+        len(non_targeted_centrality)
         < CONFIG["mtb_tf"]["mutual_information"]["min-target-count"]
     ):
         continue
-    targeted_centrality = eigenvector_centrality[list(targeted_genes)]
-    non_targeted_centrality = eigenvector_centrality[list(non_targeted_genes)]
     # Perform the Mann-Whitney U-test
     mannu_res = stats.mannwhitneyu(
         targeted_centrality,
@@ -179,9 +191,9 @@ for tf, tf_target_series in tf_target_df.items():
     )
     # Get u1 and u2
     u1 = mannu_res.statistic
-    u2 = len(targeted_genes) * len(non_targeted_genes) - u1
+    u2 = len(targeted_centrality) * len(non_targeted_centrality) - u1
     # Get the AUC
-    auc = u1 / (len(targeted_genes) * len(non_targeted_genes))
+    auc = u1 / (len(targeted_centrality) * len(non_targeted_centrality))
     # Get the p-value
     pvalue = mannu_res.pvalue
     # Save results to the dataframe
@@ -196,4 +208,4 @@ results_df["adj p-value"] = fdr_with_nan(results_df["p-value"])
 
 # Save the final results
 logger.info("Saving final results")
-results_df.to_csv(RESULTS_PATH / "mutual_information_tf_target.csv")
+results_df.to_csv(RESULTS_PATH / "mutual_information_tf_target_centrality.csv")
