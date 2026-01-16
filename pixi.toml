@@ -73,7 +73,7 @@ r-robustrankaggreg = ">=1.2.1,<2"
 rpy2 = ">=3.6.4,<4"
 
 [pypi-dependencies]
-metworkpy = { git = "https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git", rev = "5e2f8f3b9e12811805936ebc5e951659925c3bbd" }
+metworkpy = { git = "https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git" }
 metabolic-modeling-utils = { git = "https://github.com/Braden-Griebel/metabolic_modeling_utils.git" }
 
 [feature.dev.dependencies]
