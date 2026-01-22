@@ -15,7 +15,6 @@ import warnings
 
 # External Imports
 import cobra
-import matplotlib.pyplot as plt
 from metabolic_modeling_utils import escher_maps
 import metworkpy
 import numpy as np
@@ -57,7 +56,7 @@ cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 
 # Create a list of the escher maps
 ESCHER_MAPS_INPUT_LIST = [
-    ESCHER_MAPS_PATH / "mtb" / f"{map}.json"
+    ESCHER_MAPS_PATH / f"{map}.json"
     for map in [
         "Arabinogalactan_peptidoglycan_complex",
         "central_carbon",
@@ -214,7 +213,9 @@ met_rename_dict = {
 ##################
 # Read in the divergence results
 divergence_df = SCALER.fit_transform(
-    pd.read_csv(RESULTS_PATH / "divergence_results.csv", index_col=0)
+    pd.read_csv(RESULTS_PATH / "divergence_results.csv", index_col=0).replace(
+        [np.inf, -np.inf], np.nan
+    )
 )
 # Split reaction and metabolite divergence
 rxn_div_df = divergence_df.loc[
