@@ -60,3 +60,6 @@ tf_reaction_centrality:
 
 tf_metabolite_gsva:
     pixi run tf_metabolite_gsva
+
+tf_viz:
+    pixi run tf_viz

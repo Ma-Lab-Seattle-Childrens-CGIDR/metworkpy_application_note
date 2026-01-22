@@ -14,7 +14,9 @@ simulation_mi_network = { cmd = "python 05_mutual_information.py", cwd = "script
 simulation_density = { cmd = "python 06_density.py", cwd = "scripts/simulation" }
 simulation_imat = { cmd = "python 07_imat_simulation.py", cwd = "scripts/simulation" }
 simulation_visualization_script = { cmd = "python 08_visualization.py", cwd = "scripts/simulation" }
-simulation_viz = [{ task = "visualization_script", environment = "viz" }]
+simulation_viz = [
+  { task = "simulation_visualization_script", environment = "viz" },
+]
 simulation = [
   { task = "simulation_create_model", environment = "default" },
   { task = "simulation_find_metabolite_networks", environment = "default" },
@@ -39,6 +41,8 @@ tf_metabolite_gsva = [
 ]
 tf_metabolite_enrichment = { cmd = "python 08_metabolite_network_target_enrichment.py", cwd = "scripts/mtb_transcription_factor" }
 tf_mi_centrality = { cmd = "python 09_mutual_information_centrality.py", cwd = "scripts/mtb_transcription_factor" }
+tf_visualization_script = { cmd = "python 10_mtb_tf_visualization.py", cwd = "scripts/mtb_transcription_factor" }
+tf_viz = [{ task = "tf_visualization_script", environment = "viz" }]
 mtb_tf = [
   { task = "tf_reaction_info", environment = "default" },
   { task = "tf_metabolite_info", environment = "default" },
@@ -51,6 +55,7 @@ mtb_tf = [
   { task = "tf_metabolite_gsva_private", environment = "decoupler" },
   { task = "tf_metabolite_enrichment", environment = "default" },
   { task = "tf_mi_centrality", environment = "default" },
+  { task = "tf_visualization_script", environment = "viz" },
 ]
 
 [dependencies]
@@ -79,10 +84,11 @@ metabolic-modeling-utils = { git = "https://github.com/Braden-Griebel/metabolic_
 [feature.dev.dependencies]
 mypy = ">=1.19.0,<2"
 ruff = ">=0.14.8,<0.15"
-python-lsp-server = ">=1.13.2,<2"
 pandas-stubs = ">=2.3.3.251201,<3"
 taplo = ">=0.10.0,<0.11"
 types-networkx = ">=3.6.0.20251127,<4"
+ty = ">=0.0.12,<0.0.13"
+python-lsp-server = ">=1.14.0,<2"
 
 [feature.escher.pypi-dependencies]
 Escher = ">=1.8.1, <2"
