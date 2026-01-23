@@ -22,6 +22,7 @@ import metworkpy  # type:ignore
 from metworkpy.divergence import calculate_divergence_grouped  # type:ignore
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
 from tqdm import tqdm  # type:ignore
 
 # Local Imports
@@ -63,6 +64,10 @@ logging.basicConfig(
 # Read in the configuration file
 with open(BASE_PATH / "config.toml", "rb") as f:
     CONFIG = tomllib.load(f)
+
+# Create a standard scaler to process pandas dataframes
+SCALER = StandardScaler()
+SCALER.set_output(transform="pandas")
 
 # Read in the base model for finding subsystems
 cobra.Configuration().solver = CONFIG["cobra"]["solver"]
@@ -241,3 +246,38 @@ divergence_results_df.to_csv(
 )
 
 logger.info("Finished calculating divergence :)")
+
+# Seperate out the metabolite, subsystem, kegg network divergence
+met_div_df = divergence_results_df.loc[
+    :, divergence_results_df.columns.str.startswith("metabolite_synthesis__")
+]
+met_div_df.columns = met_div_df.columns.str.replace(
+    "^metabolite_synthesis__", "", regex=True
+)
+
+kegg_div_df = divergence_results_df.loc[
+    :, divergence_results_df.columns.str.startswith("kegg__")
+]
+kegg_div_df.columns = kegg_div_df.columns.str.replace(
+    "^kegg__", "", regex=True
+)
+
+subsystem_div_df = divergence_results_df.loc[
+    :, divergence_results_df.columns.str.startswith("subsystem__")
+]
+subsystem_div_df.columns = subsystem_div_df.columns.str.replace(
+    "^subsystem__", "", regex=True
+)
+
+# Save the normal version to the results path, then
+# normalize and save that as well
+for df, name in zip(
+    [met_div_df, kegg_div_df, subsystem_div_df],
+    ["metabolite", "kegg", "subsystem"],
+):
+    df.to_csv(RESULTS_PATH / f"{name}_divergence.csv", index=True)
+    # Normalize
+    df_normed = SCALER.fit_transform(df.replace([np.inf, -np.inf], np.nan))
+    df_normed.to_csv(
+        RESULTS_PATH / f"{name}_divergence_normalized.csv", index=True
+    )
