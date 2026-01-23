@@ -32,7 +32,7 @@ from common_functions import get_metabolite_network
 # Path setup
 if hasattr(sys, "ps1"):
     # Running in a REPL
-    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+    BASE_PATH = pathlib.Path(".").absolute()  # Use current dir as base path
 else:
     # Running as a file
     # Use file path to find root
@@ -240,6 +240,7 @@ divergence_results_df = divergence_results_df.clip(  # type: ignore
     ),
     axis="columns",
 )
+logger.info("Saving divergence results")
 # Save the clipped divergence
 divergence_results_df.to_csv(
     divergence_results_path,

@@ -16,14 +16,14 @@ import tomllib
 import cobra  # type: ignore
 import metworkpy  # type:ignore
 import pandas as pd
+import scipy.stats as stats
 
 # Local Imports
-from metabolic_modeling_utils import gene_target_density
 
 # Path Setup
 if hasattr(sys, "ps1"):
     # Running in a REPL
-    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+    BASE_PATH = pathlib.Path(".").absolute()  # Use current dir as base path
 else:
     # Running as a file
     # Use file path to find root
@@ -139,12 +139,17 @@ tf_target_df = (
     tf_pval_df <= CONFIG["mtb_tf"]["target_density"]["target-pval-cutoff"]
 ).astype("float")
 
+# Read in the reaction information dataframe
+rxn_info_df = pd.read_csv(
+    CACHE_PATH / "model_information" / "reaction_information.csv"
+)
+
 # SECTION: Target Density
-logger.info("Finding TF activating target density")
+logger.info("Finding TF target density")
 tf_target_density_list = []
 for tf, target_series in tf_target_df.items():
     logger.info(f"Finding target density for {tf}")
-    target_density_series = gene_target_density.gene_target_density(
+    target_density_series = metworkpy.network.gene_target_density(
         metabolic_network=reaction_network,
         metabolic_model=BASE_MODEL,
         gene_labels=target_series,
@@ -156,7 +161,43 @@ for tf, target_series in tf_target_df.items():
 logger.info("Found all target density, combining results")
 tf_density_df = pd.concat(tf_target_density_list, axis=1)
 
+# Add in the reaction information
+tf_density_df = tf_density_df.merge(
+    rxn_info_df, how="left", left_index=True, right_on="id"
+)
+
 # SECTION: Save the final results
 logger.info("Saving final results")
 tf_density_df.to_csv(RESULTS_PATH / "tf_target_density.csv", index=True)
 logger.info("Finished finding TF target density! ;)")
+
+# SECTION: Target Enrichment
+logger.info("Finding TF target enrichment")
+tf_target_enrichment_list: list[pd.Series] = []
+for tf, target_series in tf_target_df.items():
+    logger.info(f"Finding target enrichment for {tf}")
+    target_enrichment_series = metworkpy.network.gene_target_enrichment(
+        metabolic_network=reaction_network,
+        metabolic_model=BASE_MODEL,
+        gene_targets=list(target_series[target_series].index),
+        alternative="greater",
+        metric="p-value",
+        radius=CONFIG["mtb_tf"]["target_density"]["radius"],
+    )
+    target_enrichment_series = pd.Series(
+        stats.false_discovery_control(target_enrichment_series),
+        index=target_enrichment_series.index,
+    )
+    target_enrichment_series.name = tf
+    tf_target_enrichment_list.append(target_enrichment_series)
+# Combine all the target enrichments into a single dataframe
+logger.info("Found all target densities, combining results")
+tf_enrichment_df = pd.concat(tf_target_enrichment_list, axis=1)
+
+# Add the reaction information to the tf_enrichment _df
+tf_enrichment_df = tf_enrichment_df.merge(
+    rxn_info_df, how="left", left_index=True, right_on="id"
+)
+
+# Save the final dataframe
+tf_enrichment_df.to_csv(RESULTS_PATH / "tf_target_enrichment.csv", index=False)
