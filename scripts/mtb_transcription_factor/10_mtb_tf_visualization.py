@@ -224,17 +224,10 @@ rxn_div_df.columns = rxn_div_df.columns.str.replace(
     "^reaction__", "", regex=True
 )
 
-met_div_df = divergence_df.loc[
-    :, divergence_df.columns.str.startswith("reaction__")
-]
-met_div_df.columns = met_div_df.columns.str.replace(
-    "^reaction__", "", regex=True
-)
 
 # Extract the ArgR values
 # Renaming them to match the iEK1011 identifiers
 argr_rxn_divergence = rxn_div_df.loc["Rv1657"].rename(rxn_rename_dict)
-argr_met_divergence = met_div_df.loc["Rv1657"].rename(met_rename_dict)
 
 # Show the divergence for all of the escher maps
 for input_map in ESCHER_MAPS_INPUT_LIST:
@@ -245,14 +238,7 @@ for input_map in ESCHER_MAPS_INPUT_LIST:
         reaction_data=argr_rxn_divergence.replace(
             [np.inf, -np.inf], np.nan
         ).dropna(),
-        metabolite_data=argr_met_divergence.replace(
-            [np.inf, -np.inf], np.nan
-        ).dropna(),
         reaction_scale=[
-            {"type": "min", "color": "blue", "size": 10},
-            {"type": "max", "color": "red", "size": 30},
-        ],
-        metabolite_scale=[
             {"type": "min", "color": "blue", "size": 10},
             {"type": "max", "color": "red", "size": 30},
         ],
@@ -262,7 +248,9 @@ for input_map in ESCHER_MAPS_INPUT_LIST:
 ### Density ###
 ###############
 # Read in the density
-density_df = pd.read_csv(RESULTS_PATH / "tf_target_density.csv", index_col=0)
+density_df = pd.read_csv(
+    RESULTS_PATH / "tf_target_density.csv", index_col=0
+).set_index("id")
 
 argr_density = density_df["Rv1657"].rename(rxn_rename_dict)
 
