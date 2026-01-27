@@ -318,7 +318,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/9b/d1/cbd3736da8d6253da85838b105b97bc794965584243711fa2ef0bb585df3/ftpretty-0.4.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/0a/f2c3fd69961ea0b9bac796e43a29f283771d20119f09186e7d5f5c8e2ab6/goatools-1.5.2-py3-none-any.whl
       - pypi: git+https://github.com/Braden-Griebel/metabolic_modeling_utils.git#21fbf300994acc923e6782c445c1d31e9822e91a
-      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#5e2f8f3b9e12811805936ebc5e951659925c3bbd
+      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#fd0439d88019b46681b99242fcd4835178f8697e
       - pypi: https://files.pythonhosted.org/packages/7e/32/a7125fb28c4261a627f999d5fb4afff25b523800faed2c30979949d6facd/pydot-4.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/3a/0c/3662f4a66880196a590b202f0db82d919dd2f89e99a27fadef91c4a33d41/xlsxwriter-3.2.9-py3-none-any.whl
   default:
@@ -554,7 +554,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/9b/d1/cbd3736da8d6253da85838b105b97bc794965584243711fa2ef0bb585df3/ftpretty-0.4.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/0a/f2c3fd69961ea0b9bac796e43a29f283771d20119f09186e7d5f5c8e2ab6/goatools-1.5.2-py3-none-any.whl
       - pypi: git+https://github.com/Braden-Griebel/metabolic_modeling_utils.git#21fbf300994acc923e6782c445c1d31e9822e91a
-      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#5e2f8f3b9e12811805936ebc5e951659925c3bbd
+      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#fd0439d88019b46681b99242fcd4835178f8697e
       - pypi: https://files.pythonhosted.org/packages/f1/70/ba4b949bdc0490ab78d545459acd7702b211dfccf7eb89bbc1060f52818d/patsy-1.0.2-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/32/a7125fb28c4261a627f999d5fb4afff25b523800faed2c30979949d6facd/pydot-4.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/10/bd/c038d7cc38edc1aa5bf91ab8068b63d4308c66c4c8bb3cbba7dfbc049f9c/pyparsing-3.3.2-py3-none-any.whl
@@ -852,7 +852,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/9b/d1/cbd3736da8d6253da85838b105b97bc794965584243711fa2ef0bb585df3/ftpretty-0.4.0-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/c3/0a/f2c3fd69961ea0b9bac796e43a29f283771d20119f09186e7d5f5c8e2ab6/goatools-1.5.2-py3-none-any.whl
       - pypi: git+https://github.com/Braden-Griebel/metabolic_modeling_utils.git#21fbf300994acc923e6782c445c1d31e9822e91a
-      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#5e2f8f3b9e12811805936ebc5e951659925c3bbd
+      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#fd0439d88019b46681b99242fcd4835178f8697e
       - pypi: https://files.pythonhosted.org/packages/f1/70/ba4b949bdc0490ab78d545459acd7702b211dfccf7eb89bbc1060f52818d/patsy-1.0.2-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/7e/32/a7125fb28c4261a627f999d5fb4afff25b523800faed2c30979949d6facd/pydot-4.0.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/10/bd/c038d7cc38edc1aa5bf91ab8068b63d4308c66c4c8bb3cbba7dfbc049f9c/pyparsing-3.3.2-py3-none-any.whl
@@ -1245,7 +1245,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/1f/73/4f281e0f86bf532baec742da40ededf8b22dc224523e38c638fb6ad91255/jupyterlab_widgets-1.1.11-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/82/3d/14ce75ef66813643812f3093ab17e46d3a206942ce7376d31ec2d36229e7/lark-1.3.1-py3-none-any.whl
       - pypi: git+https://github.com/Braden-Griebel/metabolic_modeling_utils.git#21fbf300994acc923e6782c445c1d31e9822e91a
-      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#5e2f8f3b9e12811805936ebc5e951659925c3bbd
+      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#fd0439d88019b46681b99242fcd4835178f8697e
       - pypi: https://files.pythonhosted.org/packages/9b/f7/4a5e785ec9fbd65146a27b6b70b6cdc161a66f2024e4b04ac06a67f5578b/mistune-3.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/83/a0/5b0c2f11142ed1dddec842457d3f65eaf71a0080894eb6f018755b319c3a/nbclient-0.10.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cc/9a/cd673b2f773a12c992f41309ef81b99da1690426bd2f96957a7ade0d3ed7/nbconvert-7.16.6-py3-none-any.whl
@@ -1614,7 +1614,7 @@ environments:
       - pypi: https://files.pythonhosted.org/packages/82/3d/14ce75ef66813643812f3093ab17e46d3a206942ce7376d31ec2d36229e7/lark-1.3.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/af/33/ee4519fa02ed11a94aef9559552f3b17bb863f2ecfe1a35dc7f548cde231/matplotlib_inline-0.2.1-py3-none-any.whl
       - pypi: git+https://github.com/Braden-Griebel/metabolic_modeling_utils.git#21fbf300994acc923e6782c445c1d31e9822e91a
-      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#5e2f8f3b9e12811805936ebc5e951659925c3bbd
+      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#fd0439d88019b46681b99242fcd4835178f8697e
       - pypi: https://files.pythonhosted.org/packages/9b/f7/4a5e785ec9fbd65146a27b6b70b6cdc161a66f2024e4b04ac06a67f5578b/mistune-3.2.0-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/83/a0/5b0c2f11142ed1dddec842457d3f65eaf71a0080894eb6f018755b319c3a/nbclient-0.10.4-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/cc/9a/cd673b2f773a12c992f41309ef81b99da1690426bd2f96957a7ade0d3ed7/nbconvert-7.16.6-py3-none-any.whl
@@ -5412,7 +5412,7 @@ packages:
   - scipy>=1.15.3
   - statsmodels>=0.14.4
   requires_python: '>=3.12'
-- pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#5e2f8f3b9e12811805936ebc5e951659925c3bbd
+- pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#fd0439d88019b46681b99242fcd4835178f8697e
   name: metworkpy
   version: 0.2.10
   requires_dist:
