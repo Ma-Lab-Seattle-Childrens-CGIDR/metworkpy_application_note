@@ -13,15 +13,12 @@ import tomllib
 import warnings
 
 # External Imports
-import cobra  # type: ignore
+import cobra
 import metworkpy
 from metabolic_modeling_utils.false_discovery_control import fdr_with_nan
-from metabolic_modeling_utils.connected_components import (
-    find_connected_components,
-)
 import numpy as np
-import pandas as pd  # type:ignore
-from scipy import stats  # type:ignore
+import pandas as pd
+from scipy import stats
 
 # Local Imports
 from common_functions import get_metabolite_network
@@ -105,12 +102,14 @@ edge_list: list[tuple[str, str]] = (
     corr_df[corr_df >= 0.75].stack().index.to_list()
 )
 node_list = corr_df.columns.tolist()
-components = find_connected_components(
-    node_list=node_list, edge_list=edge_list
-)
+# Find the representative nodes (with the representative node being the one with the highest degree)
 representative_metabolite_dict: dict[str, set[str]] = {
-    min(s): s - {min(s)} for s in components
+    k: v - {k}
+    for k, v in metworkpy.utils.find_representative_nodes(
+        node_list=node_list, edge_list=edge_list
+    ).items()
 }
+
 metabolites_to_drop: set[str] = set()
 for mets in representative_metabolite_dict.values():
     metabolites_to_drop |= mets
@@ -252,10 +251,10 @@ for tf, target_list in tf_target_dict.items():
         # Calculate the rho (aka AUC)
         rho = u1 / (len(targeted_divergence) * len(non_targeted_divergence))
         pval = mann_whitney_res.pvalue
-        tf_res_df.loc[metabolite, "Mann-Whitney U1"] = u1  # type:ignore
-        tf_res_df.loc[metabolite, "Mann-Whitney U2"] = u2  # type:ignore
-        tf_res_df.loc[metabolite, "rho"] = rho  # type:ignore
-        tf_res_df.loc[metabolite, "p-value"] = pval  # type:ignore
+        tf_res_df.loc[metabolite, "Mann-Whitney U1"] = u1
+        tf_res_df.loc[metabolite, "Mann-Whitney U2"] = u2
+        tf_res_df.loc[metabolite, "rho"] = rho
+        tf_res_df.loc[metabolite, "p-value"] = pval
     logger.info(f"Finished performing tests for {tf}")
     # Correct for false discovery rate
     tf_res_df["adj p-value"] = fdr_with_nan(tf_res_df["p-value"])
