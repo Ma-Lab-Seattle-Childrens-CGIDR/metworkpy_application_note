@@ -63,3 +63,6 @@ tf_metabolite_gsva:
 
 tf_viz:
     pixi run tf_viz
+
+tf_imat_test:
+    pixi run tf_imat_test
