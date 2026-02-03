@@ -209,3 +209,95 @@ results_df["adj p-value"] = fdr_with_nan(results_df["p-value"])
 # Save the final results
 logger.info("Saving final results")
 results_df.to_csv(RESULTS_PATH / "mutual_information_tf_target_centrality.csv")
+
+
+# Evaluate the relationship between the mutual information centrality and
+results_dict: dict[str, float] = {}
+# Essentiality/Vulnerability index
+vi_df = pd.read_excel(
+    DATA_PATH / "gene_info" / "bosch_vi.xlsx",
+    sheet_name="(1) Mtb H37Rv",
+    index_col=0,
+    usecols="A,B,D,E,Z",
+)
+vi_df.index = vi_df.index.str.replace("^RVBD", "Rv", regex=True)
+# Find the overlap of genes in the model and in the essentiality data
+model_genes = set(BASE_MODEL.genes.list_attr("id"))
+vi_genes = set(vi_df.index)
+common_genes = sorted(model_genes & vi_genes)
+# Get the tnseq essentiality series
+tnseq_ess = vi_df.loc[common_genes, "tnseq_ess"]
+# Get the VI series
+vi_series = vi_df.loc[common_genes, "Vulnerability Index"]
+
+# Convert from reaction centrality to gene centrality
+gene_centrality_series = pd.Series(np.nan, index=pd.Index(model_genes))
+for gene in gene_centrality_series.index:
+    centrality_list = []
+    for rxn in BASE_MODEL.genes.get_by_id(gene).reactions:
+        if rxn.id not in eigenvector_centrality.index:
+            continue
+        centrality_list.append(eigenvector_centrality[rxn.id])
+    gene_centrality_series[gene] = max(centrality_list)
+gene_centrality_series = gene_centrality_series[common_genes]
+
+# Start by comparing the mutual information centrality of essential genes
+# and non-essential genes
+mannu_res = stats.mannwhitneyu(
+    gene_centrality_series[tnseq_ess == "Essential"],
+    gene_centrality_series[tnseq_ess != "Essential"],
+    alternative="greater",  # The distribution underlying x is stochastically greater than y
+)
+u1 = mannu_res.statistic
+u2 = (
+    gene_centrality_series[tnseq_ess == "Essential"].shape[0]
+    * gene_centrality_series[tnseq_ess != "Essential"].shape[0]
+    - u1
+)
+auc = u1 / (u1 + u2)
+pvalue = mannu_res.pvalue
+results_dict["TNSeq essential vs not Mann-Whitney U-test u1"] = u1
+results_dict["TNSeq essential vs not Mann-Whitney U-test u2"] = u2
+results_dict["TNSeq essential vs not Mann-Whitney U-test auc"] = auc
+results_dict["TNSeq essential vs not Mann-Whitney U-test p-value"] = pvalue
+
+# Evaluate the correlation between the Mutual Information Centrality and the Vulnerability Index
+# Using Kendall-Tau
+# NOTE: More negative VI values are MORE vulnerable
+kendall_res = stats.kendalltau(
+    gene_centrality_series, vi_series, alternative="less"
+)
+spearman_res = stats.spearmanrho(
+    gene_centrality_series, vi_series, alternative="less"
+)
+pearson_res = stats.pearsonr(
+    gene_centrality_series, vi_series, alternative="less"
+)
+results_dict[
+    "Vulnerability Index Correlation MI Centrality Kendall-Tau statistic"
+] = kendall_res.statistic
+results_dict[
+    "Vulnerability Index Correlation MI Centrality Kendall-Tau p-value"
+] = kendall_res.pvalue
+results_dict[
+    "Vulnerability Index Correlation MI Centrality Spearman's Rho statistic"
+] = spearman_res.statistic
+results_dict[
+    "Vulnerability Index Correlation MI Centrality Spearman's Rho p-value"
+] = spearman_res.pvalue
+results_dict[
+    "Vulnerability Index Correlation MI Centrality Pearson's R statistic"
+] = pearson_res.statistic
+results_dict[
+    "Vulnerability Index Correlation MI Centrality Pearson's R p-value"
+] = pearson_res.pvalue
+
+# Create a series to write this to a csv
+essentiality_res_series = pd.Series(
+    results_dict, name="Mutual Information Essentiality Statistical Tests"
+)
+# Save the results
+essentiality_res_series.to_csv(
+    RESULTS_PATH / "mutual_information_vi_essentiality_statistics.csv",
+    index=True,
+)
