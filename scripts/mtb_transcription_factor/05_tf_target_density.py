@@ -154,6 +154,7 @@ for tf, target_series in tf_target_df.items():
         metabolic_model=BASE_MODEL,
         gene_labels=target_series,
         radius=CONFIG["mtb_tf"]["target_density"]["radius"],
+        processes=CONFIG["processes"],
     )
     target_density_series.name = tf
     tf_target_density_list.append(target_density_series)
@@ -183,6 +184,7 @@ for tf, target_series in tf_target_df.items():
         alternative="greater",
         metric="p-value",
         radius=CONFIG["mtb_tf"]["target_density"]["radius"],
+        processes=CONFIG["processes"],
     )
     target_enrichment_series = pd.Series(
         stats.false_discovery_control(target_enrichment_series),

@@ -146,7 +146,7 @@ else:
         model=BASE_MODEL,
         genes_to_ko=BASE_MODEL.genes.list_attr("id"),
         target_networks=metabolite_network_dict,
-        divergence_metric="kl",
+        divergence_type="kl",
         n_neighbors=CONFIG["mtb_tf"]["ko_divergence"]["n-neighbors"],
         sample_count=CONFIG["mtb_tf"]["ko_divergence"]["sample-count"],
         processes=CONFIG["processes"],

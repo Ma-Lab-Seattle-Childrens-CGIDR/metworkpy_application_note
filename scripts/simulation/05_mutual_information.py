@@ -83,10 +83,11 @@ else:
         flux_samples,
         processes=CONFIG["processes"],
         progress_bar=False,
+        calculate_pvalue=True,
         n_neighbors=CONFIG["simulation"]["mutual-information"]["n-neighbors"],
         metric_x=CONFIG["simulation"]["mutual-information"]["x-metric"],
-        metric_y=CONFIG["simulation"]["mutual_information"]["y-metric"],
-        truncate=True,
+        metric_y=CONFIG["simulation"]["mutual-information"]["y-metric"],
+        clip=True,
     )
     mi_adj_mat.to_csv(mi_adj_mat_out_path, index=True)
 
