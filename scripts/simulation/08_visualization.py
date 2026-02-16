@@ -33,7 +33,7 @@ else:
     # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
 MODEL_PATH = BASE_PATH / "models"
-RESULTS_PATH = BASE_PATH / "results"
+RESULTS_PATH = BASE_PATH / "results" / "simulation"
 ESCHER_MAP_PATH = BASE_PATH / "escher_maps" / "simulation_model.json"
 
 # Script Configuration

@@ -29,7 +29,7 @@ else:
     # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
 MODEL_PATH = BASE_PATH / "models"
-RESULTS_PATH = BASE_PATH / "results" / "metabolic_networks"
+RESULTS_PATH = BASE_PATH / "results" / "simulation" / "metabolic_networks"
 
 # Create directories if needed
 RESULTS_PATH.mkdir(parents=True, exist_ok=True)

@@ -29,7 +29,7 @@ else:
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
 MODEL_PATH = BASE_PATH / "models"
 CACHE_PATH = BASE_PATH / "cache"
-RESULTS_PATH = BASE_PATH / "results" / "mutual_information"
+RESULTS_PATH = BASE_PATH / "results" / "simulation" / "mutual_information"
 FLUX_SAMPLE_PATH = CACHE_PATH / "flux_samples"
 
 # Make directories if needed

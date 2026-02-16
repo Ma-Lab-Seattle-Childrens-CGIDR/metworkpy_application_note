@@ -30,7 +30,7 @@ else:
     # Use file path to find root
     BASE_PATH = pathlib.Path(__file__).parent.parent.parent
 MODEL_PATH = BASE_PATH / "models"
-RESULTS_PATH = BASE_PATH / "results" / "ko_divergence"
+RESULTS_PATH = BASE_PATH / "results" / "simulation" / "ko_divergence"
 
 # Make directories if needed
 RESULTS_PATH.mkdir(parents=True, exist_ok=True)
