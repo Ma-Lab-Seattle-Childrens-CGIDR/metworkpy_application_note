@@ -133,7 +133,7 @@ subsystems_to_ignore_reactions: list[str] = [
 for reaction in BASE_MODEL.reactions:
     if reaction.subsystem in subsystems_to_ignore:
         continue
-    divergence_targets[f"{reaction.id}__reaction"]
+    divergence_targets[f"{reaction.id}__reaction"] = reaction.id
 
 # Add in the metabolite networks
 for met, net in metabolite_network_dict.items():
