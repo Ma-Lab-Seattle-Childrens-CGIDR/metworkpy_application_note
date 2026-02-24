@@ -10,6 +10,7 @@ import logging
 import pathlib
 import sys
 import tomllib
+from typing import cast
 import warnings
 
 # External Imports
@@ -120,8 +121,21 @@ metabolite_synthesis_rxn_network_df = metabolite_synthesis_rxn_network_df.drop(
 metabolite_network_dict: dict[str, list[str]] = {}
 for met, rxns in metabolite_synthesis_rxn_network_df.items():
     metabolite_network_dict[met] = list(rxns[rxns].index)  # type: ignore
-# Make sure none of the networks are empty (they shouldn't be, issue a warning if any are)
-new_metabolite_network_dict: dict[str, list[str]] = {}
+
+# Create a dict of reactions to find the divergence for
+divergence_targets: dict[str, list[str]] = {}
+
+subsystems_to_ignore_reactions: list[str] = [
+    "Intracellular demand",
+    "Extracellular exchange",
+]
+
+for reaction in BASE_MODEL.reactions:
+    if reaction.subsystem in subsystems_to_ignore:
+        continue
+    divergence_targets[f"{reaction.id}__reaction"]
+
+# Add in the metabolite networks
 for met, net in metabolite_network_dict.items():
     if len(net) == 0:
         warnings.warn(
@@ -129,8 +143,7 @@ for met, net in metabolite_network_dict.items():
         )  # This will print to slurm output
         logger.warning(f"Found empty network for metabolite: {met}")
         continue
-    new_metabolite_network_dict[met] = net
-metabolite_network_dict = new_metabolite_network_dict
+    divergence_targets[f"{met}__metabolite"] = net
 
 # Perform the KO divergence calculations
 logger.info("Reading in or generating the ko divergence results")
@@ -142,15 +155,18 @@ if ko_divergence_df_path.exists():
     ko_divergence_df = pd.read_csv(ko_divergence_df_path, index_col=0)
 else:
     logger.info("Performing ko divergence analysis")
-    ko_divergence_df = metworkpy.divergence.ko_divergence(
-        model=BASE_MODEL,
-        genes_to_ko=BASE_MODEL.genes.list_attr("id"),
-        target_networks=metabolite_network_dict,
-        divergence_type="kl",
-        n_neighbors=CONFIG["mtb_tf"]["ko_divergence"]["n-neighbors"],
-        sample_count=CONFIG["mtb_tf"]["ko_divergence"]["sample-count"],
-        processes=CONFIG["processes"],
-        sampler_seed=1618,
+    ko_divergence_df = cast(
+        pd.DataFrame,
+        metworkpy.divergence.ko_divergence(
+            model=BASE_MODEL,
+            genes_to_ko=BASE_MODEL.genes.list_attr("id"),
+            target_networks=divergence_targets,
+            divergence_type="kl",
+            n_neighbors=CONFIG["mtb_tf"]["ko_divergence"]["n-neighbors"],
+            sample_count=CONFIG["mtb_tf"]["ko_divergence"]["sample-count"],
+            processes=CONFIG["processes"],
+            sampler_seed=1618,
+        ),
     ).clip(lower=0.0)
     logger.info("Saving the ko divergence results")
     ko_divergence_df.to_csv(ko_divergence_df_path, index=True)
@@ -203,6 +219,14 @@ tf_target_dict = {
 # relatively large perturbations in each of the various metabolite synthesis networks
 logger.info("Performing tests for TF target ko-divergence")
 results_df_list: list[pd.DataFrame] = []
+
+# Filter the ko_divergence_df for only metabolites for the TF testing
+ko_divergence_df = ko_divergence_df.loc[
+    :, ko_divergence_df.columns.str.endswith("__metabolite")
+]
+ko_divergence_df.columns = ko_divergence_df.columns.str.replace(
+    "__metabolite$", "", regex=True
+)
 
 for tf, target_list in tf_target_dict.items():
     logger.info(f"Starting tests for TF: {tf}")
