@@ -27,7 +27,9 @@ from common_functions import get_metabolite_network
 # Path Setup
 if hasattr(sys, "ps1"):
     # Running in a REPL
-    BASE_PATH = pathlib.Path(".").absolute()  # Use current dir as base path
+    BASE_PATH = (
+        pathlib.Path(".").absolute().parent.parent
+    )  # Use current dir as base path
 else:
     # Running as a file
     # Use file path to find root
@@ -131,9 +133,9 @@ subsystems_to_ignore_reactions: list[str] = [
 ]
 
 for reaction in BASE_MODEL.reactions:
-    if reaction.subsystem in subsystems_to_ignore:
+    if reaction.subsystem in subsystems_to_ignore_reactions:
         continue
-    divergence_targets[f"{reaction.id}__reaction"] = reaction.id
+    divergence_targets[f"{reaction.id}__reaction"] = [reaction.id]
 
 # Add in the metabolite networks
 for met, net in metabolite_network_dict.items():
