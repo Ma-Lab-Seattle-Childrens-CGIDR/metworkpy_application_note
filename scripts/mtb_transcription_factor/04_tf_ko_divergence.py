@@ -243,7 +243,9 @@ for tf, target_list in tf_target_dict.items():
         # Calculate the results
         # Calculate the Mann-Whitney test results
         mann_whitney_res = stats.mannwhitneyu(
-            x=targeted_divergence, y=non_targeted_divergence
+            x=targeted_divergence,
+            y=non_targeted_divergence,
+            alternative="greater",
         )
         u1 = mann_whitney_res.statistic
         # Calculate u2 based on Scipy Stats documnetation
