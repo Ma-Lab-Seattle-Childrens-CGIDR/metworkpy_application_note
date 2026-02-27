@@ -27,7 +27,9 @@ from common_functions import get_metabolite_network
 # Path setup
 if hasattr(sys, "ps1"):
     # Running in a REPL
-    BASE_PATH = pathlib.Path(".")  # Use current dir as base path
+    BASE_PATH = (
+        pathlib.Path(".").absolute().parent.parent
+    )  # Use current dir as base path
 else:
     # Running as a file
     # Use file path to find root
@@ -254,7 +256,7 @@ for rxn in BASE_MODEL.reactions:
     if rxn.subsystem in subsystems_to_ignore:
         continue
     for gene in rxn.genes:
-        subsystem_to_gene_dict[rxn.subsystems].add(gene)
+        subsystem_to_gene_dict[rxn.subsystem].add(gene.id)
 
 # Now, for each TF find the enrichment in the subsystems
 target_subsys_enrichment_res_list: list[pd.DataFrame] = []
@@ -269,10 +271,9 @@ for tf, tf_target_series in tf_target_df.items():
         np.nan,
         columns=pd.Index(
             [
-                "metabolite network direction",
-                "metabolite network size",
+                "subsystem size",
                 "tf target count",
-                "tf target-metabolite network overlap",
+                "tf target-subsystem network overlap",
                 "total genes",
                 "odds-ratio",
                 "p-value",
@@ -305,6 +306,12 @@ for tf, tf_target_series in tf_target_df.items():
         # Fill in the dataframe
         tf_enrichment_df.loc[subsystem, "odds-ratio"] = fisher_res.statistic
         tf_enrichment_df.loc[subsystem, "p-value"] = fisher_res.pvalue
+        tf_enrichment_df.loc[subsystem, "subsystem size"] = len(
+            subsystem_genes
+        )
+        tf_enrichment_df.loc[
+            subsystem, "tf target-subsystem network overlap"
+        ] = len(subsystem_genes & tf_target_set)
     tf_enrichment_df = tf_enrichment_df.reset_index(
         drop=False, names="subsystem"
     )
