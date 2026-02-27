@@ -6,6 +6,7 @@ different metabolite networks
 # Setup
 # Imports
 # Standard Library Imports
+from collections import defaultdict
 import logging
 import pathlib
 import sys
@@ -245,4 +246,78 @@ target_enrichment_res_df = pd.merge(
 # Save the results
 target_enrichment_res_df.to_csv(
     RESULTS_PATH / "tf_target_metabolite_network_enrichment.csv", index=False
+)
+
+# Get a dict of subsystem to sets of genes
+subsystem_to_gene_dict: dict[str, set[str]] = defaultdict(set)
+for rxn in BASE_MODEL.reactions:
+    if rxn.subsystem in subsystems_to_ignore:
+        continue
+    for gene in rxn.genes:
+        subsystem_to_gene_dict[rxn.subsystems].add(gene)
+
+# Now, for each TF find the enrichment in the subsystems
+target_subsys_enrichment_res_list: list[pd.DataFrame] = []
+for tf, tf_target_series in tf_target_df.items():
+    # Find the TF targets in the model
+    tf_target_set = (
+        set(tf_target_series[tf_target_series].index) & model_gene_set
+    )
+    if len(tf_target_set) <= 3:
+        continue
+    tf_enrichment_df = pd.DataFrame(
+        np.nan,
+        columns=pd.Index(
+            [
+                "metabolite network direction",
+                "metabolite network size",
+                "tf target count",
+                "tf target-metabolite network overlap",
+                "total genes",
+                "odds-ratio",
+                "p-value",
+                "adj p-value",
+            ]
+        ),
+        index=pd.Index(subsystem_to_gene_dict.keys()),
+    )
+    tf_enrichment_df["tf target count"] = len(tf_target_set)
+    tf_enrichment_df["total genes"] = len(model_gene_set)
+    for subsystem, subsystem_genes in subsystem_to_gene_dict.items():
+        # Calculate the enrichment with a Fisher exact test
+        fisher_res = stats.fisher_exact(
+            np.array(
+                [
+                    [
+                        len(subsystem_genes & tf_target_set),
+                        len(subsystem_genes - tf_target_set),
+                    ],
+                    [
+                        len(tf_target_set - subsystem_genes),
+                        len(
+                            model_gene_set - (tf_target_set | subsystem_genes)
+                        ),
+                    ],
+                ]
+            ),
+            alternative="greater",
+        )
+        # Fill in the dataframe
+        tf_enrichment_df.loc[subsystem, "odds-ratio"] = fisher_res.statistic
+        tf_enrichment_df.loc[subsystem, "p-value"] = fisher_res.pvalue
+    tf_enrichment_df = tf_enrichment_df.reset_index(
+        drop=False, names="subsystem"
+    )
+    tf_enrichment_df["tf"] = tf  # type: ignore
+    tf_enrichment_df["adj p-value"] = fdr_with_nan(tf_enrichment_df["p-value"])
+    # Drop any rows which still have NaN
+    tf_enrichment_df = tf_enrichment_df.dropna(axis="index")
+    target_subsys_enrichment_res_list.append(tf_enrichment_df)
+# Combine the subsystem enrichment values
+target_subsys_enrichment_res_df = pd.concat(
+    target_subsys_enrichment_res_list, axis=0
+)
+# Save the dataframe
+target_subsys_enrichment_res_df.to_csv(
+    RESULTS_PATH / "tf_target_subsystem_network_enrichment.csv", index=False
 )
