@@ -327,3 +327,65 @@ tf_ko_divergence_res_df.to_csv(
     index=False,
 )
 logger.info("Finished performing KO-divergence analysis for the TFs! ;)")
+
+# Analyze the differences between essential and non-essential genes for KO divergence
+biomass_ko_div_stat_res = {}
+# Read in the essentiality data
+# Essentiality/Vulnerability index
+vi_df = pd.read_excel(
+    DATA_PATH / "gene_info" / "bosch_vi.xlsx",
+    sheet_name="(1) Mtb H37Rv",
+    index_col=0,
+    usecols="A,B,D,E,Z",
+)
+vi_df.index = vi_df.index.str.replace("^RVBD", "Rv", regex=True)
+# Find the overlap of genes in the model and in the essentiality data
+model_genes = set(BASE_MODEL.genes.list_attr("id"))
+vi_genes = set(vi_df.index)
+common_genes = sorted(model_genes & vi_genes)
+# Get the tnseq essentiality series
+tnseq_ess = vi_df.loc[common_genes, "tnseq_ess"]
+# Get the VI series
+vi_series = vi_df.loc[common_genes, "Vulnerability Index"]
+
+# Evaluate whether essential genes cause greater divergence in the
+# BIOMASS__2__reaction
+
+# Filter the ko_divergence_df for only common genes, and the biomass column
+biomass_ko_div = ko_divergence_df.loc[
+    common_genes, ko_divergence_df.columns == "BIOMASS__2__reaction"
+]
+
+# Compare the biomass divergence for the essential and the
+# non-essential, and find the AUC
+essential_biomass_ko_div = biomass_ko_div[tnseq_ess == "Essential"]
+nonessential_biomass_ko_div = biomass_ko_div[~(tnseq_ess == "Essential")]
+mannu_res = stats.mannwhitneyu(
+    x=essential_biomass_ko_div,
+    y=nonessential_biomass_ko_div,
+    alternative="greater",
+)
+# Extract the results
+u1 = mannu_res.statistic
+n1n2 = len(essential_biomass_ko_div) * len(nonessential_biomass_ko_div)
+u2 = n1n2 - u1
+auc = u1 / n1n2
+pval = mannu_res.pvalue
+
+biomass_ko_div_stat_res["Essentiality U1"] = u1
+biomass_ko_div_stat_res["EssentialityU2"] = u2
+biomass_ko_div_stat_res["Essentiality AUC ROC"] = auc
+biomass_ko_div_stat_res["Essentiality Mann-Whitney U-test p-value"] = pval
+
+# Evaluate the correlation with the VI
+# NOTE: Lower VI=> more vulnerable, so expecting negative correlation
+pearson_res = stats.pearsonr(
+    biomass_ko_div[common_genes], vi_series[common_genes], alternative="less"
+)
+biomass_ko_div_stat_res["VI Pearson Correlation"] = pearson_res.statistic
+biomass_ko_div_stat_res["VI Pearson p-value"] = pearson_res.pvalue
+
+# Create a series and save the results
+pd.Series(biomass_ko_div_stat_res, name="KO Divergence Statistics").to_csv(
+    RESULTS_PATH / "ko_divergence_biomass_statistics.csv"
+)
