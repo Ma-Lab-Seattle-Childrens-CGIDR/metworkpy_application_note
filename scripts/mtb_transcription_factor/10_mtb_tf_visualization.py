@@ -262,6 +262,27 @@ for input_map in ESCHER_MAPS_INPUT_LIST:
         reaction_data=argr_density.dropna(),
         reaction_scale=[
             {"type": "max", "color": "red", "size": 30},
-            {"type": "value", "value": 0.0, "color": "grey", "size": 10},
+            {"type": "value", "value": 0.0, "color": "gray", "size": 10},
+        ],
+    )
+########################################
+### Reaction Neighborhood Enrichment ###
+########################################
+enrich_df = pd.read_csv(
+    RESULTS_PATH / "tf_target_enrichment.csv", index_col=0
+).set_index("id")
+
+argr_rxn_neighborhood_enrich_pval = enrich_df["Rv1657"].rename(rxn_rename_dict)
+
+
+for input_map in ESCHER_MAPS_INPUT_LIST:
+    escher_maps.escher_map_add_data(
+        input_map=input_map,
+        output_dir=ESCHER_MAPS_OUT_DIR,
+        output_prefix="ArgR_enrich_pval_",
+        reaction_data=argr_rxn_neighborhood_enrich_pval.dropna(),
+        reaction_scale=[
+            {"type": "value", "value": 0.0, "color": "red", "size": 30},
+            {"type": "value", "value": 1.0, "color": "lightgray", "size": 10},
         ],
     )

@@ -8,10 +8,10 @@ Script to simulate divergence following creation of an iMAT model
 import pathlib
 import sys
 import tomllib
-from typing import Hashable
+from typing import cast, Hashable
 
 # External Imports
-import cobra  # type:ignore
+import cobra
 import metworkpy
 import pandas as pd
 
@@ -157,14 +157,17 @@ divergence_groups = {k: v for k, v in divergence_groups.items() if len(v) > 0}
 
 
 # Compute the divergence for all these groups
-imat_divergence = (
+imat_divergence = cast(
+    pd.Series,
     metworkpy.divergence.group_divergence.calculate_divergence_grouped(
         dataset1=base_samples,
         dataset2=imat_samples,
         divergence_groups=divergence_groups,
-        divergence_type="js",
+        divergence_type=CONFIG["simulation"]["divergence"]["type"],
+        jitter=CONFIG["simulation"]["divergence"]["jitter"],
         processes=CONFIG["processes"],
-    )
+        jitter_seed=129308102,
+    ),
 ).clip(lower=0.0)
 imat_divergence.name = "IMAT Divergence"
 

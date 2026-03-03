@@ -32,6 +32,7 @@ directed = false
 n-neighbors = 5
 num-samples = 1000
 use-unperturbed-as-true = true
+jitter = 1e-13
 type = "kl"
 
 [simulation.mutual-information]
