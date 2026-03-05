@@ -219,10 +219,12 @@ u2 = n1n2 - u1
 auc = u1 / n1n2
 pval = mannu_res.pvalue
 
-biomass_ko_div_stat_res["Essentiality U1"] = u1
-biomass_ko_div_stat_res["EssentialityU2"] = u2
-biomass_ko_div_stat_res["Essentiality AUC ROC"] = auc
-biomass_ko_div_stat_res["Essentiality Mann-Whitney U-test p-value"] = pval
+biomass_ko_div_stat_res["Essentiality-KO Divergence U1"] = u1
+biomass_ko_div_stat_res["Essentiality-KO Divergence U2"] = u2
+biomass_ko_div_stat_res["Essentiality-KO Divergence AUC ROC"] = auc
+biomass_ko_div_stat_res[
+    "Essentiality-KO Divergence Mann-Whitney U-test p-value"
+] = pval
 
 # Evaluate the correlation with the VI
 # NOTE: Lower VI=> more vulnerable, so expecting negative correlation
@@ -231,6 +233,89 @@ pearson_res = stats.pearsonr(
 )
 biomass_ko_div_stat_res["VI Pearson Correlation"] = pearson_res.statistic
 biomass_ko_div_stat_res["VI Pearson p-value"] = pearson_res.pvalue
+
+# Evauate the correlation and AUC with the FBA predictions
+# Get the single gene knockout predictions
+fba_ko = cobra.flux_analysis.single_gene_deletion(
+    model=BASE_MODEL,
+    gene_list=None,
+    method="fba",
+    processes=CONFIG["processes"],
+)
+# The ids columns is frozen sets, so get a gene column of strings
+fba_ko["gene"] = fba_ko["ids"].apply(lambda s: s.__iter__().__next__())
+fba_ko_series = fba_ko.set_index("gene")["growth"][common_genes]
+
+# Evaluate the correlation with the ko divergence of biomass with the growth
+div_fba_corr = stats.pearsonr(
+    biomass_ko_div[common_genes],
+    fba_ko_series[common_genes],
+    alternative="less",  # Directionality should be opposite
+)
+biomass_ko_div_stat_res["FBA Predicted Essentiality R"] = (
+    div_fba_corr.statistic
+)
+
+
+# Create a predicted essential series
+optimal_growth = BASE_MODEL.slim_optimize()
+fba_ess_series = (
+    fba_ko_series <= CONFIG["mtb_tf"]["ko_divergence"] * optimal_growth
+)[common_genes]
+
+# Can compute the AUC for this using the Mann-Whitney U-test
+fba_ko_div_mannu_res = stats.mannwhitneyu(
+    x=biomass_ko_div[fba_ess_series],
+    y=biomass_ko_div[~fba_ess_series],
+    alternative="greater",
+)
+fba_ko_div_u1 = fba_ko_div_mannu_res.statistic
+fba_ko_div_n1n2 = len(biomass_ko_div[fba_ess_series]) * len(
+    biomass_ko_div[~fba_ess_series]
+)
+fba_ko_div_u2 = fba_ko_div_n1n2 - fba_ko_div_u1
+fba_ko_div_auc = fba_ko_div_u1 / fba_ko_div_n1n2
+fba_ko_div_pval = fba_ko_div_mannu_res.pvalue
+# Add the results to the series
+biomass_ko_div_stat_res["FBA Predicted Essentiality-KO Divergence U1"] = (
+    fba_ko_div_u1
+)
+biomass_ko_div_stat_res["FBA Predicted Essentiality-KO Divergence U2"] = (
+    fba_ko_div_u2
+)
+biomass_ko_div_stat_res["FBA Predicted Essentiality-KO Divergence AUC ROC"] = (
+    fba_ko_div_auc
+)
+biomass_ko_div_stat_res[
+    "FBA Predicted Essentiality-KO Divergence Mann-Whitney U-test p-value"
+] = fba_ko_div_pval
+
+# Evaluate the Mann U for the FBA predicted growth vs the essentiality
+essential_fba_growth_series = fba_ko_series[tnseq_ess == "Essential"]
+non_essential_fba_growth_series = fba_ko_series[~(tnseq_ess == "Essential")]
+fba_growth_mannu_res = stats.mannwhitneyu(
+    x=essential_fba_growth_series,
+    y=non_essential_fba_growth_series,
+    alternative="less",  # Expect growth for essential genes to be less
+)
+
+fba_growth_u1 = mannu_res.statistic
+fba_growth_n1n2 = len(essential_fba_growth_series) * len(
+    non_essential_fba_growth_series
+)
+fba_growth_u2 = fba_growth_n1n2 - fba_growth_u1
+fba_growth_auc = fba_growth_u1 / fba_growth_n1n2
+fba_growth_pval = fba_growth_mannu_res.pvalue
+
+biomass_ko_div_stat_res["Essentiality-FBA Predicted Growth U1"] = fba_growth_u1
+biomass_ko_div_stat_res["Essentiality-FBA Predicted Growth U2"] = fba_growth_u2
+biomass_ko_div_stat_res["Essentiality-FBA Predicted Growth AUC ROC"] = (
+    fba_growth_auc
+)
+biomass_ko_div_stat_res[
+    "Essentiality-FBA Predicted Growth Mann-Whitney U-test p-value"
+] = fba_growth_pval
+
 
 # Create a series and save the results
 pd.Series(biomass_ko_div_stat_res, name="KO Divergence Statistics").to_csv(

@@ -9,14 +9,16 @@ from collections import defaultdict
 import pathlib
 import sys
 import tomllib
+from typing import cast
 
 # External Imports
-import cobra  # type: ignore
+import cobra
 import metworkpy
 from metworkpy.metabolites.metabolite_network import (
     find_metabolite_synthesis_network_reactions,
     find_metabolite_consuming_network_reactions,
 )
+import pandas as pd
 
 
 # Local Imports
@@ -101,16 +103,19 @@ divergence_targets = {
 }
 
 # Perform the KO divergence analysis
-ko_divergence_df = metworkpy.divergence.ko_divergence(
-    model=sim_model,
-    genes_to_ko=sorted(sim_model.genes.list_attr("id")),
-    target_networks=divergence_targets,
-    sample_count=CONFIG["simulation"]["divergence"]["num-samples"],
-    divergence_type=CONFIG["simulation"]["divergence"]["type"],
-    n_neighbors=CONFIG["simulation"]["divergence"]["n-neighbors"],
-    use_unperturbed_as_true=CONFIG["simulation"]["divergence"][
-        "use-unperturbed-as-true"
-    ],
+ko_divergence_df = cast(
+    pd.DataFrame,
+    metworkpy.divergence.ko_divergence(
+        model=sim_model,
+        genes_to_ko=sorted(sim_model.genes.list_attr("id")),
+        target_networks=divergence_targets,
+        sample_count=CONFIG["simulation"]["divergence"]["num-samples"],
+        divergence_type=CONFIG["simulation"]["divergence"]["type"],
+        n_neighbors=CONFIG["simulation"]["divergence"]["n-neighbors"],
+        use_unperturbed_as_true=CONFIG["simulation"]["divergence"][
+            "use-unperturbed-as-true"
+        ],
+    ),
 ).clip(lower=0)  # Divergence should be >0, but
 # this is an estimate, so it can be slightly negative
 # Clipping to correct this somewhat
