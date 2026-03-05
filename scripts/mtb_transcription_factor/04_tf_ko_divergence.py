@@ -252,9 +252,12 @@ div_fba_corr = stats.pearsonr(
     fba_ko_series[common_genes],
     alternative="less",  # Directionality should be opposite
 )
-biomass_ko_div_stat_res["FBA Predicted Essentiality R"] = (
-    div_fba_corr.statistic
-)
+biomass_ko_div_stat_res[
+    "FBA Predicted Essentiality-KO Divergence Pearson R"
+] = div_fba_corr.statistic
+biomass_ko_div_stat_res[
+    "FBA Predicted Essentiality-KO Divergence Pearson p-value"
+] = div_fba_corr.pvalue
 
 
 # Create a predicted essential series
