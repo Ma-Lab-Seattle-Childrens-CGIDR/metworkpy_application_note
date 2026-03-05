@@ -260,7 +260,8 @@ biomass_ko_div_stat_res["FBA Predicted Essentiality R"] = (
 # Create a predicted essential series
 optimal_growth = BASE_MODEL.slim_optimize()
 fba_ess_series = (
-    fba_ko_series <= CONFIG["mtb_tf"]["ko_divergence"] * optimal_growth
+    fba_ko_series
+    <= CONFIG["mtb_tf"]["ko_divergence"]["fba_ess_threshold"] * optimal_growth
 )[common_genes]
 
 # Can compute the AUC for this using the Mann-Whitney U-test
