@@ -12,10 +12,12 @@ from string import ascii_uppercase  # Used for iteration to create metabolites
 import sys  # Used to check if running in REPL or from file
 import tempfile  # Used to create temporary file for model validation
 import tomllib
+from typing import cast
 
 # External Imports
-from cobra import Configuration, Model, Reaction, Metabolite, io  # type:ignore
+from cobra import Configuration, Model, Reaction, Metabolite, io
 import metworkpy  # Used for convienience function for writing the model
+import pandas as pd
 
 if hasattr(sys, "ps1"):
     # Running in a REPL
@@ -551,3 +553,22 @@ metworkpy.write_model(sim_model, MODEL_OUT_PATH / "simulation_model.json")
 metworkpy.write_model(sim_model, MODEL_OUT_PATH / "simulation_model.xml")
 metworkpy.write_model(sim_model, MODEL_OUT_PATH / "simulation_model.mat")
 metworkpy.write_model(sim_model, MODEL_OUT_PATH / "simulation_model.yaml")
+
+###############################################
+# Create a Table of Reaction, Equation, GPR ###
+###############################################
+model_df = pd.DataFrame(
+    "",
+    index=pd.Index(sim_model.reactions.list_attr("id")),
+    columns=pd.Index(["Equation", "Gene-Reaction Rule", "Subsystem"]),
+)
+for rxn in sim_model.reactions:
+    rxn = cast(Reaction, rxn)
+    model_df.loc[rxn.id, "Equation"] = rxn.build_reaction_string()
+    model_df.loc[rxn.id, "Gene-Reaction Rule"] = rxn.gene_reaction_rule
+    model_df.loc[rxn.id, "Subsystem"] = rxn.subsystem
+
+# Save the datafame to the models folder
+model_df.reset_index(drop=False, names="Reaction").to_csv(
+    MODEL_OUT_PATH / "simulation_model_table.csv", index=False
+)

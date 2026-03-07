@@ -1,0 +1,44 @@
+Reaction,Equation,Gene-Reaction Rule,Subsystem
+A_E_ex,A_E <=> ,,External Exchange Reactions
+B_E_ex,B_E <=> ,,External Exchange Reactions
+C_E_ex,C_E <=> ,,External Exchange Reactions
+D_E_ex,D_E <=> ,,External Exchange Reactions
+E_E_ex,E_E <=> ,,External Exchange Reactions
+F_E_ex,F_E <=> ,,External Exchange Reactions
+G_E_ex,G_E <=> ,,External Exchange Reactions
+N_E_ex,N_E <=> ,,External Exchange Reactions
+R_E_ex,R_E <=> ,,External Exchange Reactions
+U_E_ex,U_E <=> ,,External Exchange Reactions
+V_E_ex,V_E <=> ,,External Exchange Reactions
+W_E_ex,W_E <=> ,,External Exchange Reactions
+X_E_ex,X_E <=> ,,External Exchange Reactions
+A_import,A_E <=> A_C,,Transport
+B_import,B_E <=> B_C,,Transport
+C_import,C_E <=> C_C,,Transport
+D_import,D_E <=> D_C,,Transport
+E_import,E_E <=> E_C,,Transport
+F_import,F_E <=> F_C,,Transport
+G_import,G_E <=> G_C,,Transport
+N_exp,N_C --> N_E,,S3
+R_exp,R_C --> R_E,g018,S5
+U_exp,U_C --> U_E,g023,S7
+V_exp,V_C --> V_E,g022,S7
+W_exp,W_C --> W_E,g017,S5
+X_exp,X_C --> X_E,g021,S7
+R_A_B__G_H,A_C + B_C <=> G_C + H_C,g001,S1
+R_C_H__I,C_C + H_C <=> I_C,g002 or g003,S2
+R_C_D__J,C_C + D_C <=> J_C,g004,S2
+R_I__P,I_C <=> P_C,g008,S2
+R_J__Q,J_C <=> Q_C,g010,S2
+R_E__M,E_C <=> M_C,g005,S3
+R_F_M__N,F_C + M_C --> N_C,g006 and g007,S3
+R_N__T,N_C <=> T_C,g011 or g012,S3
+R_N__U,N_C --> U_C,g011 and g013,S3
+R_H__K,H_C <=> K_C,g009,S4
+R_G_K__L,G_C + K_C <=> L_C,g008,S4
+R_K__O,K_C --> O_C,g024,S4
+R_L__W,L_C --> W_C,g014 and g020,S4
+R_O_P__R,O_C + P_C --> R_C,g015 and g020,S4
+R_P_Q__S,P_C + Q_C --> S_C,g016,S6
+R_S_T__V_X,S_C + T_C --> V_C + X_C,g019,S6
+biomass,U_C + W_C + X_C --> ,,Biomass
