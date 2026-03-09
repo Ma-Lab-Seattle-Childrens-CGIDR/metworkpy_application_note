@@ -16,7 +16,7 @@ from typing import cast
 
 # External Imports
 from cobra import Configuration, Model, Reaction, Metabolite, io
-import metworkpy  # Used for convienience function for writing the model
+import metworkpy  # Used for convenience function for writing the model
 import pandas as pd
 
 if hasattr(sys, "ps1"):

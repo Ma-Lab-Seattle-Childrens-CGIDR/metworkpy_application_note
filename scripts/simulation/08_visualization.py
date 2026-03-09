@@ -13,10 +13,10 @@ import sys
 import tomllib
 
 # External Imports
-import cobra  # type:ignore
+import cobra
 import iplotx as ipx  # type: ignore
 import matplotlib.pyplot as plt  # type: ignore
-from metabolic_modeling_utils import escher_maps  # type: ignore
+from metabolic_modeling_utils import escher_maps
 import metworkpy
 import networkx as nx
 import numpy as np
@@ -391,7 +391,7 @@ def draw_graph(
     ipx.network(
         network,
         ax=ax,
-        layout=nx.spring_layout(metabolic_network, seed=seed),
+        layout=nx.spring_layout(network, seed=seed),
         vertex_marker="r",
         vertex_labels=True,
         vertex_facecolor=node_color_list,
@@ -455,3 +455,31 @@ draw_graph(
     / f"metabolic_metabolite_network.{IMG_FORMAT}",
     seed=LAYOUT_SEED,
 )
+
+######################################
+# Mutual Information Visualization ###
+######################################
+mi_adj_mat = pd.read_csv(
+    RESULTS_PATH / "mutual_information" / "mi_adjacency.csv", index_col=0
+)
+mi_network = nx.from_pandas_adjacency(mi_adj_mat)
+# Create a dict from edge to weight
+mi_edge_widths = {
+    (u, v): w["weight"] for (u, v, w) in mi_network.edges(data=True)
+}
+
+fig, ax = plt.subplots()
+fig.set_size_inches(30, 30)
+
+ipx.network(
+    mi_network,
+    ax=ax,
+    layout=nx.spring_layout(mi_network, seed=1892382),
+    vertex_marker="r",
+    vertex_labels=True,
+    vertex_facecolor=REACTION_NODE_COLOR,
+    style="hollow",
+    edge_linewidth=mi_edge_widths,
+)
+fig.savefig(network_graph_viz_path / "flux_mi_network.svg")
+plt.close()
