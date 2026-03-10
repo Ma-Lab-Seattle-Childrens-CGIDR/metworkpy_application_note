@@ -59,6 +59,7 @@ mtb_tf = [
   { task = "tf_visualization_script", environment = "viz" },
   { task = "tf_imat_test", environment = "default" },
 ]
+collate = { cmd = "python collate_results.py", cwd = "scripts" }
 
 [dependencies]
 python = ">=3.13.10,<3.14"

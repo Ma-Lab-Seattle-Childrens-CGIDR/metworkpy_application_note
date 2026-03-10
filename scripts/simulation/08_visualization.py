@@ -309,8 +309,12 @@ imat_div_res = pd.read_csv(
 )
 imat_rxn_div = imat_div_res[imat_div_res.index.str.startswith("reaction__")]
 imat_rxn_div.index = imat_rxn_div.index.str.replace("reaction__", "")
-imat_met_div = imat_div_res[imat_div_res.index.str.startswith("metabolite__")]
-imat_met_div.index = imat_met_div.index.str.replace("metabolite__", "")
+imat_met_div = imat_div_res[
+    imat_div_res.index.str.startswith("metabolite_synthesis__")
+]
+imat_met_div.index = imat_met_div.index.str.replace(
+    "metabolite_synthesis__", ""
+)
 
 escher_maps.escher_map_add_data(
     input_map=ESCHER_MAP_PATH,

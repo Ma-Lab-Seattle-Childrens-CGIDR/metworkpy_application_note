@@ -132,25 +132,39 @@ imat_samples = imat_samples[imat_sampler.validate(imat_samples) == "v"]
 # for all the reactions in the model, and all the metabolites in the model
 
 # Read in the Metabolite networks for the model
-metabolite_networks = pd.read_csv(
+metabolite_synthesis_networks = pd.read_csv(
     RESULTS_PATH.parent
     / "metabolite_networks"
     / "metabolite_synthesis_network.csv",
     index_col=0,
 )
+metabolite_consuming_networks = pd.read_csv(
+    RESULTS_PATH.parent
+    / "metabolite_networks"
+    / "metabolite_consuming_network.csv",
+    index_col=0,
+)
 
 # Create a dictionary for divergence groups
-divergence_groups: dict[str, list[Hashable]] = {}
+divergence_groups: dict[str, list[Hashable]] = defaultdict(list)
 
 # For each metabolite, create a divergence group for it
-for metabolite, met_network in metabolite_networks.items():
-    divergence_groups[f"metabolite__{metabolite}"] = list(
+for metabolite, met_network in metabolite_synthesis_networks.items():
+    divergence_groups[f"metabolite_synthesis__{metabolite}"] = list(
+        met_network[met_network].index
+    )
+for metabolite, met_network in metabolite_consuming_networks.items():
+    divergence_groups[f"metabolite_consuming__{metabolite}"] = list(
         met_network[met_network].index
     )
 
-# Also, add in divergence groups for each reaction
-for rxn in metabolite_networks.index:
+# Also, add in divergence groups for each reaction and subsystem
+for rxn in metabolite_synthesis_networks.index:
     divergence_groups[f"reaction__{rxn}"] = [rxn]
+    divergence_groups[f"subsystem__{rxn.subsystem}"].append(rxn.id)
+    divergence_groups["subsystem__whole_metabolism"].append(rxn.id)
+    divergence_groups[f"reaction__{rxn.id}"].append(rxn.id)
+
 
 # Filter out any zero-size divergence groups
 divergence_groups = {k: v for k, v in divergence_groups.items() if len(v) > 0}
