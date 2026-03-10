@@ -240,6 +240,9 @@ for gene in gene_centrality_series.index:
         centrality_list.append(eigenvector_centrality[rxn.id])
     gene_centrality_series[gene] = max(centrality_list)
 gene_centrality_series = gene_centrality_series[common_genes]
+# Save the gene centrality series
+gene_centrality_series.name = "Eigenvector Centrality"
+gene_centrality_series.to_csv(RESULTS_PATH / "flux_mi_gene_centrality.csv")
 
 # Start by comparing the mutual information centrality of essential genes
 # and non-essential genes

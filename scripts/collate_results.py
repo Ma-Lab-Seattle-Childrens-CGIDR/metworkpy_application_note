@@ -33,6 +33,7 @@ MODEL_PATH = BASE_PATH / "models"
 RESULTS_PATH = BASE_PATH / "results"
 SIMULATION_RESULTS_PATH = RESULTS_PATH / "simulation"
 MTB_TF_RESULTS_PATH = RESULTS_PATH / "mtb_transcription_factors"
+CACHE_PATH = BASE_PATH / "cache"
 
 # Script Configuration
 # Read in the configuration file
@@ -252,3 +253,220 @@ def collate_simulation_results():
 
 
 collate_simulation_results()
+
+
+######################
+### Mtb TF Results ###
+######################
+def collate_mtb_tf_results():
+    """
+    Combine the results of the analysis of the Mtb Transcription Factors
+    """
+    # -----------------------
+    # -- Model Information --
+    # -----------------------
+    reaction_info = pd.read_csv(
+        CACHE_PATH / "model_information" / "reaction_information.csv"
+    )
+    metabolite_info = pd.read_csv(
+        CACHE_PATH / "model_information" / "metabolite_information.csv"
+    )
+
+    # ----------------------
+    # -- Metabolic Graphs --
+    # ----------------------
+    rxn_centrality = pd.read_csv(
+        MTB_TF_RESULTS_PATH / "metabolic_reaction_network_centrality.csv"
+    ).reset_index(drop=False, names="Reaction")
+    rxn_centrality_analysis = pd.read_csv(
+        MTB_TF_RESULTS_PATH
+        / "metabolic_reaction_network_centrality_analysis.csv",
+        index_col=0,
+    ).reset_index(names="Transcription Factor")
+
+    # ------------------------
+    # -- Mutual Information --
+    # ------------------------
+    flux_mi_gene_centrality = pd.read_csv(
+        MTB_TF_RESULTS_PATH / "flux_mi_gene_centrality.csv", index_col=0
+    ).reset_index(names="Gene")
+    flux_mi_ess_vi_stats = pd.read_csv(
+        MTB_TF_RESULTS_PATH
+        / "mutual_information_vi_essentiality_statistics.csv",
+        index_col=0,
+    )
+
+    # ----------------------------
+    # -- Metabolite Subnetworks --
+    # ----------------------------
+    tf_metabolite_network_enrichment = pd.read_csv(
+        MTB_TF_RESULTS_PATH / "tf_target_subsystem_network_enrichment.csv",
+    )["metabolite":"tf"]
+    tf_subsystem_network_enrichment = pd.read_csv(
+        MTB_TF_RESULTS_PATH / "tf_target_subsystem_network_enrichment.csv"
+    )
+    tf_metabolite_gsva = pd.read_csv(
+        MTB_TF_RESULTS_PATH / "metabolite_gsva.csv", index_col=0
+    )
+
+    # ----------------------------------------------
+    # -- Reaction Neighborhood Enrichment/Density --
+    # ----------------------------------------------
+    tf_target_density = (
+        pd.read_csv(MTB_TF_RESULTS_PATH / "tf_target_density.csv")
+        .set_index("id")["Rv1657"]
+        .to_frame(name="ArgR Neighborhood Target Density")
+        .reset_index(names="Reaction ID")
+    )
+    tf_rxn_neghborhood_enrichment = (
+        pd.read_csv(MTB_TF_RESULTS_PATH / "tf_target_enrichment.csv")
+        .set_index("id")["Rv1657"]
+        .to_frame(name="ArgR Neighborhood Target Enrichment")
+        .reset_index(names="Reaction ID")
+    )
+
+    # -------------------
+    # -- KO Divergence --
+    # -------------------
+    ko_divergence_df = pd.read_csv(
+        (
+            CACHE_PATH
+            / "gene_ko_divergence"
+            / "7h9_adc"
+            / "gene_ko_divergence_results.csv"
+        ),
+        index_col=0,
+    ).clip(lower=0.0)
+    ko_divergence_df = (
+        ko_divergence_df.loc[
+            :,
+            (
+                ko_divergence_df.columns.str.endswith("__metabolite")
+                | ko_divergence_df.columns
+                == "BIOMASS__2__reaction"
+            ),
+        ]
+        .reset_index(name="Gene")
+        .melt(
+            id_vars="Gene",
+            var_name="Divergence Group",
+            value_name="Divergence",
+        )
+    )
+
+    tf_target_ko_divergence = pd.read_csv(
+        MTB_TF_RESULTS_PATH / "ko_divergence_tf_target_analysis.csv"
+    ).rename({"rho": "AUC-ROC"})[
+        [
+            "tf",
+            "metabolite",
+            "represented metabolites",
+            "Mann-Whitney U1",
+            "Mann-Whitney U2",
+            "AUC-ROC",
+            "p-value",
+            "adj p-value",
+        ]
+    ]
+    tf_target_ko_divergence["represented metabolites"] = (
+        tf_target_ko_divergence["represented metabolite"].str.replace(
+            "set()", ""
+        )
+    )
+    # ---------------------
+    # -- IMAT Divergence --
+    # ---------------------
+    scaler = StandardScaler()
+    scaler.set_output(transform="pandas")
+    imat_divergence = scaler.fit_transform(
+        pd.read_csv(MTB_TF_RESULTS_PATH / "divergence_resuls.csv", index_col=0)
+    )
+    imat_reaction_divergence = imat_divergence.loc[
+        :, imat_divergence.columns.str.startswith("reaction__")
+    ]
+    imat_reaction_divergence.columns = (
+        imat_reaction_divergence.columns.str.replace("reaction__", "")
+    )
+    imat_reaction_divergence = imat_reaction_divergence.T
+
+    imat_metabolite_synthesis_divergence = imat_divergence.loc[
+        :, imat_divergence.columns.str.startswith("metabolite_synthesis__")
+    ]
+    imat_metabolite_synthesis_divergence.columns = (
+        imat_metabolite_synthesis_divergence.columns.str.replace(
+            "metabolite_synthesis_", ""
+        )
+    )
+    imat_metabolite_synthesis_divergence = (
+        imat_metabolite_synthesis_divergence.T
+    )
+    # ------------------
+    # -- IMAT Compare --
+    # ------------------
+    imat_compare_df = (
+        pd.read_csv(MTB_TF_RESULTS_PATH / "imat_compare.csv")
+        .set_index("id")
+        .reset_index(names="Reaction")
+    )[
+        [
+            "Reaction",
+            "pFBA fluxes",
+            "IMAT solution fluxes",
+            "FVA IMAT Model pFBA fluxes",
+            "IMAT solution Fluxes - pFBA fluxes",
+            "FVA IMAT Model pFBA fluxes - pFBA fluxes",
+        ]
+    ]
+
+    with pd.ExcelWriter(RESULTS_PATH / "mtb_tf_results.xlsx") as writer:
+        # Model Information
+        reaction_info.to_excel(writer, sheet_name="Reaction Information")
+        metabolite_info.to_excel(writer, sheet_name="Metabolite Information")
+        # Metabolic Graphs
+        rxn_centrality.to_excel(writer, sheet_name="Reaction SCN Centrality")
+        rxn_centrality_analysis.to_excel(
+            writer, sheet_name="TF Target Centrality"
+        )
+        # Flux MI Centrality
+        flux_mi_gene_centrality.to_excel(
+            writer, sheet_name="Flux MI Network Centrality"
+        )
+        flux_mi_ess_vi_stats.to_excel(
+            writer, sheet_name="MI Centrality vs Essentialiy"
+        )
+        # Metabolite Enrichment
+        tf_metabolite_network_enrichment.to_excel(
+            writer, sheet_name="TF Metabolite Enrichment"
+        )
+        tf_subsystem_network_enrichment.to_excel(
+            writer, sheet_name="TF Subsystem Enrichment"
+        )
+        tf_metabolite_gsva.to_excel(writer, sheet_name="TF Metabolite GSVA")
+        # Target density/enrichment
+        tf_target_density.to_excel(
+            writer, sheet_name="ArgR Rxn Neighborhood Density"
+        )
+        tf_rxn_neghborhood_enrichment.to_excel(
+            writer, sheet_name="ArgR Rxn Neighbor Enrichment"
+        )
+        # KO Divergence
+        ko_divergence_df.to_excel(
+            writer, sheet_name="Gene KO Divergence", index=False
+        )
+        tf_target_ko_divergence.to_excel(
+            writer, sheet_name="TF Target KO Divergence"
+        )
+        # IMAT Divergence
+        imat_reaction_divergence.to_excel(
+            writer, sheet_name="Normalized IMAT Reaction Div"
+        )
+        imat_metabolite_synthesis_divergence.to_excel(
+            writer, sheet_name="Normalized IMAT Metabolite Div"
+        )
+        # IMAT Compare
+        imat_compare_df.to_excel(
+            writer, sheet_name="ArgR IMAT Fluxes", index=False
+        )
+
+
+collate_mtb_tf_results()

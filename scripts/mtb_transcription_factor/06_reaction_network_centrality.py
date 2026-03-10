@@ -126,6 +126,13 @@ logger.info("Calculating betweenness centrality")
 betweenness_centrality_series = pd.Series(
     nx.betweenness_centrality(metabolic_reaction_network, normalized=True)
 )
+# Save these results
+pd.DataFrame(
+    {
+        "Closeness": closeness_centrality_series,
+        "Betweenness": betweenness_centrality_series,
+    }
+).to_csv(RESULTS_PATH / "metabolic_reaction_network_centrality.csv")
 
 
 # Find the TF targets
