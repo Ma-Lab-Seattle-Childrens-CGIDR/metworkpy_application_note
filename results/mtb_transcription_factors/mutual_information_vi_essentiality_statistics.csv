@@ -1,11 +1,11 @@
 ,Mutual Information Essentiality Statistical Tests
-TNSeq essential vs not Mann-Whitney U-test u1,152101.5
-TNSeq essential vs not Mann-Whitney U-test u2,57643.5
-TNSeq essential vs not Mann-Whitney U-test auc,0.7251734248730601
-TNSeq essential vs not Mann-Whitney U-test p-value,9.517125352568655e-30
-Vulnerability Index Correlation MI Centrality Kendall-Tau statistic,-0.16348700916402767
-Vulnerability Index Correlation MI Centrality Kendall-Tau p-value,7.08353215615922e-15
-Vulnerability Index Correlation MI Centrality Spearman's Rho statistic,-0.24436618213629044
-Vulnerability Index Correlation MI Centrality Spearman's Rho p-value,1.9127377076336563e-15
-Vulnerability Index Correlation MI Centrality Pearson's R statistic,-0.3203040559803319
-Vulnerability Index Correlation MI Centrality Pearson's R p-value,9.794228408038535e-26
+TNSeq essential vs not Mann-Whitney U-test u1,148819.5
+TNSeq essential vs not Mann-Whitney U-test u2,60925.5
+TNSeq essential vs not Mann-Whitney U-test auc,0.709525852821283
+TNSeq essential vs not Mann-Whitney U-test p-value,4.8406999055049304e-26
+Vulnerability Index Correlation MI Centrality Kendall-Tau statistic,-0.1512680727243592
+Vulnerability Index Correlation MI Centrality Kendall-Tau p-value,6.035605664417283e-13
+Vulnerability Index Correlation MI Centrality Spearman's Rho statistic,-0.2248232334241377
+Vulnerability Index Correlation MI Centrality Spearman's Rho p-value,2.7062112072252557e-13
+Vulnerability Index Correlation MI Centrality Pearson's R statistic,-0.31296172436381214
+Vulnerability Index Correlation MI Centrality Pearson's R p-value,1.3412819288603287e-24

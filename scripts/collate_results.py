@@ -17,6 +17,7 @@ import cobra
 import pandas as pd
 import metworkpy
 import networkx as nx
+import numpy as np
 from sklearn.preprocessing import StandardScaler
 
 # Path Setup
@@ -300,8 +301,8 @@ def collate_mtb_tf_results():
     # -- Metabolite Subnetworks --
     # ----------------------------
     tf_metabolite_network_enrichment = pd.read_csv(
-        MTB_TF_RESULTS_PATH / "tf_target_subsystem_network_enrichment.csv",
-    )["metabolite":"tf"]
+        MTB_TF_RESULTS_PATH / "tf_target_metabolite_network_enrichment.csv",
+    ).loc[:, "metabolite":"tf"]
     tf_subsystem_network_enrichment = pd.read_csv(
         MTB_TF_RESULTS_PATH / "tf_target_subsystem_network_enrichment.csv"
     )
@@ -341,12 +342,11 @@ def collate_mtb_tf_results():
         ko_divergence_df.loc[
             :,
             (
-                ko_divergence_df.columns.str.endswith("__metabolite")
-                | ko_divergence_df.columns
-                == "BIOMASS__2__reaction"
+                (ko_divergence_df.columns.str.endswith("__metabolite"))
+                | (ko_divergence_df.columns == "BIOMASS__2__reaction")
             ),
         ]
-        .reset_index(name="Gene")
+        .reset_index(names="Gene")
         .melt(
             id_vars="Gene",
             var_name="Divergence Group",
@@ -356,7 +356,7 @@ def collate_mtb_tf_results():
 
     tf_target_ko_divergence = pd.read_csv(
         MTB_TF_RESULTS_PATH / "ko_divergence_tf_target_analysis.csv"
-    ).rename({"rho": "AUC-ROC"})[
+    ).rename({"rho": "AUC-ROC"}, axis=1)[
         [
             "tf",
             "metabolite",
@@ -369,7 +369,7 @@ def collate_mtb_tf_results():
         ]
     ]
     tf_target_ko_divergence["represented metabolites"] = (
-        tf_target_ko_divergence["represented metabolite"].str.replace(
+        tf_target_ko_divergence["represented metabolites"].str.replace(
             "set()", ""
         )
     )
@@ -379,7 +379,9 @@ def collate_mtb_tf_results():
     scaler = StandardScaler()
     scaler.set_output(transform="pandas")
     imat_divergence = scaler.fit_transform(
-        pd.read_csv(MTB_TF_RESULTS_PATH / "divergence_resuls.csv", index_col=0)
+        pd.read_csv(
+            MTB_TF_RESULTS_PATH / "divergence_results.csv", index_col=0
+        ).replace([np.inf, -np.inf], np.nan)
     )
     imat_reaction_divergence = imat_divergence.loc[
         :, imat_divergence.columns.str.startswith("reaction__")
@@ -407,6 +409,15 @@ def collate_mtb_tf_results():
         pd.read_csv(MTB_TF_RESULTS_PATH / "imat_compare.csv")
         .set_index("id")
         .reset_index(names="Reaction")
+    ).rename(
+        {
+            "pFBA fluxes": "pFBA fluxes",
+            "IMAT fluxes": "IMAT solution fluxes",
+            "FVA IMAT pFBA fluxes": "FVA IMAT Model pFBA fluxes",
+            "diff imat": "IMAT solution Fluxes - pFBA fluxes",
+            "diff fva imat": "FVA IMAT Model pFBA fluxes - pFBA fluxes",
+        },
+        axis=1,
     )[
         [
             "Reaction",
