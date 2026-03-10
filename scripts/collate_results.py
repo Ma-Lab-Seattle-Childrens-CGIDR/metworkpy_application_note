@@ -253,9 +253,6 @@ def collate_simulation_results():
         imat_div.to_excel(writer, sheet_name="IMAT Divergence", index=False)
 
 
-collate_simulation_results()
-
-
 ######################
 ### Mtb TF Results ###
 ######################
@@ -277,13 +274,18 @@ def collate_mtb_tf_results():
     # -- Metabolic Graphs --
     # ----------------------
     rxn_centrality = pd.read_csv(
-        MTB_TF_RESULTS_PATH / "metabolic_reaction_network_centrality.csv"
-    ).reset_index(drop=False, names="Reaction")
-    rxn_centrality_analysis = pd.read_csv(
-        MTB_TF_RESULTS_PATH
-        / "metabolic_reaction_network_centrality_analysis.csv",
+        MTB_TF_RESULTS_PATH / "metabolic_reaction_network_centrality.csv",
         index_col=0,
-    ).reset_index(names="Transcription Factor")
+    ).reset_index(drop=False, names="Reaction")
+    rxn_centrality_analysis = (
+        pd.read_csv(
+            MTB_TF_RESULTS_PATH
+            / "metabolic_reaction_network_centrality_analysis.csv",
+            index_col=0,
+        )
+        .reset_index(names="Transcription Factor")
+        .loc[:, "Transcription Factor":"betweenness bootstrap adj p-value"]
+    ).dropna(how="all", axis="index")
 
     # ------------------------
     # -- Mutual Information --
@@ -302,10 +304,35 @@ def collate_mtb_tf_results():
     # ----------------------------
     tf_metabolite_network_enrichment = pd.read_csv(
         MTB_TF_RESULTS_PATH / "tf_target_metabolite_network_enrichment.csv",
-    ).loc[:, "metabolite":"tf"]
+    ).loc[:, "metabolite":"tf"][
+        [
+            "tf",
+            "metabolite",
+            "metabolite network direction",
+            "metabolite network size",
+            "tf target count",
+            "tf target-metabolite network overlap",
+            "total genes",
+            "odds-ratio",
+            "p-value",
+            "adj p-value",
+        ]
+    ]
     tf_subsystem_network_enrichment = pd.read_csv(
         MTB_TF_RESULTS_PATH / "tf_target_subsystem_network_enrichment.csv"
-    )
+    )[
+        [
+            "tf",
+            "subsystem",
+            "subsystem size",
+            "tf target count",
+            "tf target-subsystem network overlap",
+            "total genes",
+            "odds-ratio",
+            "p-value",
+            "adj p-value",
+        ]
+    ]
     tf_metabolite_gsva = pd.read_csv(
         MTB_TF_RESULTS_PATH / "metabolite_gsva.csv", index_col=0
     )
@@ -382,7 +409,7 @@ def collate_mtb_tf_results():
         pd.read_csv(
             MTB_TF_RESULTS_PATH / "divergence_results.csv", index_col=0
         ).replace([np.inf, -np.inf], np.nan)
-    )
+    ).dropna(axis="columns", how="all")
     imat_reaction_divergence = imat_divergence.loc[
         :, imat_divergence.columns.str.startswith("reaction__")
     ]
@@ -431,48 +458,60 @@ def collate_mtb_tf_results():
 
     with pd.ExcelWriter(RESULTS_PATH / "mtb_tf_results.xlsx") as writer:
         # Model Information
-        reaction_info.to_excel(writer, sheet_name="Reaction Information")
-        metabolite_info.to_excel(writer, sheet_name="Metabolite Information")
+        reaction_info.to_excel(
+            writer, sheet_name="Reaction Information", index=False
+        )
+        metabolite_info.to_excel(
+            writer, sheet_name="Metabolite Information", index=False
+        )
         # Metabolic Graphs
-        rxn_centrality.to_excel(writer, sheet_name="Reaction SCN Centrality")
+        rxn_centrality.to_excel(
+            writer,
+            sheet_name="Reaction SCN Centrality",
+            index=False,
+        )
         rxn_centrality_analysis.to_excel(
-            writer, sheet_name="TF Target Centrality"
+            writer, sheet_name="TF Target Centrality", index=False
         )
         # Flux MI Centrality
         flux_mi_gene_centrality.to_excel(
-            writer, sheet_name="Flux MI Network Centrality"
+            writer, sheet_name="Flux MI Network Centrality", index=False
         )
         flux_mi_ess_vi_stats.to_excel(
-            writer, sheet_name="MI Centrality vs Essentialiy"
+            writer, sheet_name="MI Centrality vs Essentialiy", index=True
         )
         # Metabolite Enrichment
         tf_metabolite_network_enrichment.to_excel(
-            writer, sheet_name="TF Metabolite Enrichment"
+            writer, sheet_name="TF Metabolite Enrichment", index=False
         )
         tf_subsystem_network_enrichment.to_excel(
-            writer, sheet_name="TF Subsystem Enrichment"
+            writer,
+            sheet_name="TF Subsystem Enrichment",
+            index=False,
         )
-        tf_metabolite_gsva.to_excel(writer, sheet_name="TF Metabolite GSVA")
+        tf_metabolite_gsva.to_excel(
+            writer, sheet_name="TF Metabolite GSVA", index=True
+        )
         # Target density/enrichment
         tf_target_density.to_excel(
-            writer, sheet_name="ArgR Rxn Neighborhood Density"
+            writer, sheet_name="ArgR Rxn Neighborhood Density", index=False
         )
         tf_rxn_neghborhood_enrichment.to_excel(
-            writer, sheet_name="ArgR Rxn Neighbor Enrichment"
+            writer, sheet_name="ArgR Rxn Neighbor Enrichment", index=False
         )
         # KO Divergence
         ko_divergence_df.to_excel(
             writer, sheet_name="Gene KO Divergence", index=False
         )
         tf_target_ko_divergence.to_excel(
-            writer, sheet_name="TF Target KO Divergence"
+            writer, sheet_name="TF Target KO Divergence", index=False
         )
         # IMAT Divergence
         imat_reaction_divergence.to_excel(
-            writer, sheet_name="Normalized IMAT Reaction Div"
+            writer, sheet_name="Normalized IMAT Reaction Div", index=True
         )
         imat_metabolite_synthesis_divergence.to_excel(
-            writer, sheet_name="Normalized IMAT Metabolite Div"
+            writer, sheet_name="Normalized IMAT Metabolite Div", index=True
         )
         # IMAT Compare
         imat_compare_df.to_excel(
@@ -480,4 +519,6 @@ def collate_mtb_tf_results():
         )
 
 
-collate_mtb_tf_results()
+if __name__ == "__main__":
+    collate_simulation_results()
+    collate_mtb_tf_results()
