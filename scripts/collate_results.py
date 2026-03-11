@@ -285,7 +285,7 @@ def collate_mtb_tf_results():
         )
         .reset_index(names="Transcription Factor")
         .loc[:, "Transcription Factor":"betweenness bootstrap adj p-value"]
-    ).dropna(how="all", axis="index")
+    ).dropna(how="any", axis="index")
 
     # ------------------------
     # -- Mutual Information --
@@ -333,8 +333,16 @@ def collate_mtb_tf_results():
             "adj p-value",
         ]
     ]
-    tf_metabolite_gsva = pd.read_csv(
-        MTB_TF_RESULTS_PATH / "metabolite_gsva.csv", index_col=0
+    tf_metabolite_gsva = (
+        pd.read_csv(MTB_TF_RESULTS_PATH / "metabolite_gsva.csv", index_col=0)
+        .reset_index(names="TF")
+        .melt(id_vars="TF", var_name="Metabolite", value_name="GSVA")
+    )
+    tf_metabolite_gsva["Network Direction"] = (
+        tf_metabolite_gsva["Metabolite"].str.split("_").str[-2].str.join("_")
+    )
+    tf_metabolite_gsva["Metabolite"] = (
+        tf_metabolite_gsva["Metabolite"].str.split("_").str[:-2].str.join("_")
     )
 
     # ----------------------------------------------
@@ -400,6 +408,12 @@ def collate_mtb_tf_results():
             "set()", ""
         )
     )
+
+    # Add the represented metabolites column to the ko_divergence_df
+    represented_metabolites = tf_target_ko_divergence.set_index("metabolite")[
+        "represented metabolites"
+    ]
+    ko_divergence_df["represented metabolites"] = represented_metabolites
     # ---------------------
     # -- IMAT Divergence --
     # ---------------------
@@ -410,24 +424,21 @@ def collate_mtb_tf_results():
             MTB_TF_RESULTS_PATH / "divergence_results.csv", index_col=0
         ).replace([np.inf, -np.inf], np.nan)
     ).dropna(axis="columns", how="all")
+    imat_divergence.index.name = "TF"
     imat_reaction_divergence = imat_divergence.loc[
         :, imat_divergence.columns.str.startswith("reaction__")
     ]
     imat_reaction_divergence.columns = (
         imat_reaction_divergence.columns.str.replace("reaction__", "")
     )
-    imat_reaction_divergence = imat_reaction_divergence.T
 
     imat_metabolite_synthesis_divergence = imat_divergence.loc[
         :, imat_divergence.columns.str.startswith("metabolite_synthesis__")
     ]
     imat_metabolite_synthesis_divergence.columns = (
         imat_metabolite_synthesis_divergence.columns.str.replace(
-            "metabolite_synthesis_", ""
+            "metabolite_synthesis__", ""
         )
-    )
-    imat_metabolite_synthesis_divergence = (
-        imat_metabolite_synthesis_divergence.T
     )
     # ------------------
     # -- IMAT Compare --
@@ -455,6 +466,9 @@ def collate_mtb_tf_results():
             "FVA IMAT Model pFBA fluxes - pFBA fluxes",
         ]
     ]
+    # Add in the subsystem columns
+    imat_compare_df = imat_compare_df.set_index("Reaction")
+    imat_compare_df["subsystem"] = reaction_info.set_index("id")["subsystem"]
 
     with pd.ExcelWriter(RESULTS_PATH / "mtb_tf_results.xlsx") as writer:
         # Model Information
@@ -490,7 +504,7 @@ def collate_mtb_tf_results():
             index=False,
         )
         tf_metabolite_gsva.to_excel(
-            writer, sheet_name="TF Metabolite GSVA", index=True
+            writer, sheet_name="TF Metabolite GSVA", index=False
         )
         # Target density/enrichment
         tf_target_density.to_excel(
@@ -515,7 +529,7 @@ def collate_mtb_tf_results():
         )
         # IMAT Compare
         imat_compare_df.to_excel(
-            writer, sheet_name="ArgR IMAT Fluxes", index=False
+            writer, sheet_name="ArgR IMAT Fluxes", index=True
         )
 
 
