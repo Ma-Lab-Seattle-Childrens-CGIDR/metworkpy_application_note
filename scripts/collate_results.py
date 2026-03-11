@@ -23,9 +23,7 @@ from sklearn.preprocessing import StandardScaler
 # Path Setup
 if hasattr(sys, "ps1"):
     # Running in a REPL
-    BASE_PATH = (
-        pathlib.Path(".").absolute().parent
-    )  # Use current dir as base path
+    BASE_PATH = pathlib.Path(".").absolute()  # Use current dir as base path
 else:
     # Running as a file
     # Use file path to find root
@@ -388,6 +386,14 @@ def collate_mtb_tf_results():
             value_name="Divergence",
         )
     )
+    ko_divergence_df["Divergence Group Type"] = (
+        ko_divergence_df["Divergence Group"].str.split("__").str[-1]
+    )
+    ko_divergence_df["Divergence Group"] = (
+        ko_divergence_df["Divergence Group"]
+        .str.replace("__reaction", "")
+        .str.replace("__metabolite", "")
+    )
 
     tf_target_ko_divergence = pd.read_csv(
         MTB_TF_RESULTS_PATH / "ko_divergence_tf_target_analysis.csv"
@@ -410,10 +416,28 @@ def collate_mtb_tf_results():
     )
 
     # Add the represented metabolites column to the ko_divergence_df
-    represented_metabolites = tf_target_ko_divergence.set_index("metabolite")[
-        "represented metabolites"
+    represented_metabolites = (
+        tf_target_ko_divergence.set_index("metabolite")[
+            "represented metabolites"
+        ]
+        .to_frame("Represented Metabolites")
+        .reset_index(names="Metabolite")
+        .drop_duplicates()
+    )
+    ko_divergence_df = ko_divergence_df.merge(
+        represented_metabolites,
+        how="left",
+        left_on="Divergence Group",
+        right_on="Metabolite",
+    )[
+        [
+            "Gene",
+            "Divergence Group",
+            "Divergence Group Type",
+            "Represented Metabolites",
+            "Divergence",
+        ]
     ]
-    ko_divergence_df["represented metabolites"] = represented_metabolites
     # ---------------------
     # -- IMAT Divergence --
     # ---------------------
