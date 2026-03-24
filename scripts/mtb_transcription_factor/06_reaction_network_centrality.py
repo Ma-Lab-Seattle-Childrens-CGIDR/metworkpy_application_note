@@ -13,17 +13,16 @@ import sys
 import tomllib
 
 # External Imports
-import cobra  # type: ignore
-import metworkpy  # type:ignore
-import networkx as nx  # type:ignore
+import cobra
+import metworkpy
+import networkx as nx
 import numpy as np
 import pandas as pd
-from scipy import stats  # type:ignore
-from tqdm import tqdm  # type:ignore
+from scipy import stats
+from tqdm import tqdm
 
 # Local Imports
-from metabolic_modeling_utils.false_discovery_control import fdr_with_nan
-from metabolic_modeling_utils.bootstrap_function import bootstrap
+from common_functions import fdr_with_nan, bootstrap
 
 # Path Setup
 if hasattr(sys, "ps1"):
@@ -276,7 +275,7 @@ for tf, tf_target_rxns in tqdm(
     # Perform Bootstrap p-value tests for mean betweeness and closeness
     _, closeness_centrality_bootstrap_pvalue = bootstrap(
         closeness_centrality_series[model_reactions_assoc_with_genes],
-        sample_set=tf_target_rxns,  # type:ignore
+        sample_set=tf_target_rxns,
         statistic=np.mean,
         iterations=CONFIG["mtb_tf"]["network_properties"][
             "bootstrap-iterations"
@@ -291,7 +290,7 @@ for tf, tf_target_rxns in tqdm(
     )
     _, betweenness_centrality_bootstrap_pvalue = bootstrap(
         betweenness_centrality_series[model_reactions_assoc_with_genes],
-        sample_set=tf_target_rxns,  # type:ignore
+        sample_set=tf_target_rxns,
         statistic=np.mean,
         iterations=CONFIG["mtb_tf"]["network_properties"][
             "bootstrap-iterations"

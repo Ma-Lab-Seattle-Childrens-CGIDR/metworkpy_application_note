@@ -337,7 +337,7 @@ def collate_mtb_tf_results():
         .melt(id_vars="TF", var_name="Metabolite", value_name="GSVA")
     )
     tf_metabolite_gsva["Network Direction"] = (
-        tf_metabolite_gsva["Metabolite"].str.split("_").str[-2].str.join("_")
+        tf_metabolite_gsva["Metabolite"].str.split("_").str[-2]
     )
     tf_metabolite_gsva["Metabolite"] = (
         tf_metabolite_gsva["Metabolite"].str.split("_").str[:-2].str.join("_")

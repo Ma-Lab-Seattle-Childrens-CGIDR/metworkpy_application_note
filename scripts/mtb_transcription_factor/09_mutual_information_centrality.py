@@ -15,13 +15,13 @@ import tomllib
 # External Imports
 import cobra
 import metworkpy
-from metabolic_modeling_utils.false_discovery_control import fdr_with_nan
 import networkx as nx
 import numpy as np
 import pandas as pd
 from scipy import stats
 
 # Local Imports
+from common_functions import fdr_with_nan
 
 
 # Path setup

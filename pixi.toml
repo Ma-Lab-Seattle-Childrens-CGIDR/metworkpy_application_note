@@ -76,13 +76,9 @@ joblib = ">=1.5.2,<2"
 osqp = ">=1.0.5,<2"
 highspy = ">=1.12.0,<2"
 openpyxl = ">=3.1.5,<4"
-r-base = ">=4.5.2,<4.6"
-r-robustrankaggreg = ">=1.2.1,<2"
-rpy2 = ">=3.6.4,<4"
 
 [pypi-dependencies]
 metworkpy = { git = "https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git" }
-metabolic-modeling-utils = { git = "https://github.com/Braden-Griebel/metabolic_modeling_utils.git" }
 
 [feature.dev.dependencies]
 mypy = ">=1.19.0,<2"

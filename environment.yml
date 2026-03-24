@@ -1,0 +1,26 @@
+name: metworkpy_application_note
+channels:
+  - conda-forge
+dependencies:
+  - decoupler-py
+  - osqp
+  - joblib
+  - scipy
+  - seaborn
+  - pyarrow
+  - numpy
+  - python=3.13
+  - tqdm
+  - sympy
+  - cobra
+  - networkx
+  - openpyxl
+  - matplotlib
+  - optlang
+  - highspy
+  - pandas
+  - pip
+  - pip:
+    - iplotx
+    - escher
+    - "git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git"

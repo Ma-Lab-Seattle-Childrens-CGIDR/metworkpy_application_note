@@ -13,15 +13,14 @@ import sys
 import tomllib
 
 # External Imports
-import cobra  # type:ignore
-import metworkpy  # type:ignore
-from metabolic_modeling_utils.false_discovery_control import fdr_with_nan
+import cobra
+import metworkpy
 import numpy as np
 import pandas as pd
-from scipy import stats  # type:ignore
+from scipy import stats
 
 # Local Imports
-from common_functions import get_metabolite_network
+from common_functions import get_metabolite_network, fdr_with_nan
 
 
 # Path setup
@@ -208,20 +207,20 @@ for metabolite_network_direction, metabolite_network_df in zip(
                 alternative="greater",
             )
             # Fill out the results table for this row
-            tf_enrichment_df.loc[metabolite, "metabolite network size"] = len(  # type:ignore
+            tf_enrichment_df.loc[metabolite, "metabolite network size"] = len(
                 met_net_gene_set
             )
             tf_enrichment_df.loc[
-                metabolite, "tf target-metabolite network overlap"  # type:ignore
+                metabolite, "tf target-metabolite network overlap"
             ] = contingency_table.loc["in met net", "tf target"]
             tf_enrichment_df.loc[metabolite, "odds-ratio"] = (
                 fisher_res.statistic
-            )  # type:ignore
-            tf_enrichment_df.loc[metabolite, "p-value"] = fisher_res.pvalue  # type:ignore
+            )
+            tf_enrichment_df.loc[metabolite, "p-value"] = fisher_res.pvalue
         tf_enrichment_df = tf_enrichment_df.reset_index(
             drop=False, names="metabolite"
         )
-        tf_enrichment_df["tf"] = tf
+        tf_enrichment_df["tf"] = tf  # type: ignore str is hashable
         tf_enrichment_df["adj p-value"] = fdr_with_nan(
             tf_enrichment_df["p-value"]
         )

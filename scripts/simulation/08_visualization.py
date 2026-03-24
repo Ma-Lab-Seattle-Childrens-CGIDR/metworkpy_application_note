@@ -6,21 +6,35 @@ results on the simulation model
 # Setup
 # Imports
 # Standard Library Imports
-from collections import defaultdict
 import json
+import os
 import pathlib
 import sys
-import tomllib
+from collections import defaultdict
+from typing import (
+    Any,
+    AnyStr,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Union,
+)
+
+import cobra
 
 # External Imports
-import cobra
-import iplotx as ipx  # type: ignore
-import matplotlib.pyplot as plt  # type: ignore
-from metabolic_modeling_utils import escher_maps
+import escher
 import metworkpy
-import networkx as nx
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
+# External Imports
+import iplotx as ipx  # type: ignore
+import matplotlib.pyplot as plt  # type: ignore
+import networkx as nx
+import tomllib
 
 # Local Imports
 
@@ -44,6 +58,101 @@ cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 
 # Read in the simulation model
 sim_model = metworkpy.read_model(MODEL_PATH / "simulation_model.json")
+
+
+# Helper function
+PathLike = Union[str, os.PathLike, pathlib.Path]
+
+
+def escher_map_add_data(
+    input_map: PathLike,
+    output_dir: PathLike,
+    output_prefix: AnyStr,
+    reaction_data: Optional[pd.Series] = None,
+    reaction_data_scaling: Optional[Literal["minmax", "standard"]] = None,
+    metabolite_data: Optional[pd.Series] = None,
+    metabolite_data_scaling: Optional[Literal["minmax", "standard"]] = None,
+    reaction_scale: Optional[List[Dict[AnyStr, Any]]] = None,
+    metabolite_scale: Optional[List[Dict[AnyStr, Any]]] = None,
+):
+    """
+    Add reaction and metabolite data to an Escher map and save the resulting HTML
+
+    Parameters
+    ----------
+    input_map : PathLike
+        Path to the map to update with reaction and metabolite data
+    reaction_data : pd.Series, optional
+        Series containing reaction data to add to the Escher map, whose index
+        matches the reaction IDS found in the map
+    reaction_data_scaling : 'minmax' or 'standard'
+        Whether to use MinMaxScaler or StandardScaler from scikit-learn
+        on the reaction data, default is to not perform scaling
+    metabolite_data : pd.Series, optional
+        Series containing metabolite data to add to the Escher map, whose index
+        matches the metabolite IDS found in the map
+    metabolite_data_scaling : 'minmax' or 'standard'
+        Whether to use MinMaxScaler or StandardScaler from scikit-learn
+        on the metabolite data, default is to not perform scaling
+    reaction_scale : list of dict from str to Any
+        Used to update the reaction scale of the builder if not None, see
+        `Escher documentation<https://escher.readthedocs.io/en/latest/escher-python.html>`_
+        for more details
+    metabolite_scale : list of dict from str to Any
+        Used to update the metabolite scale of the builder if not None, see
+        `Escher documentation<https://escher.readthedocs.io/en/latest/escher-python.html>`_
+        for more details
+    """
+    # Convert the input map path into a Pathlib Path
+    input_map_path = pathlib.Path(input_map)
+    map_name = input_map_path.stem
+    # Scale the reaction/metabolite data as needed
+    if reaction_data_scaling is not None and reaction_data is not None:
+        if reaction_data_scaling == "minmax":
+            scaler = MinMaxScaler()
+        elif reaction_data_scaling == "standard":
+            scaler = StandardScaler()
+        else:
+            raise ValueError(
+                f"Invalid reaction scaling choice, must be either minmax or standard but received {reaction_data_scaling}"
+            )
+        scaler.set_output(transform="pandas")
+        reaction_data = scaler.fit_transform(
+            reaction_data.to_frame("rxn_data")
+        )["rxn_data"]
+    if metabolite_data_scaling is not None and metabolite_data is not None:
+        if metabolite_data_scaling == "minmax":
+            scaler = MinMaxScaler()
+        elif metabolite_data_scaling == "standard":
+            scaler = StandardScaler()
+        else:
+            raise ValueError(
+                f"Invalid metabolite scaling choice, must be either minmax or standard but received {metabolite_data_scaling}"
+            )
+        scaler.set_output(transform="pandas")
+        metabolite_data = scaler.fit_transform(
+            metabolite_data.to_frame("met_data")
+        )["met_data"]
+    # Create the building loading in the map
+    builder = escher.Builder(map_json=str(input_map_path))
+    # Change the scroll behaviour
+    builder.scroll_behavior = "zoom"
+    # Stop the absolute value being used for visualizaiton
+    builder.reaction_styles = ["color", "size", "text"]
+    # Add the reaction data and metabolite data to the map
+    if reaction_data is not None:
+        builder.reaction_data = reaction_data.to_dict()
+    if metabolite_data is not None:
+        builder.metabolite_data = metabolite_data.to_dict()
+    # Add the reaction and metabolite scales if provided
+    if reaction_scale:
+        builder.reaction_scale = reaction_scale
+    if metabolite_scale:
+        builder.metabolite_scale = metabolite_scale
+    # Save the map in html format
+    output_dir = pathlib.Path(output_dir)
+    builder.save_html(str(output_dir / f"{output_prefix}{map_name}.html"))
+
 
 #########################
 # Metabolite Networks ###
@@ -71,7 +180,7 @@ for net_direction, metabolite_network_df in zip(
         # Convert the series to float to work with the json export
         network_series = network_series.astype("float")
         # Add the metabolite network data to the map
-        escher_maps.escher_map_add_data(
+        escher_map_add_data(
             input_map=ESCHER_MAP_PATH,
             output_dir=metabolite_net_escher_out_dir,
             output_prefix=f"{metabolite}_{net_direction}_",
@@ -101,7 +210,7 @@ centrality_escher_out_dir = RESULTS_PATH / "metabolic_networks" / "escher_maps"
 centrality_escher_out_dir.mkdir(parents=True, exist_ok=True)
 
 for cent_measure in ["betweenness", "closeness"]:
-    escher_maps.escher_map_add_data(
+    escher_map_add_data(
         input_map=ESCHER_MAP_PATH,
         output_dir=centrality_escher_out_dir,
         output_prefix=f"{cent_measure}_",
@@ -144,7 +253,7 @@ ko_div_map_out_dir.mkdir(parents=True, exist_ok=True)
 for gene in ko_div_res.index:
     rxn_div_series = ko_rxn_div_res.loc[gene]
     met_div_series = ko_met_div_res.loc[gene]
-    escher_maps.escher_map_add_data(
+    escher_map_add_data(
         input_map=ESCHER_MAP_PATH,
         output_dir=ko_div_map_out_dir,
         output_prefix=f"{gene}_ko_div_",
@@ -192,7 +301,7 @@ mi_cent_df = pd.read_csv(
 mi_cent_out_dir = RESULTS_PATH / "mutual_information" / "escher_maps"
 mi_cent_out_dir.mkdir(parents=True, exist_ok=True)
 
-escher_maps.escher_map_add_data(
+escher_map_add_data(
     input_map=ESCHER_MAP_PATH,
     output_dir=mi_cent_out_dir,
     output_prefix="mi_centrality_",
@@ -217,7 +326,7 @@ density_escher_out_dir = RESULTS_PATH / "target_density" / "escher_maps"
 density_escher_out_dir.mkdir(parents=True, exist_ok=True)
 
 for radius, density_series in target_density_df.items():
-    escher_maps.escher_map_add_data(
+    escher_map_add_data(
         input_map=ESCHER_MAP_PATH,
         output_dir=density_escher_out_dir,
         output_prefix=f"density_r{radius}_",
@@ -240,7 +349,7 @@ enrichment_escher_out_dir = RESULTS_PATH / "target_density" / "escher_maps"
 enrichment_escher_out_dir.mkdir(parents=True, exist_ok=True)
 
 for radius, enrichment_series in target_enrichment_pval_df.items():
-    escher_maps.escher_map_add_data(
+    escher_map_add_data(
         input_map=ESCHER_MAP_PATH,
         output_dir=enrichment_escher_out_dir,
         output_prefix=f"enrichment_pval_r{radius}_",
@@ -267,7 +376,7 @@ for radius, enrichment_series in target_enrichment_odds_df.items():
     enrichment_series = enrichment_series.clip(
         upper=enrichment_series.replace(np.inf, np.nan).max()
     )
-    escher_maps.escher_map_add_data(
+    escher_map_add_data(
         input_map=ESCHER_MAP_PATH,
         output_dir=enrichment_escher_out_dir,
         output_prefix=f"enrichment_odds_r{radius}_",
@@ -290,7 +399,7 @@ imat_escher_map_out_dir = RESULTS_PATH / "iMAT" / "escher_maps"
 imat_escher_map_out_dir.mkdir(parents=True, exist_ok=True)
 
 
-escher_maps.escher_map_add_data(
+escher_map_add_data(
     input_map=ESCHER_MAP_PATH,
     output_dir=imat_escher_map_out_dir,
     output_prefix="imat_solution_",
@@ -316,7 +425,7 @@ imat_met_div.index = imat_met_div.index.str.replace(
     "metabolite_synthesis__", ""
 )
 
-escher_maps.escher_map_add_data(
+escher_map_add_data(
     input_map=ESCHER_MAP_PATH,
     output_dir=imat_escher_map_out_dir,
     output_prefix="imat_divergence_",
@@ -407,16 +516,16 @@ def draw_graph(
 
 
 # Read in the reaction networks
-with open(  # type: ignore
+with open(
     RESULTS_PATH / "metabolic_networks" / "metabolic_network.json", "r"
 ) as f:
     metabolic_network = nx.node_link_graph(json.load(f))
-with open(  # type: ignore
+with open(
     RESULTS_PATH / "metabolic_networks" / "metabolic_reaction_network.json",
     "r",
 ) as f:
     metabolic_rxn_network = nx.node_link_graph(json.load(f))
-with open(  # type: ignore
+with open(
     RESULTS_PATH / "metabolic_networks" / "metabolic_metabolite_network.json",
     "r",
 ) as f:

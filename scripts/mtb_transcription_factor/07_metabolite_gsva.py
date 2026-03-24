@@ -13,9 +13,9 @@ import sys
 import tomllib
 
 # External Imports
-import cobra  # type:ignore
-import decoupler as dc  # type: ignore
-import metworkpy  # type:ignore
+import cobra
+import decoupler as dc
+import metworkpy
 import pandas as pd
 
 # Local Imports

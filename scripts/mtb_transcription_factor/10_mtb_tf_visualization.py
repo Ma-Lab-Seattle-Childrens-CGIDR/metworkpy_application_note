@@ -14,13 +14,13 @@ import warnings
 
 # External Imports
 import cobra
-from metabolic_modeling_utils import escher_maps
 import metworkpy
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 # Local Imports
+from common_functions import escher_map_add_data
 
 # Path Setup# Path Setup
 if hasattr(sys, "ps1"):
@@ -231,7 +231,7 @@ argr_rxn_divergence = rxn_div_df.loc["Rv1657"].rename(rxn_rename_dict)
 
 # Show the divergence for all of the escher maps
 for input_map in ESCHER_MAPS_INPUT_LIST:
-    escher_maps.escher_map_add_data(
+    escher_map_add_data(
         input_map=input_map,
         output_dir=ESCHER_MAPS_OUT_DIR,
         output_prefix="ArgR_divergence_",
@@ -255,7 +255,7 @@ density_df = pd.read_csv(
 argr_density = density_df["Rv1657"].rename(rxn_rename_dict)
 
 for input_map in ESCHER_MAPS_INPUT_LIST:
-    escher_maps.escher_map_add_data(
+    escher_map_add_data(
         input_map=input_map,
         output_dir=ESCHER_MAPS_OUT_DIR,
         output_prefix="ArgR_density_",
@@ -276,7 +276,7 @@ argr_rxn_neighborhood_enrich_pval = enrich_df["Rv1657"].rename(rxn_rename_dict)
 
 
 for input_map in ESCHER_MAPS_INPUT_LIST:
-    escher_maps.escher_map_add_data(
+    escher_map_add_data(
         input_map=input_map,
         output_dir=ESCHER_MAPS_OUT_DIR,
         output_prefix="ArgR_enrich_pval_",

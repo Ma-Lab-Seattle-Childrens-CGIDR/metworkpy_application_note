@@ -16,13 +16,12 @@ import warnings
 # External Imports
 import cobra
 import metworkpy
-from metabolic_modeling_utils.false_discovery_control import fdr_with_nan
 import numpy as np
 import pandas as pd
 from scipy import stats
 
 # Local Imports
-from common_functions import get_metabolite_network
+from common_functions import get_metabolite_network, fdr_with_nan
 
 # Path Setup
 if hasattr(sys, "ps1"):

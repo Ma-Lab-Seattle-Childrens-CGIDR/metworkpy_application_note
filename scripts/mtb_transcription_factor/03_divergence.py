@@ -16,17 +16,20 @@ from typing import Any
 import warnings
 
 # External Imports
-import cobra  # type:ignore
-from metabolic_modeling_utils import kegg_rest
-import metworkpy  # type:ignore
-from metworkpy.divergence import calculate_divergence_grouped  # type:ignore
+import cobra
+import metworkpy
+from metworkpy.divergence import calculate_divergence_grouped
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
-from tqdm import tqdm  # type:ignore
+from tqdm import tqdm
 
 # Local Imports
-from common_functions import get_metabolite_network
+from common_functions import (
+    get_metabolite_network,
+    get_kegg_pathway_genes,
+    get_kegg_pathway_descriptions,
+)
 
 
 # Path setup
@@ -116,8 +119,8 @@ metabolite_consumption_rxn_network_df = get_metabolite_network(
 )
 
 # Get the Kegg pathways
-kegg_path_df = kegg_rest.get_kegg_pathway_genes("mtu")
-kegg_desc_df = kegg_rest.get_kegg_pathway_descriptions(
+kegg_path_df = get_kegg_pathway_genes("mtu")
+kegg_desc_df = get_kegg_pathway_descriptions(
     "mtu", remove_str=" - Mycobacterium tuberculosis H37Rv"
 )
 kegg_path_df = pd.merge(
