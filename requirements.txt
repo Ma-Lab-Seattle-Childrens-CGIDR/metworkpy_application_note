@@ -1,0 +1,19 @@
+cobra==0.30.0
+decoupler==2.1.4
+Escher==1.8.1
+highspy==1.13.1
+iplotx==1.7.1
+joblib==1.5.3
+matplotlib==3.10.8
+metworkpy @ git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git@bebbf4554be7725ef9244ffb66d6e08ff526e96b
+networkx==3.6.1
+numpy==2.4.3
+openpyxl==3.1.5
+optlang==1.9.0
+osqp==1.1.1
+pandas==2.3.3
+pyarrow==23.0.1
+scipy==1.17.1
+seaborn==0.13.2
+sympy==1.14.0
+tqdm==4.67.3
