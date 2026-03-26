@@ -111,6 +111,7 @@ Pixi can be installed based on instructions from
 
 <details>
 <summary>Descriptions of the files in this repository</summary>
+
 - data: Directory containing data for performing the *Mycobacterium
   tuberculosis* (Mtb) analysis, see [below](#data-references) for the full
   references.
@@ -263,22 +264,23 @@ Pixi can be installed based on instructions from
     - 05_tf_target_density.py: Script to find the gene target density and
       enrichment of the TFs in the stoichiometric connectivity network of the
       iEK1011_v2 model
-    - 06_reaction_network_centrality.py: Analysis of the centrality of
-      reactions within the metabolic stoichiometric connectivity network,
-      and the centrality of the TF targets
+    - 06_reaction_network_centrality.py: Analysis of the centrality of reactions
+      within the metabolic stoichiometric connectivity network, and the
+      centrality of the TF targets
     - 07_metabolite_gsva.py: Script to perform gene set variation analysis
       (GSVA) on the TF expression data with the metabolite networks as the
       network input of GSVA
-    - 08_metabolite_network_target_enrichment.py: Script to analyze the TF
-      gene regulatory target enrichment in the metabolite networks of iEK1011_v2.
-    - 09_mutual_information_centrality.py: Script to find the centrality of reactions
-      in the flux mutual information network, and evaluate the centrality of the
-      gene regulatory targets of the TFs
-    - 10_mtb_tf_visualization.py: Script for creating visualizations of the results
-      of the Mtb TF analyses
+    - 08_metabolite_network_target_enrichment.py: Script to analyze the TF gene
+      regulatory target enrichment in the metabolite networks of iEK1011_v2.
+    - 09_mutual_information_centrality.py: Script to find the centrality of
+      reactions in the flux mutual information network, and evaluate the
+      centrality of the gene regulatory targets of the TFs
+    - 10_mtb_tf_visualization.py: Script for creating visualizations of the
+      results of the Mtb TF analyses
     - 11_imat_test.py: Script to perform analysis of ArgR using iMAT
     - common_functions.py: Script with some functions used by the other scripts
       in this directory
+
 </details>
 
 ## References
