@@ -112,6 +112,9 @@ Pixi can be installed based on instructions from
 <details>
 <summary>Descriptions of the files in this repository</summary>
 
+<details>
+<summary>data</summary>
+
 - data: Directory containing data for performing the *Mycobacterium
   tuberculosis* (Mtb) analysis, see [below](#data-references) for the full
   references.
@@ -133,6 +136,9 @@ Pixi can be installed based on instructions from
       in Mtb, from
       [Mapping and manipulating the Mycobacterium tuberculosis transcriptome using a transcription factor overexpression-derived regulatory network](https://pmc.ncbi.nlm.nih.gov/articles/PMC4249609/)
       used for determining the Mtb TF gene regulatory targets
+
+</details>
+
 - escher_maps: Base [Escher maps](https://escher.github.io/) for the simulation
   model and the iEK1011 Mtb model
 - models: Genome Scale Metabolic Models (GSMM) for Mtb and an example simulation
@@ -143,6 +149,10 @@ Pixi can be installed based on instructions from
   model files for the iEK1011 and iEK1011_v2 are named as
   iEK1011[\_v2]\_\<media>.json. The simulation models were created for this
   work.
+
+<details>
+<summary>results</summary>
+
 - results: The results from the analysis
   - mtb_tf_results.xlsx: The combined results for the analysis of the Mtb TF
     targets
@@ -224,6 +234,12 @@ Pixi can be installed based on instructions from
       regulatory targets in the metabolite networks of iEK1011_v2.
     - tf_target_subsystem_enrichment.csv: Enrichment of the TF gene regulatory
       targets in the subsystems of iEK1011_v2.
+
+</details>
+
+<details>
+<summary>scripts</summary>
+
 - scripts: Python scripts for performing the analysis
   - collate_results.py: Script for combining the results of the simulation and
     Mtb TF analysis into the final excel files
@@ -280,6 +296,8 @@ Pixi can be installed based on instructions from
     - 11_imat_test.py: Script to perform analysis of ArgR using iMAT
     - common_functions.py: Script with some functions used by the other scripts
       in this directory
+
+</details>
 
 </details>
 
