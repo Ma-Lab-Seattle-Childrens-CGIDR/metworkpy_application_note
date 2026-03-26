@@ -299,7 +299,42 @@ Pixi can be installed based on instructions from
 
 </details>
 
+- .gitattributes: File to handle git merges of pixi.lock file
+- .gitignore: Files to ignore, mainly a cache directory that contains large
+  intermediate results
+- LICENSE: License for the code in this repository (NOT including the data from
+  external sources, see [Licensing](#licensing) for more details)
+- README.md: This file
+- config.toml: Configuration file for the analysis pipelines
+- environment.yml: A conda environment file for installing required dependencies using conda (instead of pixi)
+- justfile: File with aliases for running pixi tasks (used mainly for editor integration)
+- pixi.lock: Pixi lock file specifying dependency versions
+- pixi.toml: Pixi configuration file, specifying pixi environments and tasks
+- requirements.txt: Pip requirements file for installed required dependencies using pip (instead of pixi)
+- ruff.toml: Configuration for Ruff linter/formatter
+
 </details>
+
+## Licensing
+
+The code in this repository, specifically in the scripts directory, is licensed
+under an MIT license, see the LICENSE file for more information. The simulation
+model files in the models directory also share this license.
+
+In the data directory
+
+- bigg_models_metabolites.txt: Licensed under the
+  [BiGG License](http://bigg.ucsd.edu/license#license)
+- Mycobacterium_tuberculosis_H37Rv_txt_v5.txt: Release from
+  [Mycobrowser](https://mycobrowser.epfl.ch/), reference in
+  [References](#references) below
+- bosch_vi.xlsx: From
+  [Genome-wide gene expression tuning reveals diverse vulnerabilities of M. tuberculosis](https://doi.org/10.1016/j.cell.2021.06.033),
+  licensed under the CC-BY license
+- tfoe_targets.xlsx: From
+  [Mapping and manipulating the Mycobacterium tuberculosis transcriptome using a transcription factor overexpression-derived regulatory network](https://doi.org/10.1186/s13059-014-0502-3),
+  licensed under the
+  [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/)
 
 ## References
 
