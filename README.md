@@ -14,9 +14,9 @@ Specifically,
 
 ```{bash}
 # Run the analysis for the simulation model
-pixi run simulation
+pixi run simulation # Relatively Short
 # Run the analysis for the Mtb TFs
-pixi run mtb_tf
+pixi run mtb_tf # Very Long
 ```
 
 Note that the simulation model analysis should take less than 10 minutes, but
@@ -109,6 +109,8 @@ Pixi can be installed based on instructions from
 
 ## Directory Structure
 
+<details>
+<summary>Descriptions of the files in this repository</summary>
 - data: Directory containing data for performing the *Mycobacterium
   tuberculosis* (Mtb) analysis, see [below](#data-references) for the full
   references.
@@ -165,6 +167,119 @@ Pixi can be installed based on instructions from
           networks in the simulation model
   - mtb_transcription_factors: Directory with the individual results for the Mtb
     TF analysis
+    - escher_maps: Directory of various Escher Maps visualizing results
+      regarding ArgR, for different parts of the Metabolism
+      - ArgR_density\_\<metabolic subsystem>: Escher maps of the gene target
+        density of ArgR in different metabolic subsystems
+      - ArgR_divergene\_\<metabolic subsystem>: Escher maps of the normalized
+        divergence (across TFs) of the ArgR iMAT model
+      - ArgR_enrich_pval\_\<metabolic subsystem>: Escher maps of the p-values
+        for the neighborood target enrichment of ArgR in various metabolic
+        subsystems
+    - divergence_results.csv: Divergence of the TFOE iMAT models
+    - flux_mi_gene_centrality.csv: Centrality of genes in the flux mutual
+      information network (converted from reaction centrality in the network)
+    - imat_compare.csv: Analysis of iMAT results for ArgR
+    - kegg_divergence.csv: Divergence of KEGG pathways for the TFOE iMAT models
+    - kegg_divergence_normalized.csv: The kegg_divergence.csv normalized using a
+      StandardScaler from scikit-learn across the various TFs
+    - ko_divergence_biomass_statistics.csv: Statistics regarding gene
+      essentiality/vulnerability and its relationship to the divergence of the
+      BIOMASS\_\_2 reaction following the knock out of the genes
+    - ko_divergence_tf_target_analysis.csv: Analysis of the divergence caused by
+      the knockout of genes targeted by the TFs
+    - metabolic_reaction_network_centrality.csv: Centrality of reactions in the
+      stoichiometric connectivity network
+    - metabolic_reaction_network_centrality_analysis.csv: Analysis of the
+      centrality of reactions targeted by the TFs in the stoichiometric
+      connectivity network
+    - metabolite_divergence.csv: Divergence of the metabolite sub-networks for
+      the TF iMAT models
+    - metabolite_divergence_normalized.csv: Divergence of the metabolite
+      sub-networks for the TF iMAT models, normalized across all the TF models
+    - metabolite_gsva.csv: Results of gene set variation analysis (GSVA) for the
+      TFs, using the metabolite networks as the network input for GSVA
+    - mutual_information_tf_target_centrality.csv: Results of Mann-Whitney
+      U-tests for the centrality, within the flux mutual information network, of
+      targets of TFs vs non-targeted genes
+    - mutual_information_vi_essentiality_statistics.csv: Statistics comparing
+      the centrality of genes, within the flux mutual information network,
+      between essential and non-essential genes. Also, includes correlations
+      between the mutual information centrality of genes and their Vulnerability
+      Index.
+    - subsystem_divergence.csv: Divergence of the subsystems in the iEK1011_v2
+      model for all of the TFOE iMAT models
+    - subsystem_divergence_normalized.csv: Divergence of the subsystems in the
+      iEK1011_v2 model for all of the TFOE iMAT models, normalized across TFs
+    - tf_target_density.csv: The gene target density of TFs in the
+      stoichiometric connectivity network, with rows representing different
+      reactions, and columns representing different TFs (and also reaction
+      information on the right end of the file)
+    - tf_target_enrichment.csv: The neighborhood gene target enrichment of TFs
+      in the stoichiometric connectivity network, with rows representing
+      different reactions, and columns representing different TFs (and also
+      reaction information on the right end of the file)
+    - tf_target_metabolite_network_enrichment.csv: Enrichment of the TF gene
+      regulatory targets in the metabolite networks of iEK1011_v2.
+    - tf_target_subsystem_enrichment.csv: Enrichment of the TF gene regulatory
+      targets in the subsystems of iEK1011_v2.
+- scripts: Python scripts for performing the analysis
+  - collate_results.py: Script for combining the results of the simulation and
+    Mtb TF analysis into the final excel files
+  - simulation: Directory of scripts for example analysis using a small
+    simulated model
+    - 01_create_model.py: Script which creates the simulation model
+    - 02_metabolite_networks.py: Script for finding the metabolite networks in
+      the simulation model
+    - 03_metabolic_network_analysis.py: Script for analyzing the stoichiometric
+      connectivity network of the simulation model
+    - 04_ko_divergence.py: Script for finding the divergence caused by all
+      single gene knockouts in the simulation model
+    - 05_mutual_information.py: Script for finding the flux mutual information
+      network of the simulation model, and evaluating centrality of nodes in
+      this network
+    - 06_density.py: Script to find the gene target density and enrichment in
+      the simulation model
+    - 07_imat_simulation.py: Script to create an iMAT model from the simulation
+      model and analyze the divergence between this iMAT model and the base
+      simulation model
+    - 08_visualization.py: Script to generate visualizations for results on the
+      simulation model
+  - mtb_transcription_factors: Directory of scripts for investigating Mtb TF
+    regulation using MetworkPy
+    - 00_metabolite_info.py: Script to gather information about the metabolites
+      in the iEK1011_v2 model into a single csv file
+    - 00_reaction_info.py: Script to gather information about the reactions in
+      the iEK1011_v2 model into a single csv file
+    - 01_model_generation.py: Script to generate iMAT models for all of the TFOE
+      strains
+    - 02_model_sampling.py: Script to sample from the TFOE iMAT models
+    - 03_divergence.py: Script to calculate the divergence between the TFOE iMAT
+      models and the base iEK1011_v2 models
+    - 04_tf_ko_divergence.py: Script to find the divergence caused by each
+      single gene knockout in the iEK1011_v2 model, and evaluate the gene
+      regulatory targets of the TFs for the metabolite subsystems they cause the
+      greatest divergence in following knockout
+    - 05_tf_target_density.py: Script to find the gene target density and
+      enrichment of the TFs in the stoichiometric connectivity network of the
+      iEK1011_v2 model
+    - 06_reaction_network_centrality.py: Analysis of the centrality of
+      reactions within the metabolic stoichiometric connectivity network,
+      and the centrality of the TF targets
+    - 07_metabolite_gsva.py: Script to perform gene set variation analysis
+      (GSVA) on the TF expression data with the metabolite networks as the
+      network input of GSVA
+    - 08_metabolite_network_target_enrichment.py: Script to analyze the TF
+      gene regulatory target enrichment in the metabolite networks of iEK1011_v2.
+    - 09_mutual_information_centrality.py: Script to find the centrality of reactions
+      in the flux mutual information network, and evaluate the centrality of the
+      gene regulatory targets of the TFs
+    - 10_mtb_tf_visualization.py: Script for creating visualizations of the results
+      of the Mtb TF analyses
+    - 11_imat_test.py: Script to perform analysis of ArgR using iMAT
+    - common_functions.py: Script with some functions used by the other scripts
+      in this directory
+</details>
 
 ## References
 
