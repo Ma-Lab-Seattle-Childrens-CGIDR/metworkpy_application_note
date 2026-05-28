@@ -54,7 +54,7 @@ def evaluate_network(
         weighted=False,
         directed=False,
         nodes_to_remove=reactions_to_remove
-        + list(metabolite_counts.sort_values(ascending=False).iloc[:n]),
+        + list(metabolite_counts.sort_values(ascending=False).iloc[:n].index),
     )
     # Create a dict to hold the results
     results_dict = {}
@@ -75,11 +75,6 @@ def evaluate_network(
     results_dict["algebraic connectivity"] = nx.algebraic_connectivity(
         rxn_network
     )
-
-    # Find the small-world coefficients of a graph
-    logger.info("Finding small-world coefficients")
-    results_dict["small-world sigma"] = nx.sigma(rxn_network)
-    results_dict["small-world omega"] = nx.omega(rxn_network)
 
     # Estimate the average clustering of the graph
     logger.info("Finding the average clustering")
@@ -156,12 +151,12 @@ if __name__ == "__main__":
     metabolite_counts = (stoich_mat.abs() > 0.0).sum(axis=1)
 
     res_list = []
-    for n in [0, 1, 5, 10, 15, 20, 30, 40, 50]:
+    for n in [0, 1, 5, 10, 15, 20, 30, 40, 50, 100, 150, 200, 500, 750, 1000]:
         logger.info(f"Working on n={n}")
         res_list.append(
             evaluate_network(
                 model=BASE_MODEL,
-                reactions_to_remove=reactions_to_remove,
+                reactions_to_remove=list(reactions_to_remove),
                 metabolite_counts=metabolite_counts,
                 n=n,
             )
