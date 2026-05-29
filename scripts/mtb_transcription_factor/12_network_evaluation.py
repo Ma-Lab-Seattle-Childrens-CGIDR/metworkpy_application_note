@@ -153,14 +153,17 @@ if __name__ == "__main__":
     res_list = []
     for n in [0, 1, 5, 10, 15, 20, 30, 40, 50, 100, 150, 200, 500, 750, 1000]:
         logger.info(f"Working on n={n}")
-        res_list.append(
-            evaluate_network(
-                model=BASE_MODEL,
-                reactions_to_remove=list(reactions_to_remove),
-                metabolite_counts=metabolite_counts,
-                n=n,
+        try:
+            res_list.append(
+                evaluate_network(
+                    model=BASE_MODEL,
+                    reactions_to_remove=list(reactions_to_remove),
+                    metabolite_counts=metabolite_counts,
+                    n=n,
+                )
             )
-        )
+        except nx.NetworkXError:
+            continue
     logger.info("Finished evaluating the networks, saving results")
     res_df = pd.concat(res_list, axis=1).T
     res_df.to_csv(RESULTS_PATH / "network_metabolite_removal_evaluation.csv")
