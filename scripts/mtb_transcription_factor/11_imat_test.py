@@ -6,7 +6,6 @@ iMAT plus FBA
 # Setup
 # Imports
 # Standard Library Imports
-from scipy.stats import stats
 import logging
 import pathlib
 import sys
@@ -17,6 +16,7 @@ import cobra
 import metworkpy
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 # Local Imports
 
@@ -192,13 +192,13 @@ stat_test_res = pd.DataFrame(
 
 # Perform statistical tests for the samples
 for rxn in stat_test_res.index:
-    ttest = stats.ttest_ind(  # type: ignore
+    ttest = stats.ttest_ind(
         base_samples[rxn],
         imat_samples[rxn],
         alternative="two-sided",
         equal_var=False,
     )
-    kstest = stats.ks_2samp(  # type: ignore
+    kstest = stats.ks_2samp(
         base_samples[rxn], imat_samples[rxn], alternative="two-sided"
     )
     stat_test_res.loc[rxn, "t-stat"] = ttest.statistic
