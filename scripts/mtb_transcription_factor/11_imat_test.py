@@ -6,6 +6,7 @@ iMAT plus FBA
 # Setup
 # Imports
 # Standard Library Imports
+from scipy.stats import stats
 import logging
 import pathlib
 import sys
@@ -14,6 +15,7 @@ import tomllib
 # External Imports
 import cobra
 import metworkpy
+import numpy as np
 import pandas as pd
 
 # Local Imports
@@ -163,10 +165,56 @@ fva_model_fluxes.name = "FVA IMAT pFBA fluxes"
 # Combine the fluxes together
 results_df = pd.concat([base_fluxes, imat_fluxes, fva_model_fluxes], axis=1)
 
+# Get samples from the base model and the iMAT FVA model
+base_samples = cobra.sampling.sample(
+    model=BASE_MODEL,
+    n=1000,
+    method="optgp",
+    thinning=100,
+    processes=CONFIG["processes"],
+    seed=812309712,
+)
+imat_samples = cobra.sampling.sample(
+    model=imat_model,
+    n=1000,
+    method="optgp",
+    thinning=100,
+    processes=CONFIG["processes"],
+    seed=812309712,
+)
+# For each reaction, calculate t-tests and ks-tests
+stat_test_res = pd.DataFrame(
+    np.nan,
+    index=base_samples.columns,
+    columns=pd.Index(["t-stat", "t p-value", "ks-stat", "ks p-value"]),
+)
+
+
+# Perform statistical tests for the samples
+for rxn in stat_test_res.index:
+    ttest = stats.ttest_ind(  # type: ignore
+        base_samples[rxn],
+        imat_samples[rxn],
+        alternative="two-sided",
+        equal_var=False,
+    )
+    kstest = stats.ks_2samp(  # type: ignore
+        base_samples[rxn], imat_samples[rxn], alternative="two-sided"
+    )
+    stat_test_res.loc[rxn, "t-stat"] = ttest.statistic
+    stat_test_res.loc[rxn, "t p-value"] = ttest.pvalue
+    stat_test_res.loc[rxn, "ks-stat"] = kstest.statistic
+    stat_test_res.loc[rxn, "ks p-value"] = kstest.pvalue
+
 # Calculate the differences in fluxes
 results_df["diff imat"] = results_df["IMAT fluxes"] - results_df["pFBA fluxes"]
 results_df["diff fva imat"] = (
     results_df["FVA IMAT pFBA fluxes"] - results_df["pFBA fluxes"]
+)
+
+# Add on the statistical test comparison
+results_df = results_df.merge(
+    stat_test_res, how="left", left_index=True, right_index=True
 )
 
 # Read in the reaction information dataframe
