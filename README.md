@@ -306,11 +306,14 @@ Pixi can be installed based on instructions from
   external sources, see [Licensing](#licensing) for more details)
 - README.md: This file
 - config.toml: Configuration file for the analysis pipelines
-- environment.yml: A conda environment file for installing required dependencies using conda (instead of pixi)
-- justfile: File with aliases for running pixi tasks (used mainly for editor integration)
+- environment.yml: A conda environment file for installing required dependencies
+  using conda (instead of pixi)
+- justfile: File with aliases for running pixi tasks (used mainly for editor
+  integration)
 - pixi.lock: Pixi lock file specifying dependency versions
 - pixi.toml: Pixi configuration file, specifying pixi environments and tasks
-- requirements.txt: Pip requirements file for installed required dependencies using pip (instead of pixi)
+- requirements.txt: Pip requirements file for installed required dependencies
+  using pip (instead of pixi)
 - ruff.toml: Configuration for Ruff linter/formatter
 
 </details>
@@ -333,6 +336,10 @@ In the data directory
   licensed under the CC-BY license
 - tfoe_targets.xlsx: From
   [Mapping and manipulating the Mycobacterium tuberculosis transcriptome using a transcription factor overexpression-derived regulatory network](https://doi.org/10.1186/s13059-014-0502-3),
+  licensed under the
+  [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/)
+- log_tpm_norm.csv: From
+  [Machine Learning of All Mycobacterium tuberculosis H37Rv RNA-seq Data Reveals a Structured Interplay between Metabolism, Stress Response, and Infection](https://doi.org/10.1128/msphere.00033-22),
   licensed under the
   [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/)
 
@@ -388,3 +395,8 @@ In the data directory
   diverse vulnerabilities of M. tuberculosis. Cell. 2021 Aug
   19;184(17):4579-4592.e24. doi: 10.1016/j.cell.2021.06.033. Epub 2021 Jul 22.
   PMID: 34297925; PMCID: PMC8382161.'
+- Yoo, R., Rychel, K., Poudel, S., Al-Bulushi, T., Yuan, Y., Chauhan, S.,
+  Lamoureux, C., Palsson, B. O., & Sastry, A. (2022). Machine Learning of All
+  Mycobacterium tuberculosis H37Rv RNA-seq Data Reveals a Structured Interplay
+  between Metabolism, Stress Response, and Infection. mSphere, 7(2), e0003322.
+  [https://doi.org/10.1128/msphere.00033-22](https://doi.org/10.1128/msphere.00033-22)
