@@ -77,6 +77,11 @@ reaction-proportion = 0.1
 correlation-cutoff = 0.75
 progress-bar = false
 
+[mtb_tf.mutual-information]
+n-neighbors = 3
+x-metric = 2.0
+y-metric = 2.0
+
 [mtb_tf.ko_divergence]
 sample-count = 1_000      # Number of samples to use when calclating divergence
 n-neighbors = 5           # Number of neighbors to use in divergence estimation

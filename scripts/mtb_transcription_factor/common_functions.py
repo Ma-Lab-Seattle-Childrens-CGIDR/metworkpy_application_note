@@ -20,12 +20,10 @@ from typing import (
 import cobra
 
 # External Imports
-import escher
 import metworkpy
 import numpy as np
 import pandas as pd
 from scipy import stats
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 
 def get_metabolite_network(
@@ -357,6 +355,9 @@ def escher_map_add_data(
         `Escher documentation<https://escher.readthedocs.io/en/latest/escher-python.html>`_
         for more details
     """
+    import escher
+    from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
     # Convert the input map path into a Pathlib Path
     input_map_path = pathlib.Path(input_map)
     map_name = input_map_path.stem

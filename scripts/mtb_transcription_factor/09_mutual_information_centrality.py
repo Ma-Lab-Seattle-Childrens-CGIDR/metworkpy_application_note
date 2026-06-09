@@ -212,6 +212,7 @@ results_df.to_csv(RESULTS_PATH / "mutual_information_tf_target_centrality.csv")
 
 
 # Evaluate the relationship between the mutual information centrality and
+# essentiality
 results_dict: dict[str, float] = {}
 # Essentiality/Vulnerability index
 vi_df = pd.read_excel(

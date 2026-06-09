@@ -40,11 +40,12 @@ tf_metabolite_gsva = [
   { task = "tf_metabolite_gsva_private", environment = "decoupler" },
 ]
 tf_metabolite_enrichment = { cmd = "python 08_metabolite_network_target_enrichment.py", cwd = "scripts/mtb_transcription_factor" }
-tf_mi_centrality = { cmd = "python 09_mutual_information_centrality.py", cwd = "scripts/mtb_transcription_factor" }
+tf_flux_mi_centrality = { cmd = "python 09_mutual_information_centrality.py", cwd = "scripts/mtb_transcription_factor" }
 tf_visualization_script = { cmd = "python 10_mtb_tf_visualization.py", cwd = "scripts/mtb_transcription_factor" }
 tf_viz = [{ task = "tf_visualization_script", environment = "viz" }]
 tf_imat_test = { cmd = "python 11_imat_test.py", cwd = "scripts/mtb_transcription_factor" }
 tf_network_evaluation = { cmd = "python 12_network_evaluation.py", cwd = "scripts/mtb_transcription_factor" }
+tf_gene_expr_mi_centrality = { cmd = "python 13_gene_expr_mi_evaluation.py", cwd = "scripts/mtb_transcription_factor" }
 mtb_tf = [
   { task = "tf_reaction_info", environment = "default" },
   { task = "tf_metabolite_info", environment = "default" },
@@ -56,7 +57,7 @@ mtb_tf = [
   { task = "tf_reaction_centrality", environment = "default" },
   { task = "tf_metabolite_gsva_private", environment = "decoupler" },
   { task = "tf_metabolite_enrichment", environment = "default" },
-  { task = "tf_mi_centrality", environment = "default" },
+  { task = "tf_flux_mi_centrality", environment = "default" },
   { task = "tf_visualization_script", environment = "viz" },
   { task = "tf_imat_test", environment = "default" },
 ]
