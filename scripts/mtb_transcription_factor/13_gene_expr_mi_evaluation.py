@@ -95,8 +95,8 @@ tnseq_ess = vi_df.loc[common_genes, "tnseq_ess"]
 vi_series = vi_df.loc[common_genes, "Vulnerability Index"]
 
 # Compute the eigenvector centrality of the networkx graph
-gene_centrality_series = eigenvector_centrality(
-    pd.Series(nx.eigenvector_centrality(mi_network, weight="weight"))
+gene_centrality_series = pd.Series(
+    nx.eigenvector_centrality(mi_network, weight="weight")
 )[common_genes]
 gene_centrality_series.name = "Gene Expr MI Eigenvector Centrality"
 gene_centrality_series.to_csv(
