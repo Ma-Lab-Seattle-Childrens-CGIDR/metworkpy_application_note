@@ -200,6 +200,8 @@ stat_test_res = pd.DataFrame(
             "ks p-value",
             "kruskal stat",
             "kruskal p-value",
+            "mannwhitneyu stat",
+            "mannwhitneyu p-value",
         ]
     ),
 )
@@ -217,6 +219,10 @@ for rxn in stat_test_res.index:
         base_samples[rxn], imat_samples[rxn], alternative="two-sided"
     )
     kruskal = stats.kruskal(
+        base_samples[rxn],
+        imat_samples[rxn],
+    )
+    mannu = stats.mannwhitneyu(
         base_samples[rxn], imat_samples[rxn], alternative="two-sided"
     )
     stat_test_res.loc[rxn, "t-stat"] = ttest.statistic
@@ -225,6 +231,8 @@ for rxn in stat_test_res.index:
     stat_test_res.loc[rxn, "ks p-value"] = kstest.pvalue
     stat_test_res.loc[rxn, "kruskal stat"] = kruskal.statistic
     stat_test_res.loc[rxn, "kruskal p-value"] = kruskal.pvalue
+    stat_test_res.loc[rxn, "mannwhitneyu stat"] = mannu.statistic
+    stat_test_res.loc[rxn, "mannwhitneyu p-value"] = mannu.pvalue
 
 
 # Add on the statistical test comparison
