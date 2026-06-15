@@ -165,6 +165,12 @@ fva_model_fluxes.name = "FVA IMAT pFBA fluxes"
 # Combine the fluxes together
 results_df = pd.concat([base_fluxes, imat_fluxes, fva_model_fluxes], axis=1)
 
+# Calculate the differences in fluxes
+results_df["diff imat"] = results_df["IMAT fluxes"] - results_df["pFBA fluxes"]
+results_df["diff fva imat"] = (
+    results_df["FVA IMAT pFBA fluxes"] - results_df["pFBA fluxes"]
+)
+
 # Get samples from the base model and the iMAT FVA model
 base_samples = cobra.sampling.sample(
     model=BASE_MODEL,
@@ -186,7 +192,16 @@ imat_samples = cobra.sampling.sample(
 stat_test_res = pd.DataFrame(
     np.nan,
     index=base_samples.columns,
-    columns=pd.Index(["t-stat", "t p-value", "ks-stat", "ks p-value"]),
+    columns=pd.Index(
+        [
+            "t-stat",
+            "t p-value",
+            "ks-stat",
+            "ks p-value",
+            "kruskal stat",
+            "kruskal p-value",
+        ]
+    ),
 )
 
 
@@ -201,16 +216,16 @@ for rxn in stat_test_res.index:
     kstest = stats.ks_2samp(
         base_samples[rxn], imat_samples[rxn], alternative="two-sided"
     )
+    kruskal = stats.kruskal(
+        base_samples[rxn], imat_samples[rxn], alternative="two-sided"
+    )
     stat_test_res.loc[rxn, "t-stat"] = ttest.statistic
     stat_test_res.loc[rxn, "t p-value"] = ttest.pvalue
     stat_test_res.loc[rxn, "ks-stat"] = kstest.statistic
     stat_test_res.loc[rxn, "ks p-value"] = kstest.pvalue
+    stat_test_res.loc[rxn, "kruskal stat"] = kruskal.statistic
+    stat_test_res.loc[rxn, "kruskal p-value"] = kruskal.pvalue
 
-# Calculate the differences in fluxes
-results_df["diff imat"] = results_df["IMAT fluxes"] - results_df["pFBA fluxes"]
-results_df["diff fva imat"] = (
-    results_df["FVA IMAT pFBA fluxes"] - results_df["pFBA fluxes"]
-)
 
 # Add on the statistical test comparison
 results_df = results_df.merge(
