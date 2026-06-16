@@ -38,7 +38,7 @@ CACHE_PATH = BASE_PATH / "cache"
 METABOLITE_NETWORKS_PATH = CACHE_PATH / "metabolite_networks" / "7H9_ADC"
 RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 MODELS_PATH = BASE_PATH / "models"
-LOG_PATH = BASE_PATH / "mtb_transcription_factors"
+LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 
 # Make required directories if they don't exist
 CACHE_PATH.mkdir(parents=True, exist_ok=True)
