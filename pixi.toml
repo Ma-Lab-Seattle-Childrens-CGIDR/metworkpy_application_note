@@ -46,6 +46,7 @@ tf_viz = [{ task = "tf_visualization_script", environment = "viz" }]
 tf_imat_test = { cmd = "python 11_imat_test.py", cwd = "scripts/mtb_transcription_factor" }
 tf_network_evaluation = { cmd = "python 12_network_evaluation.py", cwd = "scripts/mtb_transcription_factor" }
 tf_gene_expr_mi_centrality = { cmd = "python 13_gene_expr_mi_evaluation.py", cwd = "scripts/mtb_transcription_factor" }
+tf_target_subset_centrality = { cmd = "python 14_subset_centrality.py", cwd = "scripts/mtb_transcription_factor" }
 mtb_tf = [
   { task = "tf_reaction_info", environment = "default" },
   { task = "tf_metabolite_info", environment = "default" },
@@ -60,6 +61,7 @@ mtb_tf = [
   { task = "tf_flux_mi_centrality", environment = "default" },
   { task = "tf_visualization_script", environment = "viz" },
   { task = "tf_imat_test", environment = "default" },
+  { task = "tf_target_subset_centrality", environment = "default" },
 ]
 collate = { cmd = "python collate_results.py", cwd = "scripts" }
 
