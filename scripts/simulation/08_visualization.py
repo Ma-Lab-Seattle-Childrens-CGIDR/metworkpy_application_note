@@ -31,8 +31,8 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 
 # External Imports
-import iplotx as ipx  # type: ignore
-import matplotlib.pyplot as plt  # type: ignore
+import iplotx as ipx
+import matplotlib.pyplot as plt
 import networkx as nx
 import tomllib
 
@@ -244,13 +244,13 @@ metabolite_subset_centrality_df = subset_centrality_df[
     subset_centrality_df.index.isin(sim_model.metabolites.list_attr("id"))
 ]
 
-for cent_measure in ["betweenness", "closeness"]:
+for cent_measure in ["subset betweenness", "subset closeness"]:
     escher_map_add_data(
         input_map=ESCHER_MAP_PATH,
         output_dir=centrality_escher_out_dir,
-        output_prefix=f"subset {cent_measure}",
-        reaction_data=rxn_centrality_df[cent_measure],
-        metabolite_data=met_centrality_df[cent_measure],
+        output_prefix=f"{cent_measure.replace(' ', '_')}_",
+        reaction_data=reaction_subset_centrality_df[cent_measure],
+        metabolite_data=metabolite_subset_centrality_df[cent_measure],
         reaction_scale=[
             {"type": "min", "color": "blue", "size": 10},
             {"type": "max", "color": "red", "size": 30},
