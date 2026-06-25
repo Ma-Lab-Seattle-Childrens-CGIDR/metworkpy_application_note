@@ -137,3 +137,45 @@ reaction_centrality.to_csv(
 metabolite_centrality.to_csv(
     RESULTS_PATH / "metabolite_centrality.csv", index=True
 )
+
+# Perform subset centrality analysis
+subset_betweenness = pd.Series(
+    metworkpy.network.centrality.betweenness_centrality_bipartite_subset(
+        metabolic_network,
+        node_partition=model_reactions,
+        targets=CONFIG["simulation"]["metabolic-network"]["node-subset"],
+    )
+)
+metabolic_network_betweenness = pd.Series(
+    metworkpy.network.centrality.betweenness_centrality_bipartite_subset(
+        metabolic_network,
+        node_partition=model_reactions,
+    )
+)
+subset_closeness = pd.Series(
+    metworkpy.network.centrality.closeness_centrality_subset(
+        metabolic_network,
+        CONFIG["simulation"]["metabolic-network"]["node-subset"],
+    )
+)
+metabolic_network_closeness = pd.Series(
+    metworkpy.network.centrality.closeness_centrality_subset(
+        metabolic_network,
+    )
+)
+# Combine the results
+subset_centrality = pd.DataFrame(
+    {
+        "betweenness": metabolic_network_betweenness,
+        "subset betweenness": subset_betweenness,
+        "betweenness difference": subset_betweenness
+        - metabolic_network_betweenness,
+        "closeness": metabolic_network_closeness,
+        "subset closeness": subset_closeness,
+        "closeness difference": subset_closeness - metabolic_network_closeness,
+    }
+)
+# Save
+subset_centrality.to_csv(
+    RESULTS_PATH / "metabolic_networkc_subset_centrality.csv", index=True
+)

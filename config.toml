@@ -27,6 +27,7 @@ reaction-proportion = 0.10
 
 [simulation.metabolic-network]
 directed = false
+node-subset = ["R_C_D__J", "R_H__K", "R_O_P__R"]
 
 [simulation.divergence]
 n-neighbors = 5

@@ -5,6 +5,7 @@ Script to simulate divergence following creation of an iMAT model
 # Setup
 # Imports
 # Standard Library Imports
+from collections import defaultdict
 import pathlib
 import sys
 import tomllib
@@ -159,8 +160,9 @@ for metabolite, met_network in metabolite_consuming_networks.items():
     )
 
 # Also, add in divergence groups for each reaction and subsystem
-for rxn in metabolite_synthesis_networks.index:
-    divergence_groups[f"reaction__{rxn}"] = [rxn]
+for rxn in sim_model.reactions:
+    if rxn.id not in metabolite_synthesis_networks.index:
+        continue
     divergence_groups[f"subsystem__{rxn.subsystem}"].append(rxn.id)
     divergence_groups["subsystem__whole_metabolism"].append(rxn.id)
     divergence_groups[f"reaction__{rxn.id}"].append(rxn.id)

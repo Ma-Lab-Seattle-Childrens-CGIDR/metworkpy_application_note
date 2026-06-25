@@ -11,7 +11,7 @@ import sys
 import tomllib
 
 # External Imports
-import cobra  # type:ignore
+import cobra
 import metworkpy
 from metworkpy.network.density import (
     gene_target_density,
@@ -64,7 +64,7 @@ for radius in CONFIG["simulation"]["target-density"]["radius-list"]:
     target_density_series = gene_target_density(
         metabolic_network=reaction_network,
         metabolic_model=sim_model,
-        gene_labels=CONFIG["simulation"]["target-density"]["targeted-genes"],
+        gene_targets=CONFIG["simulation"]["target-density"]["targeted-genes"],
         radius=radius,
     )
     target_density_series.name = f"Radius: {radius}"

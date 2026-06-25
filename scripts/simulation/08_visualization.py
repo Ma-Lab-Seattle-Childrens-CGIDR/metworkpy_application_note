@@ -226,6 +226,41 @@ for cent_measure in ["betweenness", "closeness"]:
         ],
     )
 
+#######################################
+# Reaction Network Subet Centrality ###
+#######################################
+# Read in the subset centrality results
+subset_centrality_df = pd.read_csv(
+    RESULTS_PATH
+    / "metabolic_networks"
+    / "metabolic_networkc_subset_centrality.csv",
+    index_col=0,
+)
+# Split this into reaction and metabolite dataframes
+reaction_subset_centrality_df = subset_centrality_df[
+    subset_centrality_df.index.isin(sim_model.reactions.list_attr("id"))
+]
+metabolite_subset_centrality_df = subset_centrality_df[
+    subset_centrality_df.index.isin(sim_model.metabolites.list_attr("id"))
+]
+
+for cent_measure in ["betweenness", "closeness"]:
+    escher_map_add_data(
+        input_map=ESCHER_MAP_PATH,
+        output_dir=centrality_escher_out_dir,
+        output_prefix=f"subset {cent_measure}",
+        reaction_data=rxn_centrality_df[cent_measure],
+        metabolite_data=met_centrality_df[cent_measure],
+        reaction_scale=[
+            {"type": "min", "color": "blue", "size": 10},
+            {"type": "max", "color": "red", "size": 30},
+        ],
+        metabolite_scale=[
+            {"type": "min", "color": "blue", "size": 10},
+            {"type": "max", "color": "red", "size": 30},
+        ],
+    )
+
 ###################
 # KO Divergence ###
 ###################
