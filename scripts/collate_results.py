@@ -119,6 +119,13 @@ def collate_simulation_results():
         index_col=0,
     ).reset_index(drop=False, names="Reaction")
 
+    # And also subset centrality
+    metabolic_subset_centrality = pd.read_csv(
+        SIMULATION_RESULTS_PATH
+        / "metabolic_networks"
+        / "metabolic_network_subset_centrality.csv"
+    )
+
     # --------------------
     # -- Flux MI Graphs --
     # --------------------
@@ -223,6 +230,9 @@ def collate_simulation_results():
         )
         reaction_centrality.to_excel(
             writer, sheet_name="SCN Reaction Centrality", index=False
+        )
+        metabolic_subset_centrality.to_excel(
+            writer, sheet_name="SCN Subset Centrality", index=True
         )
         # Mutual information networks
         mi_adjacency.to_excel(

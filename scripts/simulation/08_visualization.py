@@ -233,7 +233,7 @@ for cent_measure in ["betweenness", "closeness"]:
 subset_centrality_df = pd.read_csv(
     RESULTS_PATH
     / "metabolic_networks"
-    / "metabolic_networkc_subset_centrality.csv",
+    / "metabolic_network_subset_centrality.csv",
     index_col=0,
 )
 # Split this into reaction and metabolite dataframes

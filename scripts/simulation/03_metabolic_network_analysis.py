@@ -177,5 +177,5 @@ subset_centrality = pd.DataFrame(
 )
 # Save
 subset_centrality.to_csv(
-    RESULTS_PATH / "metabolic_networkc_subset_centrality.csv", index=True
+    RESULTS_PATH / "metabolic_network_subset_centrality.csv", index=True
 )
