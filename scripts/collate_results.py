@@ -296,10 +296,10 @@ def collate_mtb_tf_results():
         .loc[:, "Transcription Factor":"betweenness bootstrap adj p-value"]
     ).dropna(how="any", axis="index")
     tf_subset_closeness = pd.read_csv(
-        RESULTS_PATH / "tf_subset_closeness.csv",
+        MTB_TF_RESULTS_PATH / "tf_subset_closeness.csv",
     )
     tf_subset_betweenness = pd.read_csv(
-        RESULTS_PATH / "tf_subset_betweenness.csv"
+        MTB_TF_RESULTS_PATH / "tf_subset_betweenness.csv"
     )
 
     # ------------------------
