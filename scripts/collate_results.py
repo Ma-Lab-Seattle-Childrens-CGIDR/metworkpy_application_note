@@ -495,6 +495,14 @@ def collate_mtb_tf_results():
             "FVA IMAT pFBA fluxes": "FVA IMAT Model pFBA fluxes",
             "diff imat": "IMAT solution Fluxes - pFBA fluxes",
             "diff fva imat": "FVA IMAT Model pFBA fluxes - pFBA fluxes",
+            "t-stat": "Flux Sample Comparison T-statistic",
+            "t p-value": "Flux Sample Comparison T-test p-value",
+            "ks-stat": "Flux Sample Comparison Kolmogorov-Smirnov Statistic",
+            "ks p-value": "Flux Sample Comparison Kolmogorov-Smirnov p-value",
+            "kruskal stat": "Flux Sample Comparison Kruskal-Wallis Statistic",
+            "kruskal p-value": "Flux Sample Comparison Kruskal-Wallis p-value",
+            "mannwhitneyu stat": "Flux Sample Comparison Mann-Whitney U-test Statistic",
+            "mannwhitneyu p-value": "Flux Sample Comparison Mann-Whitney U-test p-value",
         },
         axis=1,
     )[
@@ -505,6 +513,14 @@ def collate_mtb_tf_results():
             "FVA IMAT Model pFBA fluxes",
             "IMAT solution Fluxes - pFBA fluxes",
             "FVA IMAT Model pFBA fluxes - pFBA fluxes",
+            "Flux Sample Comparison T-statistic",
+            "Flux Sample Comparison T-test p-value",
+            "Flux Sample Comparison Kolmogorov-Smirnov Statistic",
+            "Flux Sample Comparison Kolmogorov-Smirnov p-value",
+            "Flux Sample Comparison Kruskal-Wallis Statistic",
+            "Flux Sample Comparison Kruskal-Wallis p-value",
+            "Flux Sample Comparison Mann-Whitney U-test Statistic",
+            "Flux Sample Comparison Mann-Whitney U-test p-value",
         ]
     ]
     # Add in the subsystem columns
