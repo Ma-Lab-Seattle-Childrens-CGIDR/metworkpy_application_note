@@ -123,7 +123,8 @@ def collate_simulation_results():
     metabolic_subset_centrality = pd.read_csv(
         SIMULATION_RESULTS_PATH
         / "metabolic_networks"
-        / "metabolic_network_subset_centrality.csv"
+        / "metabolic_network_subset_centrality.csv",
+        index_col=0,
     )
 
     # --------------------
@@ -294,6 +295,12 @@ def collate_mtb_tf_results():
         .reset_index(names="Transcription Factor")
         .loc[:, "Transcription Factor":"betweenness bootstrap adj p-value"]
     ).dropna(how="any", axis="index")
+    tf_subset_closeness = pd.read_csv(
+        RESULTS_PATH / "tf_subset_closeness.csv",
+    )
+    tf_subset_betweenness = pd.read_csv(
+        RESULTS_PATH / "tf_subset_betweenness.csv"
+    )
 
     # ------------------------
     # -- Mutual Information --
@@ -520,6 +527,12 @@ def collate_mtb_tf_results():
         )
         rxn_centrality_analysis.to_excel(
             writer, sheet_name="TF Target Centrality", index=False
+        )
+        tf_subset_closeness.to_excel(
+            writer, sheet_name="TF Target Subset Closeness", index=False
+        )
+        tf_subset_betweenness.to_excel(
+            writer, sheet_name="TF Target Subset Betweenness", index=False
         )
         # Flux MI Centrality
         flux_mi_gene_centrality.to_excel(
