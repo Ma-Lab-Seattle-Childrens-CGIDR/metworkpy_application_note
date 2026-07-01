@@ -58,7 +58,7 @@ logger.info("Reading in m7H9 model")
 BASE_MODEL = metworkpy.read_model(
     MODEL_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
 )
-BASE_MODEL_GENES = BASE_MODEL.list_attr("id")
+BASE_MODEL_GENES = BASE_MODEL.genes.list_attr("id")
 
 # Read in the Transcription factor expression data, and the
 # metadata
