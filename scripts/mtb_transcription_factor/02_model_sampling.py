@@ -11,9 +11,10 @@ import sys
 import tomllib
 
 # External Imports
-import cobra  # type:ignore
-from cobra.sampling import OptGPSampler  # type:ignore
-import metworkpy  # type:ignore
+import cobra
+from cobra.sampling import OptGPSampler
+import metworkpy
+import pandas as pd
 
 # Local Imports
 
@@ -30,10 +31,12 @@ CACHE_PATH = BASE_PATH / "cache"
 TFOE_MODELS_PATH = CACHE_PATH / "tf_models"
 FLUX_SAMPLES_PATH = CACHE_PATH / "tf_model_flux_samples"
 LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
+RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 
 # Make directories if required
 CACHE_PATH.mkdir(parents=True, exist_ok=True)
 FLUX_SAMPLES_PATH.mkdir(parents=True, exist_ok=True)
+RESULTS_PATH.mkdir(parents=True, exist_ok=True)
 
 # Setup Logging
 logger = logging.getLogger(__name__)
@@ -79,3 +82,23 @@ for model_path in (TFOE_MODELS_PATH).glob("*.json"):
         index=False,
     )
 logger.info("Finished Sampling! ;)")
+
+# Evaluate the convergence of the sampling for all of the TF model samples
+logger.info("Evaluating convergence for the flux samples")
+geweke_results = []
+for sample_path in FLUX_SAMPLES_PATH.glob("*"):
+    sample_name = sample_path.stem
+    logger.info(f"Evaluating convergence for {sample_name}")
+    # Read in the flux sample
+    flux_samples = pd.read_parquet(sample_path)
+    # Evaluate the Geweke criteria
+    g_res = metworkpy.sampling.geweke(
+        flux_samples,
+        first=CONFIG["mtb_tf"]["sampling"]["geweke-first"],
+        last=CONFIG["mtb_tf"]["sampling"]["geweke-last"],
+    )
+    g_res.name = sample_name
+    geweke_results.append(g_res)
+logger.info("Saving Convergence evaluation")
+geweke_results = pd.concat(geweke_results, axis=1)  # TFs as columns
+geweke_results.to_csv(RESULTS_PATH / "geweke_convergence_evaluation.csv")

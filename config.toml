@@ -71,8 +71,10 @@ method = "fva"
 # objective-tolerance = 5e-2
 
 [mtb_tf.sampling]
-thinning = 500
-num-samples = 1000
+thinning = 1_000
+num-samples = 1_000
+geweke-first = 0.1
+geweke-last = 0.5
 
 [mtb_tf.divergence]
 n-neighbors = 5
