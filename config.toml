@@ -62,8 +62,8 @@ down-regulated-genes = ["g013", "g023"]
 [mtb_tf.imat]
 epsilon = 1.0
 threshold = 0.01
-lower-quantile = 0.25
-upper-quantile = 0.75
+lower-quantile = 0.15
+upper-quantile = 0.85
 subset-genes = false
 method = "fva"
 objective-tolerance = 0.0

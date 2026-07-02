@@ -106,7 +106,7 @@ tfoe_micro_df["wildtype"] = tfoe_micro_median
 
 # For each TF/Sample, create an iMAT model
 for tf, expr_series in tfoe_micro_df.items():
-    logger.info(f"Creating iMAT model for {tf}****************")
+    logger.info(f"*************Creating iMAT model for {tf}*************")
     model_out_path = MODEL_OUT_PATH / f"{tf}.json"
     if model_out_path.exists():
         continue  # Model already generated
