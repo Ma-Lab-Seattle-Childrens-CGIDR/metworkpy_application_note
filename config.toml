@@ -62,13 +62,13 @@ down-regulated-genes = ["g013", "g023"]
 [mtb_tf.imat]
 epsilon = 1.0
 threshold = 0.01
-lower-quantile = 0.20
-upper-quantile = 0.15
-subset-genes = true
+lower-quantile = 0.25
+upper-quantile = 0.75
+subset-genes = false
 method = "fva"
+objective-tolerance = 0.0
 # neg-fold-change = -1
 # pos-fold-change = 1
-# objective-tolerance = 5e-2
 
 [mtb_tf.sampling]
 thinning = 1_000

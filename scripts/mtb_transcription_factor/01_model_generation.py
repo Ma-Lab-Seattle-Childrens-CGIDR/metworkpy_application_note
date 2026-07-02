@@ -140,10 +140,11 @@ for tf, expr_series in tfoe_micro_df.items():
         model=BASE_MODEL,
         rxn_weights=rxn_weights,
         method=CONFIG["mtb_tf"]["imat"]["method"],
-        loopless=False,
+        loopless=None,
         epsilon=CONFIG["mtb_tf"]["imat"]["epsilon"],
         threshold=CONFIG["mtb_tf"]["imat"]["threshold"],
         objective_tolerance=CONFIG["mtb_tf"]["imat"]["objective-tolerance"],
+        processes=1,  # Solver parallelism works better, and more stably
     )
     logger.info("Saving the model")
     metworkpy.write_model(model=imat_model, model_path=model_out_path)
