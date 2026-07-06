@@ -30,14 +30,14 @@ directed = false
 node-subset = ["R_C_D__J", "R_H__K", "R_O_P__R"]
 
 [simulation.divergence]
-n-neighbors = 5
+n-neighbors = 10
 num-samples = 1000
 use-unperturbed-as-true = true
-jitter = 1e-13
+jitter = 1e-10
 type = "kl"
 
 [simulation.mutual-information]
-n-neighbors = 3
+n-neighbors = 10
 x-metric = 2.0
 y-metric = 2.0
 
@@ -77,7 +77,7 @@ geweke-first = 0.1
 geweke-last = 0.5
 
 [mtb_tf.divergence]
-n-neighbors = 5
+n-neighbors = 10
 metric = 2.0
 essential-proportion = 0.1
 reaction-proportion = 0.1
@@ -85,13 +85,13 @@ correlation-cutoff = 0.75
 progress-bar = false
 
 [mtb_tf.mutual-information]
-n-neighbors = 3
+n-neighbors = 10
 x-metric = 2.0
 y-metric = 2.0
 
 [mtb_tf.ko_divergence]
 sample-count = 1_000      # Number of samples to use when calclating divergence
-n-neighbors = 5           # Number of neighbors to use in divergence estimation
+n-neighbors = 10          # Number of neighbors to use in divergence estimation
 target-fc-cutoff = 1.0    # Log2(fold-change) cutoff for considering a gene a TF target
 target-pval-cutoff = 0.05 # P-value cutoff for considering a gene a TF target
 min-target-count = 5      # Minimum number of targets in model for calculating enrichment
@@ -117,8 +117,8 @@ essential-proportion = 0.1
 reaction-proportion = 0.1
 
 [mtb_tf.target_enrichment]
-essential-proportion = 0.1 # Number of samples to use when calclating divergence
-reaction-proportion = 0.1  # Number of neighbors to use in divergence estimation
+essential-proportion = 0.1
+reaction-proportion = 0.1
 target-fc-cutoff = 1.0     # Log2(fold-change) cutoff for considering a gene a TF target
 target-pval-cutoff = 0.05  # P-value cutoff for considering a gene a TF target
 
