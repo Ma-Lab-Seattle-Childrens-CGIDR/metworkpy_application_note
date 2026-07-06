@@ -1,6 +1,6 @@
 [workspace]
 authors = ["Braden Griebel <bgriebel@uw.edu>"]
-channels = ["conda-forge"]
+channels = ["conda-forge", "bioconda", "gurobi"]
 name = "simulation"
 platforms = ["linux-64"]
 version = "0.1.0"
@@ -79,6 +79,7 @@ osqp = ">=1.1.3,<2"
 highspy = ">=1.14.0,<2"
 openpyxl = ">=3.1.5,<4"
 scikit-learn = ">=1.9.0,<2"
+gurobi = ">=13.0.2,<14"
 
 [pypi-dependencies]
 metworkpy = { git = "https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git" }

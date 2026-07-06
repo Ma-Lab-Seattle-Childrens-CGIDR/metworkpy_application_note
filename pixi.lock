@@ -10,6 +10,8 @@ environments:
   decoupler:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
+    - url: https://conda.anaconda.org/bioconda/
+    - url: https://conda.anaconda.org/gurobi/
     indexes:
     - https://pypi.org/simple
     packages:
@@ -298,11 +300,14 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/xgboost-3.3.0-cpu_pyhb39878e_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zarr-3.2.1-pyhc364b38_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
       - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#268534d528031e68badc3580c5785f319265fcc6
       - pypi: https://files.pythonhosted.org/packages/fa/ac/6252bbb89f6aba02efe67490f352b8345e0bad044f59c1a3e6776d2c44d3/robustrankaggregpy-0.3.0-py3-none-any.whl
   default:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
+    - url: https://conda.anaconda.org/bioconda/
+    - url: https://conda.anaconda.org/gurobi/
     indexes:
     - https://pypi.org/simple
     packages:
@@ -469,11 +474,14 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.15.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025c-hc9c84f9_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
       - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#268534d528031e68badc3580c5785f319265fcc6
       - pypi: https://files.pythonhosted.org/packages/fa/ac/6252bbb89f6aba02efe67490f352b8345e0bad044f59c1a3e6776d2c44d3/robustrankaggregpy-0.3.0-py3-none-any.whl
   dev:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
+    - url: https://conda.anaconda.org/bioconda/
+    - url: https://conda.anaconda.org/gurobi/
     indexes:
     - https://pypi.org/simple
     packages:
@@ -664,11 +672,14 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025c-hc9c84f9_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/wcwidth-0.8.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
       - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#268534d528031e68badc3580c5785f319265fcc6
       - pypi: https://files.pythonhosted.org/packages/fa/ac/6252bbb89f6aba02efe67490f352b8345e0bad044f59c1a3e6776d2c44d3/robustrankaggregpy-0.3.0-py3-none-any.whl
   vdev:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
+    - url: https://conda.anaconda.org/bioconda/
+    - url: https://conda.anaconda.org/gurobi/
     indexes:
     - https://pypi.org/simple
     packages:
@@ -960,6 +971,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025c-hc9c84f9_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/wcwidth-0.8.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
       - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#268534d528031e68badc3580c5785f319265fcc6
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/09/52/94108adfdd6e2ddf58be64f959a0b9c7d4ef2fa71086c38356d22dc501ea/argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
@@ -1035,6 +1047,8 @@ environments:
   viz:
     channels:
     - url: https://conda.anaconda.org/conda-forge/
+    - url: https://conda.anaconda.org/bioconda/
+    - url: https://conda.anaconda.org/gurobi/
     indexes:
     - https://pypi.org/simple
     packages:
@@ -1302,6 +1316,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/typing_extensions-4.15.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/tzdata-2025c-hc9c84f9_1.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
+      - conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
       - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#268534d528031e68badc3580c5785f319265fcc6
       - pypi: https://files.pythonhosted.org/packages/05/7f/798705f5296a58ca505d600456748d1be48078eac8a7050d8a98bc9edb89/decorator-5.3.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
@@ -4811,7 +4826,7 @@ packages:
   - __glibc >=2.17
   license: MIT
   purls:
-  - pkg:pypi/ty?source=compressed-mapping
+  - pkg:pypi/ty?source=hash-mapping
   run_exports: {}
   size: 10218365
   timestamp: 1782936582388
@@ -5339,7 +5354,7 @@ packages:
   license: BSD-3-Clause
   license_family: BSD
   purls:
-  - pkg:pypi/anndata?source=compressed-mapping
+  - pkg:pypi/anndata?source=hash-mapping
   run_exports: {}
   size: 137382
   timestamp: 1782293841619
@@ -6350,7 +6365,7 @@ packages:
   license: Apache-2.0
   license_family: APACHE
   purls:
-  - pkg:pypi/xgboost?source=compressed-mapping
+  - pkg:pypi/xgboost?source=hash-mapping
   run_exports: {}
   size: 174786
   timestamp: 1782463242337
@@ -6872,8 +6887,7 @@ packages:
   - python >=3.12
   license: Apache-2.0
   license_family: APACHE
-  purls:
-  - pkg:pypi/xgboost?source=compressed-mapping
+  purls: []
   run_exports: {}
   size: 15698
   timestamp: 1782464343154
@@ -6912,6 +6926,15 @@ packages:
   run_exports: {}
   size: 24190
   timestamp: 1779159948016
+- conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
+  sha256: db29f555e2f0f670a0ace6cdfa1b5cdfb46842c8f2f3e9c1b2650a97c90281c3
+  md5: 2ab17c05b5d4801e35d8482b87fe0b3a
+  depends:
+  - python >=3.14,<3.15.0a0
+  - python_abi 3.14.* *_cp314
+  license: PROPRIETARY
+  size: 48046270
+  timestamp: 1777597878964
 - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#268534d528031e68badc3580c5785f319265fcc6
   name: metworkpy
   version: 0.9.0
