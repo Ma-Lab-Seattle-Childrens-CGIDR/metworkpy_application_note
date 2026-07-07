@@ -71,7 +71,7 @@ objective-tolerance = 0.0
 # pos-fold-change = 1
 
 [mtb_tf.sampling]
-thinning = 1_000
+thinning = 5_000
 num-samples = 1_000
 geweke-first = 0.1
 geweke-last = 0.5
