@@ -34,221 +34,274 @@ MODEL_PATH = BASE_PATH / "models"
 LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 
-# Create directories if needed
-LOG_PATH.mkdir(parents=True, exist_ok=True)
-RESULTS_PATH.mkdir(parents=True, exist_ok=True)
 
-# Setup Logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    filename=LOG_PATH / "11_imat_test.log",
-    filemode="w",
-    level=logging.INFO,
-)
+if __name__ == "__main__":
+    # Create directories if needed
+    LOG_PATH.mkdir(parents=True, exist_ok=True)
+    RESULTS_PATH.mkdir(parents=True, exist_ok=True)
 
-# Read in the configuration file
-with open(BASE_PATH / "config.toml", "rb") as f:
-    CONFIG = tomllib.load(f)
+    # Setup Logging
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(
+        filename=LOG_PATH / "11_imat_test.log",
+        filemode="w",
+        level=logging.INFO,
+    )
 
-# Change the default cobra solver
-cobra.Configuration().solver = CONFIG["cobra"]["solver"]
+    # Read in the configuration file
+    with open(BASE_PATH / "config.toml", "rb") as f:
+        CONFIG = tomllib.load(f)
 
-# Read in base model
-logger.info("Reading in m7H9 model")
-BASE_MODEL = metworkpy.read_model(
-    MODEL_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
-)
-# Read in the transcription factor differential expression data
-logger.info("Reading in the TFOE differential expression data")
+    # Change the default cobra solver
+    cobra.Configuration().solver = CONFIG["cobra"]["solver"]
 
-tfoe_l2fc = (
-    pd.read_excel(
-        DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
-        sheet_name="SupplementaryTableS2",
-        skiprows=list(range(8)) + [9],
-        usecols="A,E:HB",
+    # Read in base model
+    logger.info("Reading in m7H9 model")
+    BASE_MODEL = metworkpy.read_model(
+        MODEL_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
+    )
+    BASE_MODEL_GENES = BASE_MODEL.genes.list_attr("id")
+    # Read in the transcription factor differential expression data
+    logger.info("Reading in the TFOE microarray expression data")
+
+    # Read in the Transcription factor expression data, and the
+    # metadata
+    logger.info("Reading in the TFOE expression data")
+    tfoe_micro_df = pd.read_csv(
+        DATA_PATH / "mtb_transcription_factors" / "trip_microarray.csv",
         index_col=0,
     )
-    .T.rename(
+    tfoe_micro_df.index = tfoe_micro_df.index.str.replace("\n", "")
+    tfoe_meta_df = pd.read_csv(
+        DATA_PATH / "mtb_transcription_factors" / "trip_microarray_meta.tsv",
+        sep="\t",
+    )
+    tfoe_meta_df["locus"] = (
+        "Rv"
+        + tfoe_meta_df["Title"].str.extract(
+            r"TFOE_\d{4}_(\d{4}[ABc]?)(_[ABC])?"
+        )[0]
+    )
+
+    # Get the median expression across
+    tfoe_micro_median = tfoe_micro_df.median(axis=0)
+
+    # Add on the Locus tag information
+    tfoe_micro_df = (
+        tfoe_micro_df.merge(
+            tfoe_meta_df[["Accession", "locus"]],
+            how="left",
+            left_index=True,
+            right_on="Accession",
+        )
+        .set_index("Accession")
+        .groupby("locus")
+        .median()
+    ).T.rename(
         {
             "Rv0061": "Rv0061c",
             "Rv2427Ac": "Rv2427A",
         },
         axis=1,
     )
-    .drop(
+
+    tfoe_micro_df["median"] = tfoe_micro_median
+
+    # Get the gene expression for ArgR (Rv1657)
+    argr_gene_weights = metworkpy.utils.expr_to_imat_gene_weights(
+        tfoe_micro_df["Rv1657"],
+        quantile=(
+            CONFIG["mtb_tf"]["imat"]["lower-quantile"],
+            CONFIG["mtb_tf"]["imat"]["upper-quantile"],
+        ),
+        subset=BASE_MODEL_GENES
+        if CONFIG["mtb_tf"]["imat"]["subset-genes"]
+        else None,
+    )
+    median_gene_weights = metworkpy.utils.expr_to_imat_gene_weights(
+        tfoe_micro_df["median"],
+        quantile=(
+            CONFIG["mtb_tf"]["imat"]["lower-quantile"],
+            CONFIG["mtb_tf"]["imat"]["upper-quantile"],
+        ),
+        subset=BASE_MODEL_GENES
+        if CONFIG["mtb_tf"]["imat"]["subset-genes"]
+        else None,
+    )
+
+    # Convert the gene weights into reactions weights
+    argr_rxn_weights = metworkpy.gene_to_rxn_weights(
+        model=BASE_MODEL,
+        gene_weights=argr_gene_weights,
+    )
+    median_rxn_weights = metworkpy.gene_to_rxn_weights(
+        model=BASE_MODEL,
+        gene_weights=argr_gene_weights,
+    )
+
+    # Find the fluxes for the base model (pFBA)
+    base_fluxes = cobra.flux_analysis.pfba(
+        model=BASE_MODEL, fraction_of_optimum=0.95
+    ).fluxes
+    if not isinstance(base_fluxes, pd.Series):
+        raise ValueError("Couldn't get fluxes from base model")
+    base_fluxes.name = "Unconstrained pFBA fluxes"
+
+    # Find the fluxes for the IMAT directly
+    argr_imat_fluxes = metworkpy.imat.imat(
+        model=BASE_MODEL,
+        rxn_weights=argr_rxn_weights,
+        epsilon=CONFIG["mtb_tf"]["imat"]["epsilon"],
+        threshold=CONFIG["mtb_tf"]["imat"]["threshold"],
+    ).fluxes
+    if not isinstance(argr_imat_fluxes, pd.Series):
+        raise ValueError("Couldn't get fluxes from imat")
+    argr_imat_fluxes.name = "ArgR iMAT fluxes"
+    median_imat_fluxes = metworkpy.imat.imat(
+        model=BASE_MODEL,
+        rxn_weights=median_rxn_weights,
+        epsilon=CONFIG["mtb_tf"]["imat"]["epsilon"],
+        threshold=CONFIG["mtb_tf"]["imat"]["threshold"],
+    ).fluxes
+    if not isinstance(median_imat_fluxes, pd.Series):
+        raise ValueError("Couldn't get fluxes from imat")
+    median_imat_fluxes.name = "Median iMAT fluxes"
+
+    # Create an FVA model, then perform pFBA
+    argr_imat_model = metworkpy.imat.generate_model(
+        model=BASE_MODEL,
+        rxn_weights=argr_rxn_weights,
+        method="fva",
+        epsilon=CONFIG["mtb_tf"]["imat"]["epsilon"],
+        threshold=CONFIG["mtb_tf"]["imat"]["threshold"],
+        loopless=False,
+        processes=CONFIG["processes"],
+        objective_tolerance=CONFIG["mtb_tf"]["imat"]["objective-tolerance"],
+    )
+    median_imat_model = metworkpy.imat.generate_model(
+        model=BASE_MODEL,
+        rxn_weights=median_rxn_weights,
+        method="fva",
+        epsilon=CONFIG["mtb_tf"]["imat"]["epsilon"],
+        threshold=CONFIG["mtb_tf"]["imat"]["threshold"],
+        loopless=False,
+        processes=CONFIG["processes"],
+        objective_tolerance=CONFIG["mtb_tf"]["imat"]["objective-tolerance"],
+    )
+    argr_fva_model_fluxes = cobra.flux_analysis.pfba(
+        argr_imat_model, fraction_of_optimum=0.95
+    ).fluxes
+    if not isinstance(argr_fva_model_fluxes, pd.Series):
+        raise ValueError("Couldn't get fluxes from fva imat model")
+    argr_fva_model_fluxes.name = "ArgR FVA IMAT pFBA fluxes"
+    median_fva_model_fluxes = cobra.flux_analysis.pfba(
+        median_imat_model, fraction_of_optimum=0.95
+    ).fluxes
+    if not isinstance(median_fva_model_fluxes, pd.Series):
+        raise ValueError("Couldn't get fluxes from fva imat model")
+    median_fva_model_fluxes.name = "Median FVA IMAT pFBA fluxes"
+
+    # Combine the fluxes together
+    results_df = pd.concat(
         [
-            "Rv1784",
-            "Rvns01",
-            "Rvns02",
-            "Rvnt01",
-            "Rvnt02",
-            "Rvnt03",
-            "Rvnt05",
-            "Rvnt06",
-            "Rvnt07",
-            "Rvnt08",
-            "Rvnt11",
-            "Rvnt12",
-            "Rvnt13",
-            "Rvnt15",
-            "Rvnt17",
-            "Rvnt19",
-            "Rvnt21",
-            "Rvnt22",
-            "Rvnt24",
-            "Rvnt27",
-            "Rvnt28",
-            "Rvnt29",
-            "Rvnt30",
-            "Rvnt32",
-            "Rvnt33",
-            "Rvnt34",
-            "Rvnt40",
-            "Rvnt41",
+            base_fluxes,
+            argr_imat_fluxes,
+            median_imat_fluxes,
+            argr_fva_model_fluxes,
+            median_fva_model_fluxes,
         ],
         axis=1,
     )
-).T
 
-# Get the gene expression for ArgR (Rv1657)
-gene_expr = tfoe_l2fc["Rv1657"]
-
-# Create a gene weights series
-gene_weights = pd.Series(0.0, index=gene_expr.index)
-gene_weights[gene_expr >= CONFIG["mtb_tf"]["imat"]["pos-fold-change"]] = 1.0
-gene_weights[gene_expr <= CONFIG["mtb_tf"]["imat"]["neg-fold-change"]] = -1.0
-
-# Convert the gene weights into reactions weights
-rxn_weights = metworkpy.gene_to_rxn_weights(
-    model=BASE_MODEL,
-    gene_weights=gene_weights,
-)
-
-# Find the fluxes for the base model (pFBA)
-base_fluxes = cobra.flux_analysis.pfba(
-    model=BASE_MODEL, fraction_of_optimum=0.95
-).fluxes
-if not isinstance(base_fluxes, pd.Series):
-    raise ValueError("Couldn't get fluxes from base model")
-base_fluxes.name = "pFBA fluxes"
-
-# Find the fluxes for the IMAT directly
-imat_fluxes = metworkpy.imat.imat(
-    model=BASE_MODEL,
-    rxn_weights=rxn_weights,
-    epsilon=CONFIG["mtb_tf"]["imat"]["epsilon"],
-    threshold=CONFIG["mtb_tf"]["imat"]["threshold"],
-).fluxes
-if not isinstance(imat_fluxes, pd.Series):
-    raise ValueError("Couldn't get fluxes from imat")
-imat_fluxes.name = "IMAT fluxes"
-
-# Create an FVA model, then perform pFBA
-imat_model = metworkpy.imat.generate_model(
-    model=BASE_MODEL,
-    rxn_weights=rxn_weights,
-    method="fva",
-    epsilon=CONFIG["mtb_tf"]["imat"]["epsilon"],
-    threshold=CONFIG["mtb_tf"]["imat"]["threshold"],
-    loopless=False,
-    processes=CONFIG["processes"],
-    objective_tolerance=CONFIG["mtb_tf"]["imat"]["objective-tolerance"],
-)
-fva_model_fluxes = cobra.flux_analysis.pfba(
-    imat_model, fraction_of_optimum=0.95
-).fluxes
-if not isinstance(fva_model_fluxes, pd.Series):
-    raise ValueError("Couldn't get fluxes from fva imat model")
-fva_model_fluxes.name = "FVA IMAT pFBA fluxes"
-
-# Combine the fluxes together
-results_df = pd.concat([base_fluxes, imat_fluxes, fva_model_fluxes], axis=1)
-
-# Calculate the differences in fluxes
-results_df["diff imat"] = results_df["IMAT fluxes"] - results_df["pFBA fluxes"]
-results_df["diff fva imat"] = (
-    results_df["FVA IMAT pFBA fluxes"] - results_df["pFBA fluxes"]
-)
-
-# Get samples from the base model and the iMAT FVA model
-base_samples = cobra.sampling.sample(
-    model=BASE_MODEL,
-    n=1000,
-    method="optgp",
-    thinning=100,
-    processes=CONFIG["processes"],
-    seed=812309712,
-)
-imat_samples = cobra.sampling.sample(
-    model=imat_model,
-    n=1000,
-    method="optgp",
-    thinning=100,
-    processes=CONFIG["processes"],
-    seed=812309712,
-)
-# For each reaction, calculate t-tests and ks-tests
-stat_test_res = pd.DataFrame(
-    np.nan,
-    index=base_samples.columns,
-    columns=pd.Index(
-        [
-            "t-stat",
-            "t p-value",
-            "ks-stat",
-            "ks p-value",
-            "kruskal stat",
-            "kruskal p-value",
-            "mannwhitneyu stat",
-            "mannwhitneyu p-value",
-        ]
-    ),
-)
-
-
-# Perform statistical tests for the samples
-for rxn in stat_test_res.index:
-    ttest = stats.ttest_ind(
-        base_samples[rxn],
-        imat_samples[rxn],
-        alternative="two-sided",
-        equal_var=False,
+    # Calculate the differences in fluxes
+    results_df["diff imat"] = (
+        results_df["ArgR iMAT fluxes"] - results_df["Median iMAT fluxes"]
     )
-    kstest = stats.ks_2samp(
-        base_samples[rxn], imat_samples[rxn], alternative="two-sided"
+    results_df["diff fva imat"] = (
+        results_df["ArgR FVA IMAT pFBA fluxes"]
+        - results_df["Median FVA IMAT pFBA fluxes"]
     )
-    kruskal = stats.kruskal(
-        base_samples[rxn],
-        imat_samples[rxn],
+
+    # Get samples from the Median Model and the iMAT FVA model
+    median_imat_samples = cobra.sampling.sample(
+        model=median_imat_model,
+        n=CONFIG["mtb_tf"]["sampling"]["num-samples"],
+        method="optgp",
+        thinning=CONFIG["mtb_tf"]["sampling"]["thinning"],
+        processes=CONFIG["processes"],
+        seed=812309712,
     )
-    mannu = stats.mannwhitneyu(
-        base_samples[rxn], imat_samples[rxn], alternative="two-sided"
+    argr_imat_samples = cobra.sampling.sample(
+        model=argr_imat_model,
+        n=CONFIG["mtb_tf"]["sampling"]["num-samples"],
+        method="optgp",
+        thinning=CONFIG["mtb_tf"]["sampling"]["thinning"],
+        processes=CONFIG["processes"],
+        seed=923875928735,
     )
-    stat_test_res.loc[rxn, "t-stat"] = ttest.statistic
-    stat_test_res.loc[rxn, "t p-value"] = ttest.pvalue
-    stat_test_res.loc[rxn, "ks-stat"] = kstest.statistic
-    stat_test_res.loc[rxn, "ks p-value"] = kstest.pvalue
-    stat_test_res.loc[rxn, "kruskal stat"] = kruskal.statistic
-    stat_test_res.loc[rxn, "kruskal p-value"] = kruskal.pvalue
-    stat_test_res.loc[rxn, "mannwhitneyu stat"] = mannu.statistic
-    stat_test_res.loc[rxn, "mannwhitneyu p-value"] = mannu.pvalue
+    # For each reaction, calculate t-tests and ks-tests
+    stat_test_res = pd.DataFrame(
+        np.nan,
+        index=median_imat_samples.columns,
+        columns=pd.Index(
+            [
+                "t-stat",
+                "t p-value",
+                "ks-stat",
+                "ks p-value",
+                "kruskal stat",
+                "kruskal p-value",
+                "mannwhitneyu stat",
+                "mannwhitneyu p-value",
+            ]
+        ),
+    )
 
+    # Perform statistical tests for the samples
+    for rxn in stat_test_res.index:
+        ttest = stats.ttest_ind(
+            median_imat_samples[rxn],
+            argr_imat_samples[rxn],
+            alternative="two-sided",
+            equal_var=False,
+        )
+        kstest = stats.ks_2samp(
+            median_imat_samples[rxn],
+            argr_imat_samples[rxn],
+            alternative="two-sided",
+        )
+        kruskal = stats.kruskal(
+            median_imat_samples[rxn],
+            argr_imat_samples[rxn],
+        )
+        mannu = stats.mannwhitneyu(
+            median_imat_samples[rxn],
+            argr_imat_samples[rxn],
+            alternative="two-sided",
+        )
+        stat_test_res.loc[rxn, "t-stat"] = ttest.statistic
+        stat_test_res.loc[rxn, "t p-value"] = ttest.pvalue
+        stat_test_res.loc[rxn, "ks-stat"] = kstest.statistic
+        stat_test_res.loc[rxn, "ks p-value"] = kstest.pvalue
+        stat_test_res.loc[rxn, "kruskal stat"] = kruskal.statistic
+        stat_test_res.loc[rxn, "kruskal p-value"] = kruskal.pvalue
+        stat_test_res.loc[rxn, "mannwhitneyu stat"] = mannu.statistic
+        stat_test_res.loc[rxn, "mannwhitneyu p-value"] = mannu.pvalue
 
-# Add on the statistical test comparison
-results_df = results_df.merge(
-    stat_test_res, how="left", left_index=True, right_index=True
-)
+    # Add on the statistical test comparison
+    results_df = results_df.merge(
+        stat_test_res, how="left", left_index=True, right_index=True
+    )
 
-# Read in the reaction information dataframe
-rxn_info_df = pd.read_csv(
-    CACHE_PATH / "model_information" / "reaction_information.csv"
-)
+    # Read in the reaction information dataframe
+    rxn_info_df = pd.read_csv(
+        CACHE_PATH / "model_information" / "reaction_information.csv"
+    )
 
-# Join the reaction information dataframe to the results dataframe
-results_df = pd.merge(
-    results_df, rxn_info_df, how="left", left_index=True, right_on="id"
-)
+    # Join the reaction information dataframe to the results dataframe
+    results_df = pd.merge(
+        results_df, rxn_info_df, how="left", left_index=True, right_on="id"
+    )
 
-# Save the results dataframe
-results_df.to_csv(RESULTS_PATH / "imat_compare.csv")
+    # Save the results dataframe
+    results_df.to_csv(RESULTS_PATH / "imat_compare.csv")

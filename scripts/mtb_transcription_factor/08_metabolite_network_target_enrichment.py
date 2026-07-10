@@ -40,290 +40,308 @@ RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 MODELS_PATH = BASE_PATH / "models"
 LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
 
-# Make required directories if they don't exist
-CACHE_PATH.mkdir(parents=True, exist_ok=True)
-METABOLITE_NETWORKS_PATH.mkdir(parents=True, exist_ok=True)
-RESULTS_PATH.mkdir(parents=True, exist_ok=True)
-LOG_PATH.mkdir(parents=True, exist_ok=True)
 
-# Setup logging
-logger = logging.getLogger(__name__)
-logging.basicConfig(
-    filename=LOG_PATH / "08_metabolite_network_target_enrichment.log",
-    filemode="w",
-    level=logging.INFO,
-)
+if __name__ == "__main__":
+    # Make required directories if they don't exist
+    CACHE_PATH.mkdir(parents=True, exist_ok=True)
+    METABOLITE_NETWORKS_PATH.mkdir(parents=True, exist_ok=True)
+    RESULTS_PATH.mkdir(parents=True, exist_ok=True)
+    LOG_PATH.mkdir(parents=True, exist_ok=True)
 
-# Read in the configuration file
-with open(BASE_PATH / "config.toml", "rb") as f:
-    CONFIG = tomllib.load(f)
+    # Setup logging
+    logger = logging.getLogger(__name__)
+    logging.basicConfig(
+        filename=LOG_PATH / "08_metabolite_network_target_enrichment.log",
+        filemode="w",
+        level=logging.INFO,
+    )
 
-# Read in the base model for finding metabolite networks
-cobra.Configuration().solver = CONFIG["cobra"]["solver"]
-BASE_MODEL = metworkpy.read_model(
-    MODELS_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
-)
+    # Read in the configuration file
+    with open(BASE_PATH / "config.toml", "rb") as f:
+        CONFIG = tomllib.load(f)
 
+    # Read in the base model for finding metabolite networks
+    cobra.Configuration().solver = CONFIG["cobra"]["solver"]
+    BASE_MODEL = metworkpy.read_model(
+        MODELS_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
+    )
 
-# Determine the metabolite reaction synthesis/consumption networks
-# NOTE: The network dataframes are indexed by reactions, with columns for each metabolite
-# Create a list of reactions to remove from the metabolite networks
-reactions_to_remove = []
-subsystems_to_ignore = [
-    "Intracellular demand",
-    "Biomass and maintenance functions",
-    "Extracellular exchange",
-]
-for rxn in BASE_MODEL.reactions:
-    if rxn.subsystem in subsystems_to_ignore:
-        reactions_to_remove.append(rxn.id)
-metabolite_synthesis_rxn_net_df_path = (
-    METABOLITE_NETWORKS_PATH / "metabolite_synthesis_reaction_network.csv"
-)
-metabolite_synthesis_rxn_network_df = get_metabolite_network(
-    metabolite_synthesis_rxn_net_df_path,
-    model=BASE_MODEL,
-    rxns_to_remove=reactions_to_remove,
-    proportion=CONFIG["mtb_tf"]["target_enrichment"]["essential-proportion"],
-    synthesis=True,
-    processes=CONFIG["processes"],
-)
+    # Determine the metabolite reaction synthesis/consumption networks
+    # NOTE: The network dataframes are indexed by reactions, with columns for each metabolite
+    # Create a list of reactions to remove from the metabolite networks
+    reactions_to_remove = []
+    subsystems_to_ignore = [
+        "Intracellular demand",
+        "Biomass and maintenance functions",
+        "Extracellular exchange",
+    ]
+    for rxn in BASE_MODEL.reactions:
+        if rxn.subsystem in subsystems_to_ignore:
+            reactions_to_remove.append(rxn.id)
+    metabolite_synthesis_rxn_net_df_path = (
+        METABOLITE_NETWORKS_PATH / "metabolite_synthesis_reaction_network.csv"
+    )
+    metabolite_synthesis_rxn_network_df = get_metabolite_network(
+        metabolite_synthesis_rxn_net_df_path,
+        model=BASE_MODEL,
+        rxns_to_remove=reactions_to_remove,
+        proportion=CONFIG["mtb_tf"]["target_enrichment"][
+            "essential-proportion"
+        ],
+        synthesis=True,
+        processes=CONFIG["processes"],
+    )
 
+    # Repeat for the consuming networks
+    metabolite_consumption_rxn_network_df_path = (
+        METABOLITE_NETWORKS_PATH
+        / "metabolite_consumption_reaction_network.csv"
+    )
+    metabolite_consumption_rxn_network_df = get_metabolite_network(
+        metabolite_consumption_rxn_network_df_path,
+        model=BASE_MODEL,
+        rxns_to_remove=reactions_to_remove,
+        proportion=CONFIG["mtb_tf"]["target_enrichment"][
+            "reaction-proportion"
+        ],
+        synthesis=False,
+        processes=CONFIG["processes"],
+    )
 
-# Repeat for the consuming networks
-metabolite_consumption_rxn_network_df_path = (
-    METABOLITE_NETWORKS_PATH / "metabolite_consumption_reaction_network.csv"
-)
-metabolite_consumption_rxn_network_df = get_metabolite_network(
-    metabolite_consumption_rxn_network_df_path,
-    model=BASE_MODEL,
-    rxns_to_remove=reactions_to_remove,
-    proportion=CONFIG["mtb_tf"]["target_enrichment"]["reaction-proportion"],
-    synthesis=False,
-    processes=CONFIG["processes"],
-)
+    # Determine the TF targets
 
+    # Find the TF targets
+    logger.info("Finding the TF targets")
+    tf_fc_df = pd.read_excel(
+        DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
+        sheet_name="SupplementaryTableS2",
+        skiprows=list(range(8)) + [9],
+        usecols="A,E:HB",
+        index_col=0,
+    )
+    tf_pval_df = pd.read_excel(
+        DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
+        sheet_name="SupplementaryTableS2",
+        skiprows=list(range(8)) + [9],
+        usecols="A,HC:OZ",
+        index_col=0,
+    )
+    tf_pval_df.columns = tf_pval_df.columns.str.replace(".1", "")
 
-# Determine the TF targets
+    tf_target_df = (
+        tf_fc_df.abs()
+        >= CONFIG["mtb_tf"]["target_enrichment"]["target-fc-cutoff"]
+    ) & (
+        tf_pval_df
+        <= CONFIG["mtb_tf"]["target_enrichment"]["target-pval-cutoff"]
+    )
 
-# Find the TF targets
-logger.info("Finding the TF targets")
-tf_fc_df = pd.read_excel(
-    DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
-    sheet_name="SupplementaryTableS2",
-    skiprows=list(range(8)) + [9],
-    usecols="A,E:HB",
-    index_col=0,
-)
-tf_pval_df = pd.read_excel(
-    DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
-    sheet_name="SupplementaryTableS2",
-    skiprows=list(range(8)) + [9],
-    usecols="A,HC:OZ",
-    index_col=0,
-)
-tf_pval_df.columns = tf_pval_df.columns.str.replace(".1", "")
+    # Get a set of genes in the model
+    model_gene_set = set(BASE_MODEL.genes.list_attr("id"))
 
-tf_target_df = (
-    tf_fc_df.abs() >= CONFIG["mtb_tf"]["target_enrichment"]["target-fc-cutoff"]
-) & (tf_pval_df <= CONFIG["mtb_tf"]["target_enrichment"]["target-pval-cutoff"])
+    # Now, for each type of metabolite network (synthesis, consumption)
+    # Identify any significant overlaps
+    target_enrichment_res_list: list[pd.DataFrame] = []
+    for metabolite_network_direction, metabolite_network_df in zip(
+        ["synthesis", "consumption"],
+        [
+            metabolite_synthesis_rxn_network_df,
+            metabolite_consumption_rxn_network_df,
+        ],
+    ):
+        for tf, tf_target_series in tf_target_df.items():
+            # Find the TF targets which are in the model
+            tf_target_set = set(
+                tf_target_series[tf_target_series].index
+            ).intersection(model_gene_set)
+            if len(tf_target_set) <= 3:
+                continue
+            tf_enrichment_df = pd.DataFrame(
+                np.nan,
+                columns=pd.Index(
+                    [
+                        "metabolite network direction",
+                        "metabolite network size",
+                        "tf target count",
+                        "tf target-metabolite network overlap",
+                        "total genes",
+                        "odds-ratio",
+                        "p-value",
+                        "adj p-value",
+                    ]
+                ),
+                index=metabolite_network_df.columns,
+            )
+            tf_enrichment_df["metabolite network direction"] = (
+                metabolite_network_direction
+            )
+            tf_enrichment_df["tf target count"] = len(tf_target_set)
+            tf_enrichment_df["total genes"] = len(model_gene_set)
+            for (
+                metabolite,
+                metabolite_net_series,
+            ) in metabolite_network_df.items():
+                # Create the contingency table
+                contingency_table = pd.DataFrame(
+                    np.nan,
+                    index=pd.Index(["in met net", "out met net"]),
+                    columns=pd.Index(["tf target", "not tf target"]),
+                )
+                # Find the metabolite network gene set
+                met_net_gene_set = set(
+                    metworkpy.reaction_to_gene_list(
+                        model=BASE_MODEL,
+                        reaction_list=list(
+                            metabolite_net_series[metabolite_net_series].index
+                        ),
+                        essential=False,
+                    )
+                )
+                if len(met_net_gene_set) <= 3:
+                    continue
+                # Fill out the contingency table
+                contingency_table.loc["in met net", "tf target"] = len(
+                    tf_target_set & met_net_gene_set
+                )
+                contingency_table.loc["in met net", "not tf target"] = len(
+                    met_net_gene_set - tf_target_set
+                )
+                contingency_table.loc["out met net", "tf target"] = len(
+                    tf_target_set - met_net_gene_set
+                )
+                contingency_table.loc["out met net", "not tf target"] = len(
+                    model_gene_set - (tf_target_set | met_net_gene_set)
+                )
+                # Perform the enrichment test
+                fisher_res = stats.fisher_exact(
+                    table=contingency_table.to_numpy(),
+                    alternative="greater",
+                )
+                # Fill out the results table for this row
+                tf_enrichment_df.loc[metabolite, "metabolite network size"] = (
+                    len(met_net_gene_set)
+                )
+                tf_enrichment_df.loc[
+                    metabolite, "tf target-metabolite network overlap"
+                ] = contingency_table.loc["in met net", "tf target"]
+                tf_enrichment_df.loc[metabolite, "odds-ratio"] = (
+                    fisher_res.statistic
+                )
+                tf_enrichment_df.loc[metabolite, "p-value"] = fisher_res.pvalue
+            tf_enrichment_df = tf_enrichment_df.reset_index(
+                drop=False, names="metabolite"
+            )
+            tf_enrichment_df["tf"] = tf  # type: ignore str is hashable
+            tf_enrichment_df["adj p-value"] = fdr_with_nan(
+                tf_enrichment_df["p-value"]
+            )
+            # Drop rows which still have NaN
+            tf_enrichment_df = tf_enrichment_df.dropna(axis="index")
+            target_enrichment_res_list.append(tf_enrichment_df)
+    # Combine all of the target enrichment
+    target_enrichment_res_df = pd.concat(target_enrichment_res_list, axis=0)
 
-# Get a set of genes in the model
-model_gene_set = set(BASE_MODEL.genes.list_attr("id"))
+    # Read in the metabolite information dataframe
+    metabolite_info_df = pd.read_csv(
+        CACHE_PATH / "model_information" / "metabolite_information.csv"
+    )
 
-# Now, for each type of metabolite network (synthesis, consumption)
-# Identify any significant overlaps
-target_enrichment_res_list: list[pd.DataFrame] = []
-for metabolite_network_direction, metabolite_network_df in zip(
-    ["synthesis", "consumption"],
-    [
-        metabolite_synthesis_rxn_network_df,
-        metabolite_consumption_rxn_network_df,
-    ],
-):
+    # Join the metabolite informatino to the target enrichment results
+    target_enrichment_res_df = pd.merge(
+        target_enrichment_res_df,
+        metabolite_info_df,
+        how="left",
+        left_on="metabolite",
+        right_on="id",
+    )
+
+    # Save the results
+    target_enrichment_res_df.to_csv(
+        RESULTS_PATH / "tf_target_metabolite_network_enrichment.csv",
+        index=False,
+    )
+
+    # Get a dict of subsystem to sets of genes
+    subsystem_to_gene_dict: dict[str, set[str]] = defaultdict(set)
+    for rxn in BASE_MODEL.reactions:
+        if rxn.subsystem in subsystems_to_ignore:
+            continue
+        for gene in rxn.genes:
+            subsystem_to_gene_dict[rxn.subsystem].add(gene.id)
+
+    # Now, for each TF find the enrichment in the subsystems
+    target_subsys_enrichment_res_list: list[pd.DataFrame] = []
     for tf, tf_target_series in tf_target_df.items():
-        # Find the TF targets which are in the model
-        tf_target_set = set(
-            tf_target_series[tf_target_series].index
-        ).intersection(model_gene_set)
+        # Find the TF targets in the model
+        tf_target_set = (
+            set(tf_target_series[tf_target_series].index) & model_gene_set
+        )
         if len(tf_target_set) <= 3:
             continue
         tf_enrichment_df = pd.DataFrame(
             np.nan,
             columns=pd.Index(
                 [
-                    "metabolite network direction",
-                    "metabolite network size",
+                    "subsystem size",
                     "tf target count",
-                    "tf target-metabolite network overlap",
+                    "tf target-subsystem network overlap",
                     "total genes",
                     "odds-ratio",
                     "p-value",
                     "adj p-value",
                 ]
             ),
-            index=metabolite_network_df.columns,
-        )
-        tf_enrichment_df["metabolite network direction"] = (
-            metabolite_network_direction
+            index=pd.Index(subsystem_to_gene_dict.keys()),
         )
         tf_enrichment_df["tf target count"] = len(tf_target_set)
         tf_enrichment_df["total genes"] = len(model_gene_set)
-        for metabolite, metabolite_net_series in metabolite_network_df.items():
-            # Create the contingency table
-            contingency_table = pd.DataFrame(
-                np.nan,
-                index=pd.Index(["in met net", "out met net"]),
-                columns=pd.Index(["tf target", "not tf target"]),
-            )
-            # Find the metabolite network gene set
-            met_net_gene_set = set(
-                metworkpy.reaction_to_gene_list(
-                    model=BASE_MODEL,
-                    reaction_list=list(
-                        metabolite_net_series[metabolite_net_series].index
-                    ),
-                    essential=False,
-                )
-            )
-            if len(met_net_gene_set) <= 3:
-                continue
-            # Fill out the contingency table
-            contingency_table.loc["in met net", "tf target"] = len(
-                tf_target_set & met_net_gene_set
-            )
-            contingency_table.loc["in met net", "not tf target"] = len(
-                met_net_gene_set - tf_target_set
-            )
-            contingency_table.loc["out met net", "tf target"] = len(
-                tf_target_set - met_net_gene_set
-            )
-            contingency_table.loc["out met net", "not tf target"] = len(
-                model_gene_set - (tf_target_set | met_net_gene_set)
-            )
-            # Perform the enrichment test
+        for subsystem, subsystem_genes in subsystem_to_gene_dict.items():
+            # Calculate the enrichment with a Fisher exact test
             fisher_res = stats.fisher_exact(
-                table=contingency_table.to_numpy(),
+                np.array(
+                    [
+                        [
+                            len(subsystem_genes & tf_target_set),
+                            len(subsystem_genes - tf_target_set),
+                        ],
+                        [
+                            len(tf_target_set - subsystem_genes),
+                            len(
+                                model_gene_set
+                                - (tf_target_set | subsystem_genes)
+                            ),
+                        ],
+                    ]
+                ),
                 alternative="greater",
             )
-            # Fill out the results table for this row
-            tf_enrichment_df.loc[metabolite, "metabolite network size"] = len(
-                met_net_gene_set
-            )
-            tf_enrichment_df.loc[
-                metabolite, "tf target-metabolite network overlap"
-            ] = contingency_table.loc["in met net", "tf target"]
-            tf_enrichment_df.loc[metabolite, "odds-ratio"] = (
+            # Fill in the dataframe
+            tf_enrichment_df.loc[subsystem, "odds-ratio"] = (
                 fisher_res.statistic
             )
-            tf_enrichment_df.loc[metabolite, "p-value"] = fisher_res.pvalue
+            tf_enrichment_df.loc[subsystem, "p-value"] = fisher_res.pvalue
+            tf_enrichment_df.loc[subsystem, "subsystem size"] = len(
+                subsystem_genes
+            )
+            tf_enrichment_df.loc[
+                subsystem, "tf target-subsystem network overlap"
+            ] = len(subsystem_genes & tf_target_set)
         tf_enrichment_df = tf_enrichment_df.reset_index(
-            drop=False, names="metabolite"
+            drop=False, names="subsystem"
         )
-        tf_enrichment_df["tf"] = tf  # type: ignore str is hashable
+        tf_enrichment_df["tf"] = tf  # type: ignore
         tf_enrichment_df["adj p-value"] = fdr_with_nan(
             tf_enrichment_df["p-value"]
         )
-        # Drop rows which still have NaN
+        # Drop any rows which still have NaN
         tf_enrichment_df = tf_enrichment_df.dropna(axis="index")
-        target_enrichment_res_list.append(tf_enrichment_df)
-# Combine all of the target enrichment
-target_enrichment_res_df = pd.concat(target_enrichment_res_list, axis=0)
-
-# Read in the metabolite information dataframe
-metabolite_info_df = pd.read_csv(
-    CACHE_PATH / "model_information" / "metabolite_information.csv"
-)
-
-# Join the metabolite informatino to the target enrichment results
-target_enrichment_res_df = pd.merge(
-    target_enrichment_res_df,
-    metabolite_info_df,
-    how="left",
-    left_on="metabolite",
-    right_on="id",
-)
-
-# Save the results
-target_enrichment_res_df.to_csv(
-    RESULTS_PATH / "tf_target_metabolite_network_enrichment.csv", index=False
-)
-
-# Get a dict of subsystem to sets of genes
-subsystem_to_gene_dict: dict[str, set[str]] = defaultdict(set)
-for rxn in BASE_MODEL.reactions:
-    if rxn.subsystem in subsystems_to_ignore:
-        continue
-    for gene in rxn.genes:
-        subsystem_to_gene_dict[rxn.subsystem].add(gene.id)
-
-# Now, for each TF find the enrichment in the subsystems
-target_subsys_enrichment_res_list: list[pd.DataFrame] = []
-for tf, tf_target_series in tf_target_df.items():
-    # Find the TF targets in the model
-    tf_target_set = (
-        set(tf_target_series[tf_target_series].index) & model_gene_set
+        target_subsys_enrichment_res_list.append(tf_enrichment_df)
+    # Combine the subsystem enrichment values
+    target_subsys_enrichment_res_df = pd.concat(
+        target_subsys_enrichment_res_list, axis=0
     )
-    if len(tf_target_set) <= 3:
-        continue
-    tf_enrichment_df = pd.DataFrame(
-        np.nan,
-        columns=pd.Index(
-            [
-                "subsystem size",
-                "tf target count",
-                "tf target-subsystem network overlap",
-                "total genes",
-                "odds-ratio",
-                "p-value",
-                "adj p-value",
-            ]
-        ),
-        index=pd.Index(subsystem_to_gene_dict.keys()),
+    # Save the dataframe
+    target_subsys_enrichment_res_df.to_csv(
+        RESULTS_PATH / "tf_target_subsystem_network_enrichment.csv",
+        index=False,
     )
-    tf_enrichment_df["tf target count"] = len(tf_target_set)
-    tf_enrichment_df["total genes"] = len(model_gene_set)
-    for subsystem, subsystem_genes in subsystem_to_gene_dict.items():
-        # Calculate the enrichment with a Fisher exact test
-        fisher_res = stats.fisher_exact(
-            np.array(
-                [
-                    [
-                        len(subsystem_genes & tf_target_set),
-                        len(subsystem_genes - tf_target_set),
-                    ],
-                    [
-                        len(tf_target_set - subsystem_genes),
-                        len(
-                            model_gene_set - (tf_target_set | subsystem_genes)
-                        ),
-                    ],
-                ]
-            ),
-            alternative="greater",
-        )
-        # Fill in the dataframe
-        tf_enrichment_df.loc[subsystem, "odds-ratio"] = fisher_res.statistic
-        tf_enrichment_df.loc[subsystem, "p-value"] = fisher_res.pvalue
-        tf_enrichment_df.loc[subsystem, "subsystem size"] = len(
-            subsystem_genes
-        )
-        tf_enrichment_df.loc[
-            subsystem, "tf target-subsystem network overlap"
-        ] = len(subsystem_genes & tf_target_set)
-    tf_enrichment_df = tf_enrichment_df.reset_index(
-        drop=False, names="subsystem"
-    )
-    tf_enrichment_df["tf"] = tf  # type: ignore
-    tf_enrichment_df["adj p-value"] = fdr_with_nan(tf_enrichment_df["p-value"])
-    # Drop any rows which still have NaN
-    tf_enrichment_df = tf_enrichment_df.dropna(axis="index")
-    target_subsys_enrichment_res_list.append(tf_enrichment_df)
-# Combine the subsystem enrichment values
-target_subsys_enrichment_res_df = pd.concat(
-    target_subsys_enrichment_res_list, axis=0
-)
-# Save the dataframe
-target_subsys_enrichment_res_df.to_csv(
-    RESULTS_PATH / "tf_target_subsystem_network_enrichment.csv", index=False
-)
