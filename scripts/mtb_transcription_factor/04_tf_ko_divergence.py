@@ -62,7 +62,7 @@ if __name__ == "__main__":
         CONFIG = tomllib.load(f)
 
     # Script Parameters
-    cobra.Configuration().solver = CONFIG["cobra"]["solver"]
+    cobra.Configuration().solver = "hybrid"  # CONFIG["cobra"]["solver"] # Swapped to hydrid due to overage issues
 
     # Read in the Base Model
     logger.info("Reading in the base model")
