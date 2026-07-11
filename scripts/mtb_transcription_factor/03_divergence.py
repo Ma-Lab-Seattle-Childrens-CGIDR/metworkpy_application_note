@@ -73,7 +73,7 @@ if __name__ == "__main__":
     SCALER.set_output(transform="pandas")
 
     # Read in the base model for finding subsystems
-    cobra.Configuration().solver = CONFIG["cobra"]["solver"]
+    cobra.Configuration().solver = "hybrid"  # CONFIG["cobra"]["solver"] # trying to run too many jobs at once for the gurobi license
     BASE_MODEL = metworkpy.read_model(
         MODELS_PATH / "iEK1011_v2_7H9_ADC_glycerol.json"
     )
