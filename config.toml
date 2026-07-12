@@ -1,10 +1,10 @@
 ###########################
 # General Configuration ###
 ###########################
-processes = 16
+processes = 12
 
 [cobra]
-solver = "gurobi"
+solver = "hybrid"
 
 ##############################
 # Simulation Configuration ###
