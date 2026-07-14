@@ -1,17 +1,17 @@
 ,KO Divergence Statistics
-Essentiality-KO Divergence U1,176261.0
-Essentiality-KO Divergence U2,33484.0
-Essentiality-KO Divergence AUC ROC,0.8403585305966769
-Essentiality-KO Divergence Mann-Whitney U-test p-value,4.5673277323126515e-66
-VI Pearson Correlation,-0.6091207946484812
-VI Pearson p-value,1.687999361213801e-103
-FBA Predicted Essentiality-KO Divergence Pearson R,-0.9959332329698493
+Essentiality-KO Divergence U1,179137.5
+Essentiality-KO Divergence U2,30607.5
+Essentiality-KO Divergence AUC ROC,0.8540728026889794
+Essentiality-KO Divergence Mann-Whitney U-test p-value,2.21810438169671e-71
+VI Pearson Correlation,-0.6129390331858189
+VI Pearson p-value,3.99266182953642e-105
+FBA Predicted Essentiality-KO Divergence Pearson R,-0.9953669115228369
 FBA Predicted Essentiality-KO Divergence Pearson p-value,0.0
 FBA Predicted Essentiality-KO Divergence U1,192493.0
 FBA Predicted Essentiality-KO Divergence U2,0.0
 FBA Predicted Essentiality-KO Divergence AUC ROC,1.0
-FBA Predicted Essentiality-KO Divergence Mann-Whitney U-test p-value,1.1048858423864324e-128
-Essentiality-FBA Predicted Growth U1,176261.0
-Essentiality-FBA Predicted Growth U2,33484.0
-Essentiality-FBA Predicted Growth AUC ROC,0.8403585305966769
-Essentiality-FBA Predicted Growth Mann-Whitney U-test p-value,4.382032047379303e-78
+FBA Predicted Essentiality-KO Divergence Mann-Whitney U-test p-value,8.609858795611288e-129
+Essentiality-FBA Predicted Growth U1,179137.5
+Essentiality-FBA Predicted Growth U2,30607.5
+Essentiality-FBA Predicted Growth AUC ROC,0.8540728026889794
+Essentiality-FBA Predicted Growth Mann-Whitney U-test p-value,1.250326654729331e-80
