@@ -4,7 +4,7 @@
 processes = 12
 
 [cobra]
-solver = "hybrid"
+solver = "gurobi"
 
 ##############################
 # Simulation Configuration ###

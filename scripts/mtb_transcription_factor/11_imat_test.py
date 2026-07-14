@@ -175,7 +175,7 @@ if __name__ == "__main__":
         epsilon=CONFIG["mtb_tf"]["imat"]["epsilon"],
         threshold=CONFIG["mtb_tf"]["imat"]["threshold"],
         loopless=False,
-        processes=CONFIG["processes"],
+        processes=1,  #  CONFIG["processes"], # Solver parallelism faster than python parallelism
         objective_tolerance=CONFIG["mtb_tf"]["imat"]["objective-tolerance"],
     )
     median_imat_model = metworkpy.imat.generate_model(
@@ -185,7 +185,7 @@ if __name__ == "__main__":
         epsilon=CONFIG["mtb_tf"]["imat"]["epsilon"],
         threshold=CONFIG["mtb_tf"]["imat"]["threshold"],
         loopless=False,
-        processes=CONFIG["processes"],
+        processes=1,  # CONFIG["processes"], # Solver parallelism faster than python parallelism
         objective_tolerance=CONFIG["mtb_tf"]["imat"]["objective-tolerance"],
     )
     argr_fva_model_fluxes = cobra.flux_analysis.pfba(
@@ -228,7 +228,7 @@ if __name__ == "__main__":
         n=CONFIG["mtb_tf"]["sampling"]["num-samples"],
         method="optgp",
         thinning=CONFIG["mtb_tf"]["sampling"]["thinning"],
-        processes=CONFIG["processes"],
+        processes=32,  # CONFIG["processes"], TODO:: Change back, trying to speed this up before maintenance
         seed=812309712,
     )
     argr_imat_samples = cobra.sampling.sample(
@@ -236,7 +236,7 @@ if __name__ == "__main__":
         n=CONFIG["mtb_tf"]["sampling"]["num-samples"],
         method="optgp",
         thinning=CONFIG["mtb_tf"]["sampling"]["thinning"],
-        processes=CONFIG["processes"],
+        processes=32,  # CONFIG["processes"], TODO:: Change back, trying to speed this up before maintenance
         seed=923875928735,
     )
     # For each reaction, calculate t-tests and ks-tests
