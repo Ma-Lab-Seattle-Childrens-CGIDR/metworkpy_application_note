@@ -136,7 +136,7 @@ if __name__ == "__main__":
     )
     median_rxn_weights = metworkpy.gene_to_rxn_weights(
         model=BASE_MODEL,
-        gene_weights=argr_gene_weights,
+        gene_weights=median_gene_weights,
     )
 
     # Find the fluxes for the base model (pFBA)
