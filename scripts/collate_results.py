@@ -127,17 +127,19 @@ def collate_simulation_results():
         index_col=0,
     )
 
+    # Removed from final analysis
     # --------------------
     # -- Flux MI Graphs --
     # --------------------
-    mi_adjacency = pd.read_csv(
-        SIMULATION_RESULTS_PATH / "mutual_information" / "mi_adjacency.csv",
-        index_col=0,
-    )
-    mi_centrality = pd.read_csv(
-        SIMULATION_RESULTS_PATH / "mutual_information" / "mi_centrality.csv",
-        index_col=0,
-    ).reset_index(drop=False, names="Reaction")
+    # mi_adjacency = pd.read_csv(
+    #     SIMULATION_RESULTS_PATH / "mutual_information" / "mi_adjacency.csv",
+    #     index_col=0,
+    # )
+    # mi_centrality = pd.read_csv(
+    #     SIMULATION_RESULTS_PATH / "mutual_information" / "mi_centrality.csv",
+    #     index_col=0,
+    # ).reset_index(drop=False, names="Reaction")
+
     # ----------------------------
     # -- Metabolite Subnetworks --
     # ----------------------------
@@ -236,12 +238,12 @@ def collate_simulation_results():
             writer, sheet_name="SCN Subset Centrality", index=True
         )
         # Mutual information networks
-        mi_adjacency.to_excel(
-            writer, sheet_name="Flux MI Adjacency Matrix", index=True
-        )
-        mi_centrality.to_excel(
-            writer, sheet_name="Flux MI Centrality", index=False
-        )
+        # mi_adjacency.to_excel(
+        #     writer, sheet_name="Flux MI Adjacency Matrix", index=True
+        # )
+        # mi_centrality.to_excel(
+        #     writer, sheet_name="Flux MI Centrality", index=False
+        # )
         # Metabolite Networks
         metabolite_synthesis_network.to_excel(
             writer, sheet_name="Metabolite synthesis Networks", index=True
@@ -305,14 +307,14 @@ def collate_mtb_tf_results():
     # ------------------------
     # -- Mutual Information --
     # ------------------------
-    flux_mi_gene_centrality = pd.read_csv(
-        MTB_TF_RESULTS_PATH / "flux_mi_gene_centrality.csv", index_col=0
-    ).reset_index(names="Gene")
-    flux_mi_ess_vi_stats = pd.read_csv(
-        MTB_TF_RESULTS_PATH
-        / "mutual_information_vi_essentiality_statistics.csv",
-        index_col=0,
-    )
+    # flux_mi_gene_centrality = pd.read_csv(
+    #     MTB_TF_RESULTS_PATH / "flux_mi_gene_centrality.csv", index_col=0
+    # ).reset_index(names="Gene")
+    # flux_mi_ess_vi_stats = pd.read_csv(
+    #     MTB_TF_RESULTS_PATH
+    #     / "mutual_information_vi_essentiality_statistics.csv",
+    #     index_col=0,
+    # )
 
     # ----------------------------
     # -- Metabolite Subnetworks --
@@ -412,49 +414,64 @@ def collate_mtb_tf_results():
         .str.replace("__metabolite", "")
     )
 
-    tf_target_ko_divergence = pd.read_csv(
-        MTB_TF_RESULTS_PATH / "ko_divergence_tf_target_analysis.csv"
-    ).rename({"rho": "AUC-ROC"}, axis=1)[
-        [
-            "tf",
-            "metabolite",
-            "represented metabolites",
-            "Mann-Whitney U1",
-            "Mann-Whitney U2",
-            "AUC-ROC",
-            "p-value",
-            "adj p-value",
+    tf_target_ko_divergence = (
+        pd.read_csv(
+            MTB_TF_RESULTS_PATH / "ko_divergence_tf_target_analysis.csv"
+        )
+        .rename({"rho": "AUC-ROC"}, axis=1)
+        .rename(
+            {"represented metabolites": "Represented Metabolites"}, axis=1
+        )[
+            [
+                "tf",
+                "metabolite",
+                "Represented Metabolites",
+                "Mann-Whitney U1",
+                "Mann-Whitney U2",
+                "AUC-ROC",
+                "p-value",
+                "adj p-value",
+            ]
         ]
-    ]
-    tf_target_ko_divergence["represented metabolites"] = (
-        tf_target_ko_divergence["represented metabolites"].str.replace(
+    )
+    tf_target_ko_divergence["Represented Metabolites"] = (
+        tf_target_ko_divergence["Represented Metabolites"].str.replace(
             "set()", ""
         )
     )
 
     # Add the represented metabolites column to the ko_divergence_df
-    represented_metabolites = (
-        tf_target_ko_divergence.set_index("metabolite")[
-            "represented metabolites"
-        ]
-        .to_frame("Represented Metabolites")
-        .reset_index(names="Metabolite")
-        .drop_duplicates()
-    )
-    ko_divergence_df = ko_divergence_df.merge(
-        represented_metabolites,
-        how="left",
-        left_on="Divergence Group",
-        right_on="Metabolite",
-    )[
-        [
-            "Gene",
-            "Divergence Group",
-            "Divergence Group Type",
-            "Represented Metabolites",
-            "Divergence",
-        ]
-    ]
+    # represented_metabolites = (
+    #     tf_target_ko_divergence.set_index("metabolite")[
+    #         "represented metabolites"
+    #     ]
+    #     .to_frame("Represented Metabolites")
+    #     .reset_index(names="Metabolite")
+    #     .drop_duplicates()
+    # )
+    # ko_divergence_df = ko_divergence_df.merge(
+    #     represented_metabolites,
+    #     how="left",
+    #     left_on="Divergence Group",
+    #     right_on="Metabolite",
+    # )[
+    #     [
+    #         "Gene",
+    #         "Divergence Group",
+    #         "Divergence Group Type",
+    #         "Represented Metabolites",
+    #         "Divergence",
+    #     ]
+    # ]
+    # ko_divergence_df = ko_divergence_df[
+    #     [
+    #         "Gene",
+    #         "Divergence Group",
+    #         "Divergence Group Type",
+    #         "Represented Metabolites",
+    #         "Divergence",
+    #     ]
+    # ]
     # ---------------------
     # -- IMAT Divergence --
     # ---------------------
@@ -484,17 +501,22 @@ def collate_mtb_tf_results():
     # ------------------
     # -- IMAT Compare --
     # ------------------
-    imat_compare_df = (
-        pd.read_csv(MTB_TF_RESULTS_PATH / "imat_compare.csv")
-        .set_index("id")
-        .reset_index(names="Reaction")
-    ).rename(
+    imat_compare_df = pd.read_csv(MTB_TF_RESULTS_PATH / "imat_compare.csv")
+    imat_compare_df["ArgR iMAT Fluxes - Unconstrained pFBA"] = (
+        imat_compare_df["ArgR iMAT fluxes"]
+        - imat_compare_df["Unconstrained pFBA fluxes"]
+    )
+    imat_compare_df["ArgR FVA iMAT pFBA - Unconstrained pFBA"] = (
+        imat_compare_df["ArgR FVA IMAT pFBA fluxes"]
+        - imat_compare_df["Unconstrained pFBA fluxes"]
+    )
+
+    imat_compare_df = imat_compare_df.rename(
         {
-            "pFBA fluxes": "pFBA fluxes",
-            "IMAT fluxes": "IMAT solution fluxes",
-            "FVA IMAT pFBA fluxes": "FVA IMAT Model pFBA fluxes",
-            "diff imat": "IMAT solution Fluxes - pFBA fluxes",
-            "diff fva imat": "FVA IMAT Model pFBA fluxes - pFBA fluxes",
+            "id": "Reaction ID",
+            "name": "Reaction Name",
+            "diff imat": "ArgR iMAT Solution Fluxes - Median iMAT Solution Fluxes",
+            "diff fva imat": "ArgR FVA iMAT Model pFBA - Median FVA iMAT Model pFBA",
             "t-stat": "Flux Sample Comparison T-statistic",
             "t p-value": "Flux Sample Comparison T-test p-value",
             "ks-stat": "Flux Sample Comparison Kolmogorov-Smirnov Statistic",
@@ -503,16 +525,24 @@ def collate_mtb_tf_results():
             "kruskal p-value": "Flux Sample Comparison Kruskal-Wallis p-value",
             "mannwhitneyu stat": "Flux Sample Comparison Mann-Whitney U-test Statistic",
             "mannwhitneyu p-value": "Flux Sample Comparison Mann-Whitney U-test p-value",
+            "Unconstrained pFBA fluxes": "Unconstrained pFBA Fluxes",
+            "ArgR iMAT fluxes": "ArgR iMAT Fluxes",
+            "Median iMAT fluxes": "Median iMAT Fluxes",
+            "ArgR FVA IMAT pFBA fluxes": "ArgR FVA iMAT pFBA Fluxes",
         },
         axis=1,
     )[
         [
-            "Reaction",
-            "pFBA fluxes",
-            "IMAT solution fluxes",
-            "FVA IMAT Model pFBA fluxes",
-            "IMAT solution Fluxes - pFBA fluxes",
-            "FVA IMAT Model pFBA fluxes - pFBA fluxes",
+            "Reaction ID",
+            "Reaction Name",
+            "Unconstrained pFBA Fluxes",
+            "ArgR iMAT Fluxes",
+            "Median iMAT Fluxes",
+            "ArgR FVA iMAT pFBA Fluxes",
+            "ArgR iMAT Fluxes - Unconstrained pFBA",
+            "ArgR FVA iMAT pFBA - Unconstrained pFBA",
+            "ArgR iMAT Solution Fluxes - Median iMAT Solution Fluxes",
+            "ArgR FVA iMAT Model pFBA - Median FVA iMAT Model pFBA",
             "Flux Sample Comparison T-statistic",
             "Flux Sample Comparison T-test p-value",
             "Flux Sample Comparison Kolmogorov-Smirnov Statistic",
@@ -524,8 +554,8 @@ def collate_mtb_tf_results():
         ]
     ]
     # Add in the subsystem columns
-    imat_compare_df = imat_compare_df.set_index("Reaction")
-    imat_compare_df["subsystem"] = reaction_info.set_index("id")["subsystem"]
+    imat_compare_df = imat_compare_df.set_index("Reaction ID")
+    imat_compare_df["Subsystem"] = reaction_info.set_index("id")["subsystem"]
 
     with pd.ExcelWriter(RESULTS_PATH / "mtb_tf_results.xlsx") as writer:
         # Model Information
@@ -551,12 +581,12 @@ def collate_mtb_tf_results():
             writer, sheet_name="TF Target Subset Betweenness", index=False
         )
         # Flux MI Centrality
-        flux_mi_gene_centrality.to_excel(
-            writer, sheet_name="Flux MI Network Centrality", index=False
-        )
-        flux_mi_ess_vi_stats.to_excel(
-            writer, sheet_name="MI Centrality vs Essentialiy", index=True
-        )
+        # flux_mi_gene_centrality.to_excel(
+        #     writer, sheet_name="Flux MI Network Centrality", index=False
+        # )
+        # flux_mi_ess_vi_stats.to_excel(
+        #     writer, sheet_name="MI Centrality vs Essentialiy", index=True
+        # )
         # Metabolite Enrichment
         tf_metabolite_network_enrichment.to_excel(
             writer, sheet_name="TF Metabolite Enrichment", index=False
@@ -584,10 +614,14 @@ def collate_mtb_tf_results():
             writer, sheet_name="TF Target KO Divergence", index=False
         )
         # IMAT Divergence
-        imat_reaction_divergence.to_excel(
+        imat_reaction_divergence.T.sort_index(axis=0).sort_index(
+            axis=1
+        ).to_excel(
             writer, sheet_name="Normalized IMAT Reaction Div", index=True
         )
-        imat_metabolite_synthesis_divergence.to_excel(
+        imat_metabolite_synthesis_divergence.T.sort_index(axis=0).sort_index(
+            axis=1
+        ).to_excel(
             writer, sheet_name="Normalized IMAT Metabolite Div", index=True
         )
         # IMAT Compare
