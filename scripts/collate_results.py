@@ -498,6 +498,11 @@ def collate_mtb_tf_results():
             "metabolite_synthesis__", ""
         )
     )
+    # ------------
+    # -- TF RRA --
+    # ------------
+    rra_res = pd.read_csv(MTB_TF_RESULTS_PATH / "tf_rra.csv")
+
     # ------------------
     # -- IMAT Compare --
     # ------------------
@@ -624,6 +629,8 @@ def collate_mtb_tf_results():
         ).to_excel(
             writer, sheet_name="Normalized IMAT Metabolite Div", index=True
         )
+        # TF RRA
+        rra_res.to_excel(writer, sheet_name="RRA", index=False)
         # IMAT Compare
         imat_compare_df.to_excel(
             writer, sheet_name="ArgR IMAT Fluxes", index=True
