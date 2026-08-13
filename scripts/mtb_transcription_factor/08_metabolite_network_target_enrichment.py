@@ -11,6 +11,7 @@ import logging
 import pathlib
 import sys
 import tomllib
+from typing import Iterable
 
 # External Imports
 import cobra
@@ -39,6 +40,23 @@ METABOLITE_NETWORKS_PATH = CACHE_PATH / "metabolite_networks" / "7H9_ADC"
 RESULTS_PATH = BASE_PATH / "results" / "mtb_transcription_factors"
 MODELS_PATH = BASE_PATH / "models"
 LOG_PATH = BASE_PATH / "logs" / "mtb_transcription_factors"
+
+
+def find_overlap_enrichment(
+    target_dict: dict[str, Iterable[str]],
+    gene_set_dict: dict[str, Iterable[str]],
+    population_genes: Iterable[str],
+) -> pd.DataFrame:
+    # Conver the dicts to use sets for values to make the overlaps/unions easier
+    target_dict = {k: set(v) for k, v in target_dict.items()}
+    gene_set_dict = {k: set(v) for k, v in gene_set_dict.items()}
+    population_genes = set(population_genes)
+
+    for regulator, target_set in target_dict.items():
+        for gene_set_name, gene_set in gene_set_dict.items():
+            pass
+
+    pass
 
 
 if __name__ == "__main__":
