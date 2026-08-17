@@ -295,6 +295,7 @@ if __name__ == "__main__":
         enrichment_df["Metabolite Network Direction"] = (
             metabolite_network_direction
         )
+        metabolite_enrichment_list.append(enrichment_df)
     metabolite_network_enrichment = pd.concat(
         metabolite_enrichment_list, axis=0
     )[
