@@ -8,19 +8,22 @@ metabolite networks (consuming and synthesis)
 # Standard Library Imports
 import logging
 import pathlib
-from typing import cast
 import sys
-import tomllib
+from typing import cast
 
 # External Imports
 import cobra
 import decoupler as dc
 import metworkpy
 import pandas as pd
+import tomllib
 
 # Local Imports
-from common_functions import get_metabolite_network
-
+from common_functions import (
+    get_kegg_pathway_descriptions,
+    get_kegg_pathway_genes,
+    get_metabolite_network,
+)
 
 # Path setup
 if hasattr(sys, "ps1"):
@@ -227,3 +230,24 @@ if __name__ == "__main__":
 
     # Save the GSVA results
     gsva_res.to_csv(RESULTS_PATH / "metabolite_gsva.csv", index=True)
+
+    # Repeat for the KEGG Pathways
+    kegg_path_df = get_kegg_pathway_genes("mtu")
+    kegg_desc_df = get_kegg_pathway_descriptions(
+        "mtu", remove_str=" - Mycobacterium tuberculosis H37Rv"
+    )
+    kegg_path_df = kegg_path_df.merge(
+        kegg_desc_df, how="left", left_on="pathway", right_on="pathway"
+    )[["description", "gene"]]
+    # The KEGG Pathways are already in the Long form, with pathway being the source, and gene being the target
+    kegg_gsva_res, _ = dc.mt.gsva(
+        data=tfoe_l2fc,
+        net=kegg_path_df.rename(
+            {"description": "source", "gene": "target"}, axis=1
+        ),
+        kcdf="gaussian",
+    )
+    # Results is again a dataframe
+    gsva_res = cast(pd.DataFrame, kegg_gsva_res)
+    # Save the results
+    gsva_res.to_csv(RESULTS_PATH / "kegg_gsva.csv", index=True)

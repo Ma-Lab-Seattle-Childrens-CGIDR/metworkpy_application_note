@@ -341,6 +341,11 @@ def collate_mtb_tf_results():
     tf_metabolite_gsva["Metabolite"] = (
         tf_metabolite_gsva["Metabolite"].str.split("_").str[:-2].str.join("_")
     )
+    tf_kegg_gsva = (
+        pd.read_csv(MTB_TF_RESULTS_PATH / "kegg_gsva.csv", index_col=0)
+        .reset_index(names="TF")
+        .melt(id_vars="TF", var_name="KEGG Pathway", value_name="GSVA")
+    )
 
     # ----------------------------------------------
     # -- Reaction Neighborhood Enrichment/Density --
@@ -587,6 +592,7 @@ def collate_mtb_tf_results():
         tf_metabolite_gsva.to_excel(
             writer, sheet_name="TF Metabolite GSVA", index=False
         )
+        tf_kegg_gsva.to_excel(writer, sheet_name="TF KEGG GSVA", index=False)
         # Target density/enrichment
         tf_target_density.to_excel(
             writer, sheet_name="ArgR Rxn Neighborhood Density", index=False

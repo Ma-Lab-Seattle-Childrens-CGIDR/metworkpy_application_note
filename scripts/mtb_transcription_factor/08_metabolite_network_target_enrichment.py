@@ -357,13 +357,6 @@ if __name__ == "__main__":
     kegg_desc_df = get_kegg_pathway_descriptions(
         "mtu", remove_str=" - Mycobacterium tuberculosis H37Rv"
     )
-    kegg_path_df = pd.merge(
-        kegg_path_df,
-        kegg_desc_df,
-        how="left",
-        left_on="pathway",
-        right_on="pathway",
-    )
 
     # Convert the kegg pathway genes into a dict, and get a set of all genes in KEGG pathways
     kegg_path_dict: dict[str, set[str]] = cast(
