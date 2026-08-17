@@ -321,35 +321,15 @@ def collate_mtb_tf_results():
     # ----------------------------
     tf_metabolite_network_enrichment = pd.read_csv(
         MTB_TF_RESULTS_PATH / "tf_target_metabolite_network_enrichment.csv",
-    ).loc[:, "metabolite":"tf"][
-        [
-            "tf",
-            "metabolite",
-            "metabolite network direction",
-            "metabolite network size",
-            "tf target count",
-            "tf target-metabolite network overlap",
-            "total genes",
-            "odds-ratio",
-            "p-value",
-            "adj p-value",
-        ]
-    ]
+    )
     tf_subsystem_network_enrichment = pd.read_csv(
         MTB_TF_RESULTS_PATH / "tf_target_subsystem_network_enrichment.csv"
-    )[
-        [
-            "tf",
-            "subsystem",
-            "subsystem size",
-            "tf target count",
-            "tf target-subsystem network overlap",
-            "total genes",
-            "odds-ratio",
-            "p-value",
-            "adj p-value",
-        ]
-    ]
+    )
+    tf_kegg_enrichment = pd.read_csv(
+        MTB_TF_RESULTS_PATH / "tf_target_kegg_enrichment.csv"
+    )
+
+    # GSVA
     tf_metabolite_gsva = (
         pd.read_csv(MTB_TF_RESULTS_PATH / "metabolite_gsva.csv", index_col=0)
         .reset_index(names="TF")
@@ -600,6 +580,9 @@ def collate_mtb_tf_results():
             writer,
             sheet_name="TF Subsystem Enrichment",
             index=False,
+        )
+        tf_kegg_enrichment.to_excel(
+            writer, sheet_name="TF KEGG Enrichment", index=False
         )
         tf_metabolite_gsva.to_excel(
             writer, sheet_name="TF Metabolite GSVA", index=False
