@@ -38,13 +38,12 @@ tf_reaction_centrality = { cmd = "python 06_reaction_network_centrality.py", cwd
 tf_metabolite_gsva = { cmd = "python 07_metabolite_gsva.py", cwd = "scripts/mtb_transcription_factor", default-environment = "decoupler" }
 tf_metabolite_enrichment = { cmd = "python 08_metabolite_network_target_enrichment.py", cwd = "scripts/mtb_transcription_factor" }
 tf_flux_mi_centrality = { cmd = "python 09_mutual_information_centrality.py", cwd = "scripts/mtb_transcription_factor" }
-tf_viz = { cmd = "python 10_mtb_tf_visualization.py", cwd = "scripts/mtb_transcription_factor", default-environment = "viz" }
-tf_imat_test = { cmd = "python 11_imat_test.py", cwd = "scripts/mtb_transcription_factor" }
-tf_network_evaluation = { cmd = "python 12_network_evaluation.py", cwd = "scripts/mtb_transcription_factor" }
-tf_gene_expr_mi_centrality = { cmd = "python 13_gene_expr_mi_evaluation.py", cwd = "scripts/mtb_transcription_factor" }
-tf_rra = { cmd = "python 14_rank_aggregation.py", cwd = "scripts/mtb_transcription_factor" }
-tf_target_subset_centrality = { cmd = "python 15_subset_centrality.py", cwd = "scripts/mtb_transcription_factor" }
-tf_corner_sampling_evaluation = { cmd = "python 16_imat_corner_sampling_evaluation.py", cwd = "scripts/mtb_transcription_factor" }
+tf_imat_test = { cmd = "python 10_imat_test.py", cwd = "scripts/mtb_transcription_factor" }
+tf_network_evaluation = { cmd = "python 11_network_evaluation.py", cwd = "scripts/mtb_transcription_factor" }
+tf_gene_expr_mi_centrality = { cmd = "python 12_gene_expr_mi_evaluation.py", cwd = "scripts/mtb_transcription_factor" }
+tf_rra = { cmd = "python 13_rank_aggregation.py", cwd = "scripts/mtb_transcription_factor" }
+tf_target_subset_centrality = { cmd = "python 14_subset_centrality.py", cwd = "scripts/mtb_transcription_factor" }
+tf_viz = { cmd = "python 15_mtb_tf_visualization.py", cwd = "scripts/mtb_transcription_factor", default-environment = "viz" }
 mtb_tf = [
   { task = "tf_reaction_info", environment = "default" },
   { task = "tf_metabolite_info", environment = "default" },
