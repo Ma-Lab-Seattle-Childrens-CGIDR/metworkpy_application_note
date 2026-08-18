@@ -62,6 +62,7 @@ if __name__ == "__main__":
             "central_carbon",
             "sulfur_and_folate",
             "nitrogen",
+            "tca_nitrogen",
         ]
     ]
 
@@ -284,14 +285,60 @@ if __name__ == "__main__":
             input_map=input_map,
             output_dir=ESCHER_MAPS_OUT_DIR,
             output_prefix="ArgR_enrich_pval_",
-            reaction_data=argr_rxn_neighborhood_enrich_pval.dropna(),
+            reaction_data=-np.log10(
+                argr_rxn_neighborhood_enrich_pval
+            ).dropna(),  # type: ignore
             reaction_scale=[
-                {"type": "value", "value": 0.0, "color": "red", "size": 30},
                 {
                     "type": "value",
-                    "value": 1.0,
-                    "color": "lightgray",
+                    "value": 0,
+                    "color": "#C0C0C0",
                     "size": 10,
                 },
+                {
+                    "type": "value",
+                    "value": -np.log10(0.05),
+                    "color": "#C0C0C0",
+                    "size": 10,
+                },
+                {
+                    "type": "max",
+                    "color": "red",
+                    "size": 30,
+                },
+            ],
+        )
+
+    ###########
+    ### RRA ###
+    ###########
+    rra_series = (
+        -np.log10(
+            pd.read_csv(RESULTS_PATH / "tf_rra.csv").set_index("id")["Rv1657"]
+        )
+        .replace([np.inf, -np.inf, np.nan], 0.0)  # type: ignore
+        .rename(rxn_rename_dict)
+    )
+
+    for input_map in ESCHER_MAPS_INPUT_LIST:
+        escher_map_add_data(
+            input_map=input_map,
+            output_dir=ESCHER_MAPS_OUT_DIR,
+            output_prefix="ArgR_rra_",
+            reaction_data=rra_series.dropna(),
+            reaction_scale=[
+                {
+                    "type": "value",
+                    "value": -np.log10(0.05),
+                    "color": "#C0C0C0",
+                    "size": 10,
+                },
+                {
+                    "type": "value",
+                    "value": 0,
+                    "color": "#C0C0C0",
+                    "size": 10,
+                },
+                {"type": "max", "color": "red", "size": 30},
             ],
         )
