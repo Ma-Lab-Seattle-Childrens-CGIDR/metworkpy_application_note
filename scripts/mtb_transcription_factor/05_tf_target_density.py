@@ -23,7 +23,9 @@ import scipy.stats as stats
 # Path Setup
 if hasattr(sys, "ps1"):
     # Running in a REPL
-    BASE_PATH = pathlib.Path(".").absolute()  # Use current dir as base path
+    BASE_PATH = (
+        pathlib.Path(".").absolute().parent.parent
+    )  # Use current dir as base path
 else:
     # Running as a file
     # Use file path to find root
@@ -162,8 +164,34 @@ if __name__ == "__main__":
     logger.info("Found all target density, combining results")
     tf_density_df = pd.concat(tf_target_density_list, axis=1)
 
+    # SECTION: Target Reaction Density
+    logger.info("Finding TF target reaction density")
+    tf_target_reaction_density_list = []
+    for tf, target_series in tf_target_df.items():
+        logger.info(f"Finding target reaction density for {tf}")
+        target_density_series = metworkpy.network.node_target_density(
+            network=reaction_network,
+            targets=metworkpy.utils.gene_to_reaction_list(
+                model=BASE_MODEL,
+                gene_list=list(target_series.index),
+                essential=False,
+            ),
+            radius=CONFIG["mtb_tf"]["target_density"]["radius"],
+            processes=CONFIG["processes"],
+        )
+        target_density_series.name = tf
+        tf_target_reaction_density_list.append(target_density_series)
+    # Combine all the target densities into a single dataframe
+    logger.info("Found all target reaction density, combining results")
+    tf_target_reaction_density_df = pd.concat(
+        tf_target_reaction_density_list, axis=1
+    )
+
     # Add in the reaction information
     tf_density_df = tf_density_df.merge(
+        rxn_info_df, how="left", left_index=True, right_on="id"
+    )
+    tf_target_reaction_density_df = tf_target_reaction_density_df.merge(
         rxn_info_df, how="left", left_index=True, right_on="id"
     )
 
@@ -171,6 +199,10 @@ if __name__ == "__main__":
     logger.info("Saving final results")
     tf_density_df.to_csv(RESULTS_PATH / "tf_target_density.csv", index=True)
     logger.info("Finished finding TF target density! ;)")
+    tf_target_reaction_density_df.to_csv(
+        RESULTS_PATH / "tf_target_reaction_density.csv", index=True
+    )
+    logger.info("Finished finding TF target reaction density! ;)")
 
     # SECTION: Target Enrichment
     logger.info("Finding TF target enrichment")
