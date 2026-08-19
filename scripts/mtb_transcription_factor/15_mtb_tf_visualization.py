@@ -11,6 +11,7 @@ import logging
 import sys
 import tomllib
 import warnings
+from typing import cast
 
 # External Imports
 import cobra
@@ -20,12 +21,18 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 # Local Imports
-from common_functions import escher_map_add_data
+from common_functions import (
+    escher_map_add_data,
+    get_kegg_pathway_descriptions,
+    get_kegg_pathway_genes,
+)
 
 # Path Setup# Path Setup
 if hasattr(sys, "ps1"):
     # Running in a REPL
-    BASE_PATH = pathlib.Path(".").absolute()  # Use current dir as base path
+    BASE_PATH = (
+        pathlib.Path(".").absolute().parent.parent
+    )  # Use current dir as base path
 else:
     # Running as a file
     # Use file path to find root
@@ -248,9 +255,9 @@ if __name__ == "__main__":
             ],
         )
 
-    ###############
-    ### Density ###
-    ###############
+    ###########################
+    ### Gene Target Density ###
+    ###########################
     # Read in the density
     density_df = pd.read_csv(
         RESULTS_PATH / "tf_target_density.csv", index_col=0
@@ -267,6 +274,34 @@ if __name__ == "__main__":
             reaction_scale=[
                 {"type": "max", "color": "red", "size": 30},
                 {"type": "value", "value": 0.0, "color": "gray", "size": 10},
+            ],
+        )
+    ###############
+    ### Density ###
+    ###############
+    # Read in the density
+    target_reaction_density_df = pd.read_csv(
+        RESULTS_PATH / "tf_target_reaction_density.csv", index_col=0
+    ).set_index("id")
+
+    argr_target_rxn_density = target_reaction_density_df["Rv1657"].rename(
+        rxn_rename_dict
+    )
+
+    for input_map in ESCHER_MAPS_INPUT_LIST:
+        escher_map_add_data(
+            input_map=input_map,
+            output_dir=ESCHER_MAPS_OUT_DIR,
+            output_prefix="ArgR_rxn_target_density_",
+            reaction_data=argr_target_rxn_density.dropna(),
+            reaction_scale=[
+                {"type": "max", "color": "red", "size": 30},
+                {
+                    "type": "value",
+                    "value": 0.0,
+                    "color": "lightgray",
+                    "size": 10,
+                },
             ],
         )
     ########################################
@@ -342,3 +377,75 @@ if __name__ == "__main__":
                 {"type": "max", "color": "red", "size": 30},
             ],
         )
+
+    ################
+    ### Pathways ###
+    ################
+    kegg_path_of_interest = "mtu00220"
+    kegg_path_df = get_kegg_pathway_genes("mtu")
+    arginine_kegg_gene_series = pd.Series(
+        1,
+        index=pd.Index(
+            kegg_path_df[kegg_path_df["pathway"] == kegg_path_of_interest][
+                "gene"
+            ]
+        ),
+    )
+    # Translate to reactions
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        arginine_kegg_rxn_series = metworkpy.gpr.gene_to_rxn_weights(
+            model=model_v1,
+            gene_weights=arginine_kegg_gene_series,
+            fn_dict={"AND": max, "OR": min},
+        )
+
+    # Also get a series of reactions which are in Arginine Proline subsystem
+    arg_subsystem_rxns = [
+        rxn.id
+        for rxn in model_v1.reactions
+        if rxn.subsystem == "Arginine and Proline Metabolism"
+    ]
+
+    # Create Escher Maps of these two
+
+    escher_map_add_data(
+        input_map=ESCHER_MAPS_PATH / "tca_nitrogen.json",
+        output_dir=ESCHER_MAPS_OUT_DIR,
+        output_prefix="kegg_arginine_biosynthesis_",
+        reaction_data=arginine_kegg_rxn_series,
+        reaction_scale=[
+            {
+                "type": "value",
+                "value": 0,
+                "color": "#C0C0C0",
+                "size": 10,
+            },
+            {
+                "type": "value",
+                "value": 1,
+                "color": "#0000ff",
+                "size": 10,
+            },
+        ],
+    )
+    escher_map_add_data(
+        input_map=ESCHER_MAPS_PATH / "tca_nitrogen.json",
+        output_dir=ESCHER_MAPS_OUT_DIR,
+        output_prefix="subsystem_arginine_biosynthesis_",
+        reaction_data=pd.Series(1, index=pd.Index(arg_subsystem_rxns)),
+        reaction_scale=[
+            {
+                "type": "value",
+                "value": 0,
+                "color": "#C0C0C0",
+                "size": 10,
+            },
+            {
+                "type": "value",
+                "value": 1,
+                "color": "#9d02d7",
+                "size": 10,
+            },
+        ],
+    )
