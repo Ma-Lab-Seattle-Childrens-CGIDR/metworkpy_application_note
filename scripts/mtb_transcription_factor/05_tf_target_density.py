@@ -175,7 +175,7 @@ if __name__ == "__main__":
                 model=BASE_MODEL,
                 gene_list=[
                     g
-                    for g in target_series.index
+                    for g in target_series[target_series].index
                     if g in set(BASE_MODEL.genes.list_attr("id"))
                 ],
                 essential=False,
