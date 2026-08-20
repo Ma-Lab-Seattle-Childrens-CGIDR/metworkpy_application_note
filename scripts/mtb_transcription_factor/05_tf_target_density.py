@@ -173,7 +173,11 @@ if __name__ == "__main__":
             network=reaction_network,
             targets=metworkpy.utils.gene_to_reaction_list(
                 model=BASE_MODEL,
-                gene_list=list(target_series.index),
+                gene_list=[
+                    g
+                    for g in target_series.index
+                    if g in set(BASE_MODEL.genes.list_attr("id"))
+                ],
                 essential=False,
             ),
             radius=CONFIG["mtb_tf"]["target_density"]["radius"],
