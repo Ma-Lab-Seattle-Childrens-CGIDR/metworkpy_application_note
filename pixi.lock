@@ -367,7 +367,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/zarr-3.2.1-pyhc364b38_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
-      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#2009180fec18d4fbcc1adea04d678b0b9b22b9dd
+      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#b09a21b28a0a688f45671e6f74ef006d476642be
       - pypi: https://files.pythonhosted.org/packages/fa/ac/6252bbb89f6aba02efe67490f352b8345e0bad044f59c1a3e6776d2c44d3/robustrankaggregpy-0.3.0-py3-none-any.whl
   default:
     channels:
@@ -661,7 +661,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/uvicorn-0.51.0-pyhc90fa1f_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
-      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#2009180fec18d4fbcc1adea04d678b0b9b22b9dd
+      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#b09a21b28a0a688f45671e6f74ef006d476642be
       - pypi: https://files.pythonhosted.org/packages/44/8e/250fab1cafeea43f4eb11f1d64cd6313f639965ff62cb0d9da3883655781/docrep-0.3.2.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fa/ac/6252bbb89f6aba02efe67490f352b8345e0bad044f59c1a3e6776d2c44d3/robustrankaggregpy-0.3.0-py3-none-any.whl
   dev:
@@ -975,7 +975,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wcwidth-0.8.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
-      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#2009180fec18d4fbcc1adea04d678b0b9b22b9dd
+      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#b09a21b28a0a688f45671e6f74ef006d476642be
       - pypi: https://files.pythonhosted.org/packages/44/8e/250fab1cafeea43f4eb11f1d64cd6313f639965ff62cb0d9da3883655781/docrep-0.3.2.tar.gz
       - pypi: https://files.pythonhosted.org/packages/fa/ac/6252bbb89f6aba02efe67490f352b8345e0bad044f59c1a3e6776d2c44d3/robustrankaggregpy-0.3.0-py3-none-any.whl
   vdev:
@@ -1293,7 +1293,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/wcwidth-0.8.2-pyhd8ed1ab_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
-      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#2009180fec18d4fbcc1adea04d678b0b9b22b9dd
+      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#b09a21b28a0a688f45671e6f74ef006d476642be
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/09/52/94108adfdd6e2ddf58be64f959a0b9c7d4ef2fa71086c38356d22dc501ea/argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
       - pypi: https://files.pythonhosted.org/packages/0c/c3/44f3fbbfa403ea2a7c779186dc20772604442dde72947e7d01069cbe98e3/pycparser-3.0-py3-none-any.whl
@@ -1660,7 +1660,7 @@ environments:
       - conda: https://conda.anaconda.org/conda-forge/noarch/uvicorn-0.51.0-pyhc90fa1f_0.conda
       - conda: https://conda.anaconda.org/conda-forge/noarch/zipp-4.1.0-pyhcf101f3_0.conda
       - conda: https://conda.anaconda.org/gurobi/linux-64/gurobi-13.0.2-py314_0.conda
-      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#2009180fec18d4fbcc1adea04d678b0b9b22b9dd
+      - pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#b09a21b28a0a688f45671e6f74ef006d476642be
       - pypi: https://files.pythonhosted.org/packages/05/7f/798705f5296a58ca505d600456748d1be48078eac8a7050d8a98bc9edb89/decorator-5.3.1-py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/07/6c/aa3f2f849e01cb6a001cd8554a88d4c77c5c1a31c95bdf1cf9301e6d9ef4/defusedxml-0.7.1-py2.py3-none-any.whl
       - pypi: https://files.pythonhosted.org/packages/09/52/94108adfdd6e2ddf58be64f959a0b9c7d4ef2fa71086c38356d22dc501ea/argon2_cffi_bindings-25.1.0-cp39-abi3-manylinux_2_26_x86_64.manylinux_2_28_x86_64.whl
@@ -7624,7 +7624,7 @@ packages:
   license: PROPRIETARY
   size: 48046270
   timestamp: 1777597878964
-- pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#2009180fec18d4fbcc1adea04d678b0b9b22b9dd
+- pypi: git+https://github.com/Ma-Lab-Seattle-Childrens-CGIDR/metworkpy.git#b09a21b28a0a688f45671e6f74ef006d476642be
   name: metworkpy
   version: 0.10.0
   requires_dist:
@@ -7640,7 +7640,7 @@ packages:
   - joblib>=1.4.2
   - robustrankaggregpy>=0.3.0
   - docrep>=0.3.2
-  - cplex>=22.1.1.1 ; extra == 'cplex'
+  - cplex>=22.1.0.0 ; extra == 'cplex'
   - gurobipy>=11.0.0 ; extra == 'gurobi'
   - openpyxl>=3.1.4 ; extra == 'excel'
   - highspy>=1.10.0 ; extra == 'hybrid'
