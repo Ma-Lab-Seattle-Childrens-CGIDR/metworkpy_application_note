@@ -628,18 +628,20 @@ if __name__ == "__main__":
     # Highlight the node groups
     g1 = ["G_C", "I_C", "K_C"]
     g2 = ["O_C", "T_C"]
-    g3 = ["M_C", "S_C"]
+    g3 = ["N_C", "E_C"]
+    g4 = ["M_C", "S_C"]
     mets_not_in_groups = list(
         set(graph_node_colors[METABOLITE_NODE_COLOR])
-        - (set(g1) | set(g2) | set(g3))
+        - (set(g1) | set(g2) | set(g3) | set(g4))
     )
     draw_graph(
         metabolic_metabolite_network,
         figure_size=(15, 15),
         node_colors={
-            "#F6AE2D": g1,
-            "#8cbcb9": g2,
-            "#BB342F": g3,
+            "#bd4bb5": g1,
+            "#00a2ff": g2,
+            "#00c269": g3,
+            "#ffa600": g4,
             "lightgray": mets_not_in_groups,
         },
         out_path=network_graph_viz_path
