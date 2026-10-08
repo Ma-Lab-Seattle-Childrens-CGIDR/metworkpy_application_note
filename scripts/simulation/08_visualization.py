@@ -526,7 +526,6 @@ if __name__ == "__main__":
         figure_size: tuple[float, float],
         node_colors: dict,
         out_path: pathlib.Path,
-        seed: int | np.random.RandomState | None = None,
         **kwargs,
     ):
         """
@@ -541,7 +540,6 @@ if __name__ == "__main__":
         node_colors : dict of str to list of str
             Dictionary describing node colors, the keys should be the colors,
             and the values should be lists of nodes which will have that color
-        seed : int, RanomState instance or None, default=None
         kwargs
             Any additional arguments are passed to the iplotx network function
         """
@@ -560,7 +558,6 @@ if __name__ == "__main__":
         ipx.network(
             network,
             ax=ax,
-            layout=nx.spring_layout(network, seed=seed),
             vertex_marker="r",
             vertex_labels=True,
             vertex_facecolor=node_color_list,
@@ -605,7 +602,7 @@ if __name__ == "__main__":
         figure_size=(30, 30),
         node_colors=graph_node_colors,
         out_path=network_graph_viz_path / f"metabolic_network.{IMG_FORMAT}",
-        seed=LAYOUT_SEED,
+        layout=nx.spring_layout(metabolic_network, seed=LAYOUT_SEED),
     )
 
     # Draw the metabolic reaction network
@@ -615,7 +612,7 @@ if __name__ == "__main__":
         node_colors=graph_node_colors,
         out_path=network_graph_viz_path
         / f"metabolic_reaction_network.{IMG_FORMAT}",
-        seed=LAYOUT_SEED,
+        layout=nx.spring_layout(metabolic_network, seed=LAYOUT_SEED),
     )
 
     # Draw the metabolic metabolite network
@@ -625,7 +622,29 @@ if __name__ == "__main__":
         node_colors=graph_node_colors,
         out_path=network_graph_viz_path
         / f"metabolic_metabolite_network.{IMG_FORMAT}",
-        seed=LAYOUT_SEED,
+        layout=nx.spring_layout(metabolic_network, seed=LAYOUT_SEED),
+    )
+
+    # Highlight the node groups
+    g1 = ["G_C", "I_C", "K_C"]
+    g2 = ["O_C", "T_C"]
+    g3 = ["M_C", "S_C"]
+    mets_not_in_groups = list(
+        set(graph_node_colors[METABOLITE_NODE_COLOR])
+        - (set(g1) | set(g2) | set(g3))
+    )
+    draw_graph(
+        metabolic_metabolite_network,
+        figure_size=(15, 15),
+        node_colors={
+            "#F6AE2D": g1,
+            "#8cbcb9": g2,
+            "#BB342F": g3,
+            "lightgray": mets_not_in_groups,
+        },
+        out_path=network_graph_viz_path
+        / f"metabolic_metabolite_network_groups.{IMG_FORMAT}",
+        layout=nx.spring_layout(metabolic_network, seed=LAYOUT_SEED),
     )
 
     ######################################
