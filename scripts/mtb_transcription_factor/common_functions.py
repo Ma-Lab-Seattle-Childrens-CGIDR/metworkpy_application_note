@@ -285,13 +285,6 @@ def bootstrap(
             )
             + 1
         ) / float(iterations + 1)
-        empirical_distribution = stats.ecdf(bootstrap_statistic_distribution)
-        prob_less: float = empirical_distribution.cdf.evaluate(
-            sample_statistic
-        )
-        prob_greater: float = empirical_distribution.sf.evaluate(
-            sample_statistic
-        )
     else:
         raise ValueError(
             f"method must be 'kernel' or 'emprical' but received {method}"
