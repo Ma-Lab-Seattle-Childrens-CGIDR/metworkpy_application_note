@@ -146,6 +146,7 @@ if __name__ == "__main__":
         metworkpy.network.centrality.betweenness_centrality_bipartite_subset(
             metabolic_network,
             node_partition=model_reactions,
+            sources=CONFIG["simulation"]["metabolic-network"]["node-subset"],
             targets=CONFIG["simulation"]["metabolic-network"]["node-subset"],
         )
     )
@@ -158,7 +159,7 @@ if __name__ == "__main__":
     subset_closeness = pd.Series(
         metworkpy.network.centrality.closeness_centrality_subset(
             metabolic_network,
-            CONFIG["simulation"]["metabolic-network"]["node-subset"],
+            sources=CONFIG["simulation"]["metabolic-network"]["node-subset"],
         )
     )
     metabolic_network_closeness = pd.Series(

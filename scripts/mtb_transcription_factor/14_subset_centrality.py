@@ -103,8 +103,7 @@ if __name__ == "__main__":
     base_betweenness = pd.Series(
         metworkpy.network.centrality.betweenness_centrality_bipartite_subset(
             metabolic_network,
-            metabolic_network_rxn_nodes,
-            metabolic_network_rxn_nodes,
+            node_partition=metabolic_network_rxn_nodes,
         )
     )
 
@@ -165,7 +164,7 @@ if __name__ == "__main__":
         subset_closeness_df[tf] = (
             pd.Series(
                 metworkpy.network.centrality.closeness_centrality_subset(
-                    metabolic_network, targets=reaction_targets
+                    metabolic_network, sources=reaction_targets
                 )
             )
             - base_closeness
@@ -175,6 +174,7 @@ if __name__ == "__main__":
                 metworkpy.network.centrality.betweenness_centrality_bipartite_subset(
                     metabolic_network,
                     node_partition=metabolic_network_rxn_nodes,
+                    sources=reaction_targets,
                     targets=reaction_targets,
                 )
             )
