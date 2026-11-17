@@ -116,13 +116,17 @@ if __name__ == "__main__":
 
     # SECTION: TF targets
     logger.info("Reading in TF target information")
+    # fhaA (Rv0020c) and fhaB (Rv0019c) are not well
+    # supported as transcriptional regulators,
+    # so they will be removed from the TFs
+    columns_to_remove = ["Rv0019c", "Rv0020c"]
     tf_fc_df = pd.read_excel(
         DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
         sheet_name="SupplementaryTableS2",
         skiprows=list(range(8)) + [9],
         usecols="A,E:HB",
         index_col=0,
-    )
+    ).drop(columns_to_remove, axis=1)
     tf_pval_df = pd.read_excel(
         DATA_PATH / "mtb_transcription_factors" / "tfoe_targets.xlsx",
         sheet_name="SupplementaryTableS2",
@@ -131,6 +135,7 @@ if __name__ == "__main__":
         index_col=0,
     )
     tf_pval_df.columns = tf_pval_df.columns.str.replace(".1", "")
+    tf_pval_df = tf_pval_df.drop(columns_to_remove, axis=1)
 
     # Create the TF target dataframe
     logger.info("Finding TF targets")
