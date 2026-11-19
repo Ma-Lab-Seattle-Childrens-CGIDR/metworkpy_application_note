@@ -67,6 +67,7 @@ if __name__ == "__main__":
     # Read in the Transcription factor expression data, and the
     # metadata
     logger.info("Reading in the TFOE expression data")
+    columns_to_drop = ["Rv0019c", "Rv0020c", "Rv2595", "Rv3417c"]
     tfoe_micro_df = pd.read_csv(
         DATA_PATH / "mtb_transcription_factors" / "trip_microarray.csv",
         index_col=0,
@@ -88,21 +89,25 @@ if __name__ == "__main__":
 
     # Add on the Locus tag information
     tfoe_micro_df = (
-        tfoe_micro_df.merge(
-            tfoe_meta_df[["Accession", "locus"]],
-            how="left",
-            left_index=True,
-            right_on="Accession",
+        (
+            tfoe_micro_df.merge(
+                tfoe_meta_df[["Accession", "locus"]],
+                how="left",
+                left_index=True,
+                right_on="Accession",
+            )
+            .set_index("Accession")
+            .groupby("locus")
+            .median()
         )
-        .set_index("Accession")
-        .groupby("locus")
-        .median()
-    ).T.rename(
-        {
-            "Rv0061": "Rv0061c",
-            "Rv2427Ac": "Rv2427A",
-        },
-        axis=1,
+        .T.rename(
+            {
+                "Rv0061": "Rv0061c",
+                "Rv2427Ac": "Rv2427A",
+            },
+            axis=1,
+        )
+        .drop(columns_to_drop, axis=1)
     )
 
     tfoe_micro_df["median"] = tfoe_micro_median

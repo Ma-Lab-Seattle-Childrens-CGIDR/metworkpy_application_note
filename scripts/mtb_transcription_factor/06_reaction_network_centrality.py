@@ -139,7 +139,7 @@ if __name__ == "__main__":
     # fhaA (Rv0020c) and fhaB (Rv0019c) are not well
     # supported as transcriptional regulators,
     # so they will be removed from the TFs
-    columns_to_remove = ["Rv0019c", "Rv0020c"]
+    columns_to_remove = ["Rv0019c", "Rv0020c", "Rv2595", "Rv3417c"]
 
     logger.info("Finding the TF targets")
     tf_fc_df = pd.read_excel(
